@@ -20,7 +20,7 @@ import customEnchants.listeners.MagnetListener;
 import customEnchants.listeners.BlockBreakListener;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
-import customEnchants.listeners.EnchantScrapListener;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
