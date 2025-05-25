@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 
 import customEnchants.utils.EnchantmentData;
+import customEnchants.utils.InventoryParser;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -27,12 +28,55 @@ public class InventoryListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
+        ItemStack cursor = event.getCursor();
+        ItemStack clicked = event.getCurrentItem();
 
-        handleEnchantmentApplication(event, player);
+        handleInventoryInteraction(event, player);
+
+        //Dust Application
+        if (cursor != null && cursor.getType() == Material.SUGAR) {
+    int cursorRarity = InventoryParser.itemRarity(cursor);
+    int clickedRarity = InventoryParser.itemRarity(clicked);
+
+    if (cursorRarity != -1 && clickedRarity != -1 && cursorRarity == clickedRarity) {
+        int boost = InventoryParser.getSuccessBoosterValue(cursor);
+        int baseSuccess = InventoryParser.clickedSuccess(clicked);
+        if (baseSuccess >= 100) {
+            return; // Already maxed, skip applying booster
+        }
+
+        if (boost > 0 && baseSuccess >= 0) {
+            int newSuccess = baseSuccess + boost;
+            newSuccess = Math.min(newSuccess, 100); // Clamp to max 100%
+
+            // Update the lore line
+            ItemMeta meta = clicked.getItemMeta();
+            List<String> lore = meta.getLore();
+
+            for (int i = 0; i < lore.size(); i++) {
+                String clean = lore.get(i).replaceAll("§[0-9a-fk-or]", "").toLowerCase().trim();
+                if (clean.startsWith("success rate:")) {
+                    lore.set(i, "§7Success Rate: " + ChatColor.GREEN + newSuccess + "%");
+                    break;
+                }
+            }
+
+            meta.setLore(lore);
+            clicked.setItemMeta(meta);
+
+            // Consume the booster (1 item)
+            cursor.setAmount(cursor.getAmount() - 1);
+            event.setCancelled(true);
+
+            }
+        } else {
+            return;
+        }
     }
+}
 
 
-    private void handleEnchantmentApplication(InventoryClickEvent event, Player player) {
+    private void handleInventoryInteraction(InventoryClickEvent event, Player player) {
         ItemStack cursor = event.getCursor();
         ItemStack clicked = event.getCurrentItem();
 
@@ -266,4 +310,7 @@ public class InventoryListener implements Listener {
     private static class ToolEnchantInfo {
         final Map<String, Integer> map = new HashMap<>();
     }
+
+
 }
+
