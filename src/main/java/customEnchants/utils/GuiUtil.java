@@ -39,7 +39,7 @@ public class GuiUtil {
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.WHITE + info.lore);
         lore.add("");
-        lore.add(ChatColor.GREEN + "Success Rate: " + String.format("%.1f", chance * 100) + "%");
+        lore.add(ChatColor.GREEN + "Success Rate: " + (int) Math.round(chance * 100) + "%");
         lore.add(EnchantmentData.getColoredRarity(info.rarity));
         lore.add("");
         lore.add(ChatColor.GRAY + "Applicable to: " + formatToolTypes(info.toolTypes));
@@ -50,9 +50,7 @@ public class GuiUtil {
         return book;
     }
 
-    /**
-     * Parses an enchanted book and returns enchantment info.
-     */
+    //Parses an enchanted book and returns enchantment info.
     public static EnchantParseResult parseCustomEnchantBook(ItemStack item) {
         if (item == null || item.getType() != Material.ENCHANTED_BOOK) return null;
         ItemMeta meta = item.getItemMeta();
