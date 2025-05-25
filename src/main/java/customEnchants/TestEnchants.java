@@ -14,11 +14,13 @@ import customEnchants.managers.PluginManager;
 import customEnchants.listeners.AnvilCombineListener;
 import customEnchants.listeners.InventoryListener;
 import customEnchants.listeners.DurabilityEnchantListener;
+import customEnchants.listeners.EnchantScrapListener;
 import customEnchants.listeners.GiveItemListener;
 import customEnchants.listeners.MagnetListener;
 import customEnchants.listeners.BlockBreakListener;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
+import customEnchants.listeners.EnchantScrapListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +40,7 @@ public class TestEnchants extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MagnetListener(), this);
         getServer().getPluginManager().registerEvents(new DurabilityEnchantListener(), this);
         getServer().getPluginManager().registerEvents(new AnvilCombineListener(), this);
+        getServer().getPluginManager().registerEvents(new EnchantScrapListener(this), this);
 
         getLogger().info("CustomEnchant has been enabled!");
 
