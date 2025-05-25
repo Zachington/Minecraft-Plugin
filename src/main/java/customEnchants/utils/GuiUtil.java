@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import customEnchants.utils.EnchantmentData;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -81,6 +82,37 @@ public class GuiUtil {
         if (chance < 0) return null;
         return new EnchantParseResult(name, level, chance);
     }
+    public static class RarityInfo {
+        public final String colorCode;
+        public final String rarityName;
+
+        public RarityInfo(String colorCode, String rarityName) {
+            this.colorCode = colorCode;
+            this.rarityName = rarityName;
+        }
+    }
+
+    public static RarityInfo getRarityInfoFromBook(ItemStack book) {
+    if (book == null) return new RarityInfo("§f", "COMMON");
+
+    ItemMeta meta = book.getItemMeta();
+    if (meta == null || !meta.hasDisplayName()) return new RarityInfo("§f", "COMMON");
+
+    String displayName = meta.getDisplayName();
+
+    if (displayName.length() >= 2 && displayName.charAt(0) == '§') {
+        String colorCode = displayName.substring(0, 2);
+
+        for (int i = 0; i < EnchantmentData.RARITY_COLORS.length; i++) {
+            if (EnchantmentData.RARITY_COLORS[i].equals(colorCode)) {
+                return new RarityInfo(EnchantmentData.RARITY_COLORS[i], EnchantmentData.RARITY_NAMES[i]);
+            }
+        }
+    }
+
+    return new RarityInfo("§f", "COMMON"); // default fallback
+}
+
 
     private static String toRoman(int number) {
         return switch (number) {
@@ -121,7 +153,7 @@ public class GuiUtil {
     }
 
     public static Inventory createScrapGui(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 27, "§8Tinker Enchant Book");
+        Inventory gui = Bukkit.createInventory(null, 27, "§8Tinkerer");
 
         for (int i = 0; i < 9; i++) {
             gui.setItem(i, createPane(Material.BLACK_STAINED_GLASS_PANE));
