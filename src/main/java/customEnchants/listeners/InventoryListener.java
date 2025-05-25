@@ -9,7 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.Plugin;
+
 
 import customEnchants.utils.EnchantmentData;
 
@@ -21,14 +21,8 @@ public class InventoryListener implements Listener {
 
     private static final Random random = new Random();
     private static final Pattern SUCCESS_PATTERN = Pattern.compile("Success Rate: (\\d+)%");
-    private final Plugin yourPluginInstance; // Change Object to your actual plugin class
     
 
-
-
-    public InventoryListener(Plugin pluginInstance) {
-        this.yourPluginInstance = pluginInstance;
-    }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -37,8 +31,6 @@ public class InventoryListener implements Listener {
         handleEnchantmentApplication(event, player);
     }
 
-    
-    // -- The rest of your existing methods below remain unchanged --
 
     private void handleEnchantmentApplication(InventoryClickEvent event, Player player) {
         ItemStack cursor = event.getCursor();
@@ -253,6 +245,8 @@ public class InventoryListener implements Listener {
             case "rare" -> 3;
             case "epic" -> 4;
             case "legendary" -> 5;
+            case "prestige" -> 6;
+            case "prestige+" -> 7;
             default -> 0;
         };
     }

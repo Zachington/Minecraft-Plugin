@@ -32,7 +32,7 @@ public class TestEnchants extends JavaPlugin {
     @Override
     public void onEnable() {
         PluginManager.getInstance().initialize();
-        getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
+        getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new GiveItemListener(), this);
         getServer().getPluginManager().registerEvents(new MagnetListener(), this);
