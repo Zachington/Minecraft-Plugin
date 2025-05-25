@@ -1,0 +1,14 @@
+main: customEnchants.TestEnchants
+version: 1.0.0-SNAPSHOT
+name: TestEnchants
+author: Zach
+api-version: 1.13
+
+commands:
+  giveEnchant:
+    description: Gives a custom enchantment book
+    usage: /<command> <enchantName> [level]
+
+  scrap:
+    description: opens scrap gui
+    usage: /scrap

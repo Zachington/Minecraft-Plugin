@@ -1,0 +1,181 @@
+package customEnchants.utils;
+
+
+public class EnchantmentData {
+    //enchantmentcount 
+        public static int getEnchantmentCount() {
+            return ENCHANT_NAMES.length;
+    }
+    // Enchantment names
+    public static final String[] ENCHANT_NAMES = {
+        "Wall Breaker",
+        "Blast",
+        "Gold Digger",
+        "Amplify",
+        "Ore Scavenger",
+        "Auto Smelt",
+        "Unbreakable",
+        "Magnet",
+        "Preservation",
+        "Frost Touch"
+    };
+    
+    // Maximum levels for each enchantment (corresponds to ENCHANT_NAMES array)
+    public static final int[] ENCHANT_MAX_LEVELS = {
+        3,  // Wall Breaker
+        5,  // Blast
+        3,  // Gold Digger
+        3,  // Amplify
+        4,  // Ore Scavenger
+        1,  // Auto Smelt
+        1,  // Unbreakable
+        3,  // Magnet
+        8,   // Preservation
+        5
+    };
+    
+    // Tool types that can receive each enchantment
+    public static final String[] ENCHANT_TOOL_TYPES = {
+        "PICKAXE",         // Wall Breaker
+        "PICKAXE",         // Blast
+        "PICKAXE",         // Gold Digger
+        "PICKAXE",         // Amplify
+        "PICKAXE",         // Ore Scavenger
+        "PICKAXE",         // Auto Smelt
+        "ALL",             // Unbreakable
+        "PICKAXE",         // Magnet
+        "ALL",             // Preservation 
+        "PICKAXE"          //Frost Touch
+    };
+    
+    // Rarity levels with ChatColors (COMMON=WHITE, UNCOMMON=GREEN, RARE=BLUE, EPIC=PURPLE, LEGENDARY=GOLD, PRESTIGE=PINK)
+    public static final String[] ENCHANT_RARITY = {
+        "PRESTIGE",   // Wall Breaker
+        "PRESTIGE",   // Blast
+        "EPIC",       // Gold Digger
+        "RARE",       // Amplify
+        "UNCOMMON",   // Ore Scavenger
+        "LEGENDARY",  // Auto Smelt
+        "PRESTIGE+",   // Unbreakable
+        "LEGENDARY",     // Magnet
+        "EPIC",        //Preservation
+        "EPIC"
+    };
+    
+    // ChatColor mappings for each rarity
+    public static final String[] RARITY_COLORS = {
+        "§f", // COMMON - White
+        "§a", // UNCOMMON - Green
+        "§9", // RARE - Blue
+        "§5", // EPIC - Purple
+        "§6", // LEGENDARY - Gold
+        "§d",  // PRESTIGE - Pink
+        "§c"  //PRESTIGE+ - Red
+    };
+    
+    // Rarity names for display
+    public static final String[] RARITY_NAMES = {
+        "COMMON",
+        "UNCOMMON", 
+        "RARE",
+        "EPIC",
+        "LEGENDARY",
+        "PRESTIGE",
+        "PRESTIGE+" 
+    };
+    
+    // Lore descriptions for each enchantment
+    public static final String[] ENCHANT_LORE = {
+        "Breaks multiple blocks in a wall pattern",           // Wall Breaker
+        "Breaks a 3x3x3 cube",                     // Blast
+        "Chance to give _____",         // Gold Digger
+        "Increases other enchants proc chance",            // Amplify
+        "Null",              // Ore Scavenger
+        "Automatically smelts mined blocks",                   // Auto Smelt
+        "Tool never breaks from durability damage",           // Unbreakable
+        "Attracts nearby dropped items to player",             // Magnet
+        "Chance to return durability to the tool",      //Preservation
+        "Chance to spawn ice around the player"         //Frost Touch
+    };
+    
+    // Proc chance percentages (0.0 to 1.0)
+    public static final double[] ENCHANT_PROC_CHANCE = {
+        .1,    // Wall Breaker - 10% per level
+        .05,   // Blast - 5% per level
+        0.5,   // Gold Digger - Always active (passive)
+        1.0,   //Amplify never used
+        0.35,  // Ore Scavenger - 35% chance
+        1.0,   // Auto Smelt - Always active (passive)
+        1.0,   // Unbreakable - Always active (passive)
+        1.0,   // Magnet - Always active (passive)
+        0.05,    // Preservation 5%
+        0.01    //Frost Touch 5%
+        
+    };
+    
+    // Helper method to get rarity color by rarity name
+    public static String getRarityColor(String rarity) {
+        for (int i = 0; i < RARITY_NAMES.length; i++) {
+            if (RARITY_NAMES[i].equalsIgnoreCase(rarity)) {
+                return RARITY_COLORS[i];
+            }
+        }
+        return "§f"; // Default to white if not found
+    }
+    
+    // Helper method to get colored rarity display text
+    public static String getColoredRarity(String rarity) {
+        return getRarityColor(rarity) + rarity.toUpperCase();
+    }
+    
+    // Helper method to get enchantment data by index
+    public static EnchantmentInfo getEnchantmentInfo(int index) {
+        if (index < 0 || index >= ENCHANT_NAMES.length) {
+            return null;
+        }
+        
+        return new EnchantmentInfo(
+            ENCHANT_NAMES[index],
+            ENCHANT_MAX_LEVELS[index],
+            ENCHANT_TOOL_TYPES[index],
+            ENCHANT_RARITY[index],
+            ENCHANT_LORE[index],
+            ENCHANT_PROC_CHANCE[index]
+        );
+    }
+    
+    // Helper method to get enchantment index by name
+    public static int getEnchantmentIndex(String name) {
+        for (int i = 0; i < ENCHANT_NAMES.length; i++) {
+            if (ENCHANT_NAMES[i].equalsIgnoreCase(name)) {
+                return i;
+            }
+        }
+        return -1; // Not found
+    }
+    
+    // Inner class to hold enchantment data
+    public static class EnchantmentInfo {
+        public final String name;
+        public final int maxLevel;
+        public final String toolTypes;
+        public final String rarity;
+        public final String lore;
+        public final double procChance;
+        
+        public EnchantmentInfo(String name, int maxLevel, String toolTypes, 
+                            String rarity, String lore, double procChance) {
+            this.name = name;
+            this.maxLevel = maxLevel;
+            this.toolTypes = toolTypes;
+            this.rarity = rarity;
+            this.lore = lore;
+            this.procChance = procChance;
+        }
+        
+        // Check if this enchantment can be applied to a specific tool type
+        public boolean canApplyTo(String toolType) {
+            return toolTypes.toUpperCase().contains(toolType.toUpperCase());
+        }
+    }
+}
