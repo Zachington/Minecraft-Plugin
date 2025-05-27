@@ -1,5 +1,12 @@
 package customEnchants.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class EnchantmentData {
     //enchantmentcount 
@@ -90,7 +97,7 @@ public class EnchantmentData {
         "Breaks a 3x3x3 cube",                     // Blast
         "Chance to give _____",         // Gold Digger
         "Increases other enchants proc chance",            // Amplify
-        "Null",              // Ore Scavenger
+        "Chance to spawn more ore",              // Ore Scavenger
         "Automatically smelts mined blocks",                   // Auto Smelt
         "Tool never breaks from durability damage",           // Unbreakable
         "Attracts nearby dropped items to player",             // Magnet
@@ -108,7 +115,7 @@ public class EnchantmentData {
         1.0,   // Auto Smelt - Always active (passive)
         1.0,   // Unbreakable - Always active (passive)
         1.0,   // Magnet - Always active (passive)
-        0.05,    // Preservation 5%
+        0.1,    // Preservation 5%
         0.01    //Frost Touch 5%
         
     };
@@ -178,4 +185,67 @@ public class EnchantmentData {
             return toolTypes.toUpperCase().contains(toolType.toUpperCase());
         }
     }
+    
+    public static final List<EnchantmentInfo> ENCHANTMENTS = new ArrayList<>();
+
+    static {
+    for (int i = 0; i < ENCHANT_NAMES.length; i++) {
+        ENCHANTMENTS.add(new EnchantmentInfo(
+            ENCHANT_NAMES[i],
+            ENCHANT_MAX_LEVELS[i],
+            ENCHANT_TOOL_TYPES[i],
+            ENCHANT_RARITY[i],
+            ENCHANT_LORE[i],
+            ENCHANT_PROC_CHANCE[i]
+        ));
+    }
+}
+
+    public static ItemStack createEnchantedBook(EnchantmentData.EnchantmentInfo enchantInfo, int level, int chance) {
+        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
+        ItemMeta meta = book.getItemMeta();
+
+        if (meta != null) {
+            String rarityColor = EnchantmentData.getRarityColor(enchantInfo.rarity);
+            String displayName = rarityColor + enchantInfo.name + " " + getRomanNumeral(level);
+            meta.setDisplayName(displayName);
+
+            List<String> lore = new ArrayList<>();
+            lore.add(ChatColor.WHITE + enchantInfo.lore);
+            lore.add("");
+            lore.add(ChatColor.GREEN + "Success Rate: " + chance + "%");
+            lore.add(EnchantmentData.getColoredRarity(enchantInfo.rarity));
+            lore.add("");
+            lore.add(ChatColor.GRAY + "Applicable to: " + formatToolTypes(enchantInfo.toolTypes));
+            lore.add(ChatColor.GRAY + "Drag and drop onto item to apply");
+
+            meta.setLore(lore);
+            book.setItemMeta(meta);
+        }
+
+        return book;
+    }
+    
+
+    public static String formatToolTypes(String toolTypes) {
+        if ("ALL".equals(toolTypes)) {
+            return "All Tools";
+        }
+        return toolTypes.replace(",", ", ");
+    }
+    
+    public static String getRomanNumeral(int number) {
+        return switch (number) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            default -> String.valueOf(number);
+        };
+    }
+
+
+
+
 }

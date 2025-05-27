@@ -19,9 +19,7 @@ public class GuiUtil {
     private static final Pattern LEVEL_PATTERN = Pattern.compile("(.+) ([IVXLCDM]+)$");
     private static final Pattern CHANCE_PATTERN = Pattern.compile("Success Rate: (\\d+(?:\\.\\d+)?)%");
 
-    /**
-     * Creates a custom enchanted book with the specified name, level, and chance.
-     */
+    //Use EnchantmentData createEnchantedBook this is only for anvils 
     public static ItemStack createCustomEnchantBook(String enchantName, int level, double chance) {
         int index = EnchantmentData.getEnchantmentIndex(enchantName);
         if (index == -1) return null;
@@ -175,4 +173,32 @@ public class GuiUtil {
         }
         return pane;
     }
+
+    public static Inventory blackScrollInventory(Player player) {
+        Inventory blackScrollGui = Bukkit.createInventory(null, 54, "§8Black Scroll");
+
+        for (int i = 0; i < 9; i++) {
+            blackScrollGui.setItem(i, createPane(Material.GRAY_STAINED_GLASS_PANE));
+        }
+        for (int i = 9; i < 13; i++) {
+            blackScrollGui.setItem(i, createPane(Material.GRAY_STAINED_GLASS_PANE));
+        }
+        for (int i = 14; i < 28; i++) {
+            blackScrollGui.setItem(i, createPane(Material.GRAY_STAINED_GLASS_PANE));
+        }
+        for (int i = 35; i < 37; i++) {
+            blackScrollGui.setItem(i, createPane(Material.GRAY_STAINED_GLASS_PANE));
+        }
+        for (int i = 44; i < 54; i++) {
+            blackScrollGui.setItem(i, createPane(Material.GRAY_STAINED_GLASS_PANE));
+        }
+        return blackScrollGui;
+    }
+
+
+
+
+
+
+
 }

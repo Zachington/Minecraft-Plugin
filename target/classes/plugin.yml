@@ -5,10 +5,11 @@ author: Zach
 api-version: 1.13
 
 commands:
-  giveEnchant:
-    description: Gives a custom enchantment book
-    usage: /<command> <enchantName> [level]
-
   scrap:
-    description: opens scrap gui
-    usage: /scrap
+    description: Opens the scrap GUI
+  giveenchant:
+    description: Gives a custom enchanted book
+  giveCustomItem:
+    description: Gives a custom utility item
+  testblackscroll:
+    description: opens Black Scroll Gui

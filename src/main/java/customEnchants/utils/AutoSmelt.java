@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -28,6 +29,7 @@ public class AutoSmelt {
         // Add more as needed
     }
 
+    public static final NamespacedKey FORTUNE_KEY = NamespacedKey.minecraft("fortune");
     public static void tryAutoSmelt(Block block, ItemStack tool, int autoSmeltLevel) {
     Material smeltedMaterial = smeltMap.get(block.getType());
     if (smeltedMaterial == null) {
@@ -39,7 +41,8 @@ public class AutoSmelt {
 
     block.setType(Material.AIR);
 
-    int fortuneLevel = tool.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
+    Enchantment fortune = Enchantment.getByKey(NamespacedKey.minecraft("fortune"));
+    int fortuneLevel = (fortune != null) ? tool.getEnchantmentLevel(fortune) : 0;
     int amount = smeltedMaterial == Material.COPPER_INGOT
         ? 3 + random.nextInt(fortuneLevel + 1)  // COPPER special case
         : 1 + random.nextInt(fortuneLevel + 1);

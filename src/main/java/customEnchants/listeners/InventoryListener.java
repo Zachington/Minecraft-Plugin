@@ -265,22 +265,13 @@ public class InventoryListener implements Listener {
                     EnchantmentData.EnchantmentInfo data =
                             EnchantmentData.getEnchantmentInfo(EnchantmentData.getEnchantmentIndex(e.getKey()));
                     String color = EnchantmentData.getRarityColor(data.rarity);
-                    lore.add(color + e.getKey() + " " + toRoman(e.getValue()));
+                    lore.add(color + e.getKey() + " " + EnchantmentData.getRomanNumeral(e.getValue()));
                 });
 
         return lore;
     }
 
-    private String toRoman(int number) {
-        return switch (number) {
-            case 1 -> "I";
-            case 2 -> "II";
-            case 3 -> "III";
-            case 4 -> "IV";
-            case 5 -> "V";
-            default -> String.valueOf(number);
-        };
-    }
+    
 
     private int getRarityRank(String rarity) {
         return switch (rarity.toLowerCase()) {

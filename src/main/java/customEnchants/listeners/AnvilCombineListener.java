@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 
 import java.util.*;
+import java.lang.reflect.Field;
 
 public class AnvilCombineListener implements Listener {
 
@@ -39,28 +40,38 @@ public class AnvilCombineListener implements Listener {
     }
 
     private void handleBookCombine(PrepareAnvilEvent event, ItemStack first, ItemStack second, AnvilInventory inv) {
-        EnchantParseResult result1 = GuiUtil.parseCustomEnchantBook(first);
-        EnchantParseResult result2 = GuiUtil.parseCustomEnchantBook(second);
-        if (result1 == null || result2 == null) return;
+    EnchantParseResult result1 = GuiUtil.parseCustomEnchantBook(first);
+    EnchantParseResult result2 = GuiUtil.parseCustomEnchantBook(second);
+    if (result1 == null || result2 == null) return;
 
-        if (!result1.name.equals(result2.name)) return;
-        if (result1.level != result2.level) return;
+    if (!result1.name.equals(result2.name)) return;
+    if (result1.level != result2.level) return;
 
-        int enchantIndex = EnchantmentData.getEnchantmentIndex(result1.name);
-        if (enchantIndex == -1) return;
+    int enchantIndex = EnchantmentData.getEnchantmentIndex(result1.name);
+    if (enchantIndex == -1) return;
 
-        int maxLevel = EnchantmentData.getEnchantmentInfo(enchantIndex).maxLevel;
-        if (result1.level >= maxLevel) return;
+    int maxLevel = EnchantmentData.getEnchantmentInfo(enchantIndex).maxLevel;
+    if (result1.level >= maxLevel) return;
 
-        int newLevel = result1.level + 1;
-        double newChance = (result1.chance + result2.chance) / 2.0;
+    int newLevel = result1.level + 1;
+    double newChance = (result1.chance + result2.chance) / 2;
 
-        ItemStack combined = GuiUtil.createCustomEnchantBook(result1.name, newLevel, newChance);
-        event.setResult(combined);
-        inv.setRepairCost(0); // books always cost 1 XP to combine here
+    ItemStack combined = GuiUtil.createCustomEnchantBook(result1.name, newLevel, newChance);
+    event.setResult(combined);
+
+    try {
+        // Get the underlying NMS container of the anvil inventory
+        Object nmsContainer = inv.getClass().getMethod("getHandle").invoke(inv);
+        // Get the 'repairCost' field (name may differ based on server version)
+        Field repairCostField = nmsContainer.getClass().getDeclaredField("repairCost");
+        repairCostField.setAccessible(true);
+        repairCostField.setInt(nmsContainer, 0);
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
 
-   private void handleToolCombine(PrepareAnvilEvent event, ItemStack first, ItemStack second, AnvilInventory inv) {
+    private void handleToolCombine(PrepareAnvilEvent event, ItemStack first, ItemStack second, AnvilInventory inv) {
     if (first.getType() != second.getType()) {
         event.setResult(null);
         return;
@@ -125,8 +136,18 @@ public class AnvilCombineListener implements Listener {
     int secondRepairCost = getRepairCost(second);
     int maxRepairCost = Math.max(firstRepairCost, secondRepairCost);
     int newRepairCost = (maxRepairCost - 1) * 2 + 1;
-    inv.setRepairCost(Math.max(newRepairCost, 0)); // avoid negative
+
+    try {
+        // Access the underlying NMS container and set repairCost field
+        Object nmsContainer = inv.getClass().getMethod("getHandle").invoke(inv);
+        Field repairCostField = nmsContainer.getClass().getDeclaredField("repairCost");
+        repairCostField.setAccessible(true);
+        repairCostField.setInt(nmsContainer, Math.max(newRepairCost, 0));
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
 }
+
 
 
 
