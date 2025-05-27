@@ -85,7 +85,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             int chance = (customChance != null) ? customChance : generateRandomChance(enchantInfo.rarity);
 
-            ItemStack book = EnchantmentData.createEnchantedBook(enchantInfo, level, chance);
+            ItemStack book = EnchantmentData.createEnchantedBook(enchantInfo, level, chance, false);
 
             player.getInventory().addItem(book);
             player.sendMessage(ChatColor.GREEN + "Given " + enchantInfo.name + " Level " + level + " with " + chance + "% chance");

@@ -201,30 +201,43 @@ public class EnchantmentData {
     }
 }
 
-    public static ItemStack createEnchantedBook(EnchantmentData.EnchantmentInfo enchantInfo, int level, int chance) {
-        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
-        ItemMeta meta = book.getItemMeta();
-
-        if (meta != null) {
-            String rarityColor = EnchantmentData.getRarityColor(enchantInfo.rarity);
-            String displayName = rarityColor + enchantInfo.name + " " + getRomanNumeral(level);
-            meta.setDisplayName(displayName);
-
-            List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.WHITE + enchantInfo.lore);
-            lore.add("");
-            lore.add(ChatColor.GREEN + "Success Rate: " + chance + "%");
-            lore.add(EnchantmentData.getColoredRarity(enchantInfo.rarity));
-            lore.add("");
-            lore.add(ChatColor.GRAY + "Applicable to: " + formatToolTypes(enchantInfo.toolTypes));
-            lore.add(ChatColor.GRAY + "Drag and drop onto item to apply");
-
-            meta.setLore(lore);
-            book.setItemMeta(meta);
-        }
-
-        return book;
+    public static EnchantmentInfo getEnchantmentInfoByName(String name) {
+    for (EnchantmentInfo info : ENCHANTMENTS) {
+        if (info.name.equalsIgnoreCase(name)) return info;
     }
+    return null;
+    }
+
+    public static ItemStack createEnchantedBook(EnchantmentData.EnchantmentInfo enchantInfo, int level, int chance, boolean obfuscateChance) {
+    ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
+    ItemMeta meta = book.getItemMeta();
+
+    if (meta != null) {
+        String rarityColor = EnchantmentData.getRarityColor(enchantInfo.rarity);
+        String displayName = rarityColor + enchantInfo.name + " " + getRomanNumeral(level);
+        meta.setDisplayName(displayName);
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.WHITE + enchantInfo.lore);
+        lore.add("");
+        
+        if (obfuscateChance) {
+            lore.add(ChatColor.GREEN + "Success Rate: " + ChatColor.MAGIC + chance + "%" + ChatColor.RESET);
+        } else {
+            lore.add(ChatColor.GREEN + "Success Rate: " + chance + "%");
+        }
+        
+        lore.add(EnchantmentData.getColoredRarity(enchantInfo.rarity));
+        lore.add("");
+        lore.add(ChatColor.GRAY + "Applicable to: " + formatToolTypes(enchantInfo.toolTypes));
+        lore.add(ChatColor.GRAY + "Drag and drop onto item to apply");
+
+        meta.setLore(lore);
+        book.setItemMeta(meta);
+    }
+
+    return book;
+}
     
 
     public static String formatToolTypes(String toolTypes) {

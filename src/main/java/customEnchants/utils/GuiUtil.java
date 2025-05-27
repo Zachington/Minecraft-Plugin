@@ -8,6 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import customEnchants.utils.crateTableUtil.LootEntry;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -109,6 +110,17 @@ public class GuiUtil {
     return new RarityInfo("§f", "COMMON"); // default fallback
 }
 
+    private static void fillSlots(Inventory inv, ItemStack item, int[]... ranges) {
+    for (int[] range : ranges) {
+        for (int i = range[0]; i < range[1]; i++) {
+            inv.setItem(i, item);
+        }
+    }
+}
+
+    private static int[] range(int start, int end) {
+        return new int[]{start, end};
+    }
 
     private static String toRoman(int number) {
         return switch (number) {
@@ -164,7 +176,7 @@ public class GuiUtil {
         return gui;
     }
 
-    private static ItemStack createPane(Material color) {
+    public static ItemStack createPane(Material color) {
         ItemStack pane = new ItemStack(color);
         ItemMeta meta = pane.getItemMeta();
         if (meta != null) {
@@ -195,10 +207,61 @@ public class GuiUtil {
         return blackScrollGui;
     }
 
+    public static Inventory enchantKeyInventory(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 54, "§5Enchanter Crate");
+
+    
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE),
+        range(0, 10), range(17, 19), range(26, 28), range(35, 37), range(44, 54));
+
+    List<crateTableUtil.LootEntry> lootList = crateTableUtil.LOOT_TABLES.get("Enchant Key");
 
 
+if (lootList != null) {
+    int slotIndex = 10;
+    
+    for (crateTableUtil.LootEntry loot : lootList) {
+        
+        while (slotIndex < gui.getSize() && gui.getItem(slotIndex) != null) {
+            slotIndex++;
+        }
+        if (slotIndex >= gui.getSize()) {
+            break;
+        }
+        if (loot.enchantmentInfo != null) {
+            gui.setItem(slotIndex, EnchantmentData.createEnchantedBook(loot.enchantmentInfo, 1, 100, true));
+        } else {
+            gui.setItem(slotIndex, loot.item.clone());
+        }
+        slotIndex++;
+    }
+} else {
+}
 
 
+    return gui;
+}
+
+
+    public static Inventory miningKeyInventory(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 54, "§3Mining Crate");
+
+    // Fill background slots with gray panes
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE), 
+        range(0, 10), range(17, 19), range(26, 28), range(35, 37), range(44, 54));
+
+    List<LootEntry> lootList = crateTableUtil.LOOT_TABLES.get("Mining Key");
+    if (lootList != null) {
+        int slotIndex = 10; // choose your starting slot (avoid background slots)
+        for (LootEntry loot : lootList) {
+            if (slotIndex >= gui.getSize()) break; // safety check
+            gui.setItem(slotIndex, loot.item.clone()); // place the exact item
+            slotIndex++;
+        }
+    }
+
+    return gui;
+}
 
 
 }

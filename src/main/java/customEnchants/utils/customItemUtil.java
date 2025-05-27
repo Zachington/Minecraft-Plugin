@@ -25,7 +25,6 @@ public class customItemUtil {
         "Durability Key",
         "Prestige Key",
         "Prestige+ Key"
-
     };
 
     //Change these

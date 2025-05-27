@@ -167,7 +167,7 @@ public void onInventoryClick(InventoryClickEvent event) {
             for (EnchantmentData.EnchantmentInfo info : EnchantmentData.ENCHANTMENTS) {
                 if (line.contains(info.name)) {
                     int level = extractLevelFromLore(line);
-                    ItemStack book = EnchantmentData.createEnchantedBook(info, level, 100);
+                    ItemStack book = EnchantmentData.createEnchantedBook(info, level, 100, false);
                     if (bookIndex < bookSlots.length) {
                         gui.setItem(bookSlots[bookIndex], book);
                         bookIndex++;
