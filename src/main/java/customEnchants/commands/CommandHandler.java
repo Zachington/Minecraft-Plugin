@@ -15,6 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -119,36 +120,78 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         //Give Custom Item
         if (command.getName().equalsIgnoreCase("giveCustomItem")) {
     if (args.length < 1) {
-        player.sendMessage(ChatColor.RED + "Usage: /giveCustomItem <itemName>");
+        player.sendMessage(ChatColor.RED + "Usage: /giveCustomItem <itemName> [amount]");
         return true;
     }
 
-    String inputName = String.join(" ", args).replace('_', ' ').toLowerCase();
-    String matchedName = null;
+    // Extract item name (all args except last if it looks like a number)
+    String inputName;
+    int amount = 1;
 
-    for (String itemName : customItemUtil.CUSTOM_ITEM) {
-        String stripped = ChatColor.stripColor(itemName).toLowerCase();
-        if (stripped.equals(inputName)) {
-            matchedName = itemName; // Use original (with color) for creation
+    if (args.length > 1) {
+        // Try parse last argument as amount
+        try {
+            amount = Integer.parseInt(args[args.length - 1]);
+            if (amount < 1) {
+                player.sendMessage(ChatColor.RED + "Amount must be at least 1.");
+                return true;
+            }
+            // Item name is all args except last
+            inputName = String.join(" ", Arrays.copyOf(args, args.length - 1)).replace('_', ' ').toLowerCase();
+        } catch (NumberFormatException e) {
+            // Last arg is not a number, treat whole input as item name
+            inputName = String.join(" ", args).replace('_', ' ').toLowerCase();
+        }
+    } else {
+        inputName = args[0].replace('_', ' ').toLowerCase();
+    }
+
+    player.sendMessage(ChatColor.YELLOW + "Searching for custom item: " + inputName);
+
+    customItemUtil.CustomItemInfo matchedInfo = null;
+
+    for (int i = 0; i < customItemUtil.CUSTOM_ITEM.length; i++) {
+        customItemUtil.CustomItemInfo candidate = customItemUtil.getCustomItemInfo(i);
+        if (candidate == null) continue;
+
+        String rawName = candidate.getName();
+        String cleanName = ChatColor.stripColor(rawName);
+        if (cleanName == null || cleanName.trim().isEmpty()) {
+            cleanName = rawName.replaceAll("§[0-9A-FK-ORa-fk-or]", "");
+        }
+
+        if (cleanName.toLowerCase().equals(inputName)) {
+            matchedInfo = candidate;
             break;
         }
     }
 
-    if (matchedName == null) {
+    if (matchedInfo == null) {
         player.sendMessage(ChatColor.RED + "Invalid custom item name: " + inputName);
         return true;
     }
 
-    ItemStack customItem = customItemUtil.createCustomItem(matchedName);
+    player.sendMessage(ChatColor.YELLOW + "Matched item: " + matchedInfo.getName());
+
+    ItemStack customItem = customItemUtil.createCustomItem(matchedInfo.getName());
+
     if (customItem == null) {
         player.sendMessage(ChatColor.RED + "Failed to create custom item.");
         return true;
     }
 
+    // Set amount on the item stack
+    customItem.setAmount(amount);
+
     player.getInventory().addItem(customItem);
-    player.sendMessage(ChatColor.GREEN + "You have been given: " + customItem.getItemMeta().getDisplayName());
+    player.sendMessage(ChatColor.GREEN + "You have been given " + amount + "x: " + customItem.getItemMeta().getDisplayName());
+
     return true;
 }
+
+
+
+
 
     
         return false; // command not handled here

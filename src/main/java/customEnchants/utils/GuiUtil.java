@@ -210,37 +210,41 @@ public class GuiUtil {
     public static Inventory enchantKeyInventory(Player player) {
     Inventory gui = Bukkit.createInventory(null, 54, "§5Enchanter Crate");
 
-    
     fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE),
         range(0, 10), range(17, 19), range(26, 28), range(35, 37), range(44, 54));
 
     List<crateTableUtil.LootEntry> lootList = crateTableUtil.LOOT_TABLES.get("Enchant Key");
 
+    if (lootList != null) {
+        int slotIndex = 10;
 
-if (lootList != null) {
-    int slotIndex = 10;
-    
-    for (crateTableUtil.LootEntry loot : lootList) {
-        
-        while (slotIndex < gui.getSize() && gui.getItem(slotIndex) != null) {
-            slotIndex++;
+        for (crateTableUtil.LootEntry loot : lootList) {
+            while (slotIndex < gui.getSize() && gui.getItem(slotIndex) != null) {
+                slotIndex++;
+            }
+            if (slotIndex >= gui.getSize()) break;
+
+            String name = ChatColor.stripColor(loot.item.getItemMeta().getDisplayName());
+            ItemStack customItem = customItemUtil.createCustomItem(name);
+
+            if (customItem != null) {
+                ItemMeta meta = customItem.getItemMeta();
+                if (meta != null) {
+                    List<String> lore = meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
+                    meta.setLore(lore);
+                    customItem.setItemMeta(meta);
+                }
+
+                gui.setItem(slotIndex++, customItem);
+            }
         }
-        if (slotIndex >= gui.getSize()) {
-            break;
-        }
-        if (loot.enchantmentInfo != null) {
-            gui.setItem(slotIndex, EnchantmentData.createEnchantedBook(loot.enchantmentInfo, 1, 100, true));
-        } else {
-            gui.setItem(slotIndex, loot.item.clone());
-        }
-        slotIndex++;
     }
-} else {
-}
-
 
     return gui;
 }
+
+
 
     public static Inventory miningKeyInventory(Player player) {
     Inventory gui = Bukkit.createInventory(null, 54, "§3Mining Crate");

@@ -43,7 +43,7 @@ public class customItemUtil {
         "Use on Mining crate at /warp crates",
         "Use on Prison crate at /warp crates",
         "Use on Enchant crate at /warp crates",
-        "Use on Divine crate at /warp cartes",
+        "Use on Divine crate at /warp crates",
         "Use on Durability crate at /warp crates",
         "Use on Prestige crate at /warp crates",    
         "Use on Prestige+ crate at /warp crates",
@@ -97,6 +97,7 @@ public class customItemUtil {
     null,
     null,
     null,
+    null,
     null
 };
 
@@ -119,20 +120,24 @@ public class customItemUtil {
         null,
         null,
         null,
+        null,
         null
 };
 
 
 
     public static ItemStack createCustomItem(String itemName) {
-    // Find CustomItemInfo by matching name (case insensitive)
     CustomItemInfo info = null;
+    String cleanInput = ChatColor.stripColor(itemName).toLowerCase();
 
     for (int i = 0; i < CUSTOM_ITEM.length; i++) {
         CustomItemInfo candidate = getCustomItemInfo(i);
-        if (candidate != null && ChatColor.stripColor(candidate.getName()).equalsIgnoreCase(itemName)) {
-            info = candidate;
-            break;
+        if (candidate != null) {
+            String cleanCandidate = ChatColor.stripColor(candidate.getName()).toLowerCase();
+            if (cleanCandidate.equals(cleanInput)) {
+                info = candidate;
+                break;
+            }
         }
     }
 
@@ -158,6 +163,7 @@ public class customItemUtil {
 
     return item;
 }
+
 
 
     public static class CustomItemInfo {
@@ -212,7 +218,7 @@ public class customItemUtil {
         int b2 = Integer.valueOf(endHex.substring(5, 7), 16);
 
         for (int i = 0; i < length; i++) {
-            double ratio = (double) i / (length - 1);
+            double ratio = (length == 1) ? 0 : (double) i / (length - 1);
             int r = (int) (r1 + (r2 - r1) * ratio);
             int g = (int) (g1 + (g2 - g1) * ratio);
             int b = (int) (b1 + (b2 - b1) * ratio);
@@ -224,6 +230,18 @@ public class customItemUtil {
         return result;
     }
 }
+
+    public static int getCustomItemIndexByStrippedName(String strippedName) {
+    for (int i = 0; i < CUSTOM_ITEM.length; i++) {
+        String stripped = ChatColor.stripColor(CUSTOM_ITEM[i]).toLowerCase();
+        if (stripped.equals(strippedName.toLowerCase())) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
 }
 
 

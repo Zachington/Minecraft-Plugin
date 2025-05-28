@@ -199,25 +199,36 @@ public class CrateListener implements Listener {
         int index = 0;
 
         @Override
-        public void run() {
-            if (index >= slotsToChange.size()) {
-                this.cancel();
+    public void run() {
+        if (index >= slotsToChange.size()) {
+            this.cancel();
 
-                HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(chosenItem.clone());
-                if (!leftover.isEmpty()) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), chosenItem.clone());
+            // Clean "Success Rate" lore line before giving
+            if (chosenItem.hasItemMeta()) {
+                ItemMeta meta = chosenItem.getItemMeta();
+                if (meta.hasLore()) {
+                    List<String> lore = new ArrayList<>(meta.getLore());
+                    lore.removeIf(line -> ChatColor.stripColor(line).startsWith("Chance"));
+                    meta.setLore(lore);
+                    chosenItem.setItemMeta(meta);
                 }
-
-                topInv.setItem(chosenSlot, null);
-                player.sendMessage("You received: " + chosenItem.getType().name());
-                player.closeInventory();
-                return;
             }
-            int slot = slotsToChange.get(index);
-            topInv.setItem(slot, GuiUtil.createPane(Material.GRAY_STAINED_GLASS_PANE));
-            index++;
+
+            HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(chosenItem.clone());
+            if (!leftover.isEmpty()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), chosenItem.clone());
+            }
+
+            topInv.setItem(chosenSlot, null);
+            player.sendMessage("You received: " + chosenItem.getType().name());
+            player.closeInventory();
+            return;
         }
-    }.runTaskTimer(TestEnchants.getInstance(), 10L, 2L);
+        int slot = slotsToChange.get(index);
+        topInv.setItem(slot, GuiUtil.createPane(Material.GRAY_STAINED_GLASS_PANE));
+        index++;
+    }
+}.runTaskTimer(TestEnchants.getInstance(), 10L, 2L);
 }
 
 

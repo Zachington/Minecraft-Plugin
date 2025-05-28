@@ -123,7 +123,7 @@ public class ItemVoucherUtil {
         EnchantmentData.EnchantmentInfo chosen = matches.get(random.nextInt(matches.size()));
 
         // Random level between 1 and max level
-        int level = 1 + random.nextInt(chosen.maxLevel);
+        int level = 1;
 
         // Random success chance between 40% and 100%
         int chance = 40 + random.nextInt(61); // 40 to 100 inclusive
