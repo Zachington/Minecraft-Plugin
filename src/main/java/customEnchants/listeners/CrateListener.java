@@ -299,7 +299,7 @@ public class CrateListener implements Listener {
                     pushPlayerBack(player, clickedBlockLoc);
                 }
             } else {
-                player.sendMessage("Not a Custom Item");
+                player.sendMessage("You must hold an Mining Key to open this");
                 pushPlayerBack(player, clickedBlockLoc);
             }
     }

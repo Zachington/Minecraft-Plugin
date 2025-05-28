@@ -1,10 +1,14 @@
 package customEnchants.utils;
 
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
+
+import customEnchants.TestEnchants;
 
 public class ScoreboardUtil {
 
@@ -13,6 +17,13 @@ public class ScoreboardUtil {
     public static void updateScoreboard(Player player) {
         ScoreboardManager manager = Bukkit.getScoreboardManager();
         if (manager == null) return;
+
+        StatTracker statTracker = TestEnchants.getInstance().getStatTracker();
+        UUID uuid = player.getUniqueId();
+
+        int totalBroken = statTracker.getPlayerStat(uuid, "blocks_broken", false);
+        int dailyBroken = statTracker.getPlayerStat(uuid, "blocks_broken", true);
+
 
         Scoreboard board = manager.getNewScoreboard();
         Objective obj = board.registerNewObjective("info", "dummy", ChatColor.GREEN + "Minecraft Server Name");
@@ -32,6 +43,13 @@ public class ScoreboardUtil {
         // Placeholder Quests
         obj.getScore(ChatColor.YELLOW + "Quests Complete:").setScore(line--);
         obj.getScore(ChatColor.WHITE + "0").setScore(line--);
+
+        // Space
+        obj.getScore(" ").setScore(line--);
+
+        //Blocks Broken
+        obj.getScore(ChatColor.YELLOW + "Blocks Broken (Total): " + ChatColor.WHITE + String.valueOf(totalBroken)).setScore(line--);
+        obj.getScore(ChatColor.YELLOW + "Blocks Broken (Daily): " + ChatColor.WHITE + String.valueOf(dailyBroken)).setScore(line--);
 
         // Space
         obj.getScore(" ").setScore(line--);

@@ -1,6 +1,10 @@
 package customEnchants;
 
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.Duration;
+
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -8,8 +12,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
 
+
+
 import customEnchants.managers.PluginManager;
 import customEnchants.utils.ScoreboardUtil;
+import customEnchants.utils.StatTracker;
 import customEnchants.utils.VaultUtil;
 import customEnchants.utils.customItemUtil;
 import customEnchants.listeners.AnvilCombineListener;
@@ -23,6 +30,8 @@ import customEnchants.listeners.PlayerListener;
 import customEnchants.listeners.VoucherListener;
 import customEnchants.listeners.BlockBreakListener;
 import customEnchants.listeners.CrateListener;
+import customEnchants.listeners.GeneralBlockBreakListener;
+import customEnchants.listeners.PlayerQuitListener;
 
 import customEnchants.commands.CommandHandler;
 
@@ -30,10 +39,28 @@ import customEnchants.commands.CommandHandler;
 public class TestEnchants extends JavaPlugin {
     
     private static TestEnchants instance;
+    private StatTracker statTracker;
+    private void scheduleDailyReset() {
+    ZoneId zone = ZoneId.systemDefault(); // Server's timezone. Change if needed.
+
+    // Calculate delay until next midnight
+    LocalDateTime now = LocalDateTime.now(zone);
+    LocalDateTime nextMidnight = now.toLocalDate().plusDays(1).atStartOfDay();
+
+    long delaySeconds = Duration.between(now, nextMidnight).getSeconds();
+    long delayTicks = delaySeconds * 20; // 20 ticks per second
+    long ticksPerDay = 20L * 60 * 60 * 24;
+
+    Bukkit.getScheduler().runTaskTimer(this, () -> {
+        statTracker.resetDailyIfNeeded();
+        getLogger().info("Daily stats reset at midnight.");
+    }, delayTicks, ticksPerDay);
+}
 
     @Override
     public void onEnable() {
         instance = this;
+        this.statTracker = new StatTracker(getDataFolder());
 
         long ticksPerHour = 20L * 60 * 60; // 72000 ticks = 1 hour
 
@@ -71,7 +98,12 @@ public class TestEnchants extends JavaPlugin {
                 player.sendTitle(ChatColor.GOLD + "Key All", ChatColor.AQUA + "You got a Key All Voucher!", 10, 70, 20);
             }
         }, ticksUntilNextHour, ticksPerHour);
-
+        //Data save
+        getServer().getScheduler().runTaskTimer(this, () -> {
+        statTracker.save();
+    }, 0L, 100L); // 100 ticks = 5 seconds
+        //Daily Blocks reset
+        scheduleDailyReset();
 
         // Your existing event registrations, commands, etc.
         World world = Bukkit.getWorld("world"); // or your actual world name
@@ -104,11 +136,18 @@ public class TestEnchants extends JavaPlugin {
         getCommand("giveCustomItem").setTabCompleter(handler);
         getCommand("testblackscroll").setExecutor(handler);
         getCommand("keyall").setExecutor(new CommandHandler());
+
+        getServer().getPluginManager().registerEvents(new GeneralBlockBreakListener(statTracker), this);
+        getServer().getPluginManager().registerEvents(new PlayerQuitListener(statTracker), this);
     }
 
 
     public static TestEnchants getInstance() {
         return instance;
+    }
+
+    public StatTracker getStatTracker() {
+        return statTracker;
     }
     
 }
