@@ -29,27 +29,11 @@ public class crateTableUtil {
 
         // Enchant Key loot
         LOOT_TABLES.put("Enchant Key", Arrays.asList(
-            new LootEntry(
-                EnchantmentData.createEnchantedBook(getEnchantmentInfoByName("Blast"), 1, 100, true),9,getEnchantmentInfoByName("Blast")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Ore Scavenger"), 1, 100, true), 9, getEnchantmentInfoByName("Ore Scavenger")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Wall Breaker"), 1, 100, true), 9, getEnchantmentInfoByName("Wall Breaker")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Unbreakable"), 1, 100, true), 9, getEnchantmentInfoByName("Unbreakable")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Auto Smelt"), 1, 100, true), 9, getEnchantmentInfoByName("Auto Smelt")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Magnet"), 1, 100, true), 9, getEnchantmentInfoByName("Magnet")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Preservation"), 1, 100, true), 9, getEnchantmentInfoByName("Preservation")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Gold Digger"), 1, 100, true), 9, getEnchantmentInfoByName("Gold Digger")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Frost Touch"), 1, 100, true), 9, getEnchantmentInfoByName("Frost Touch")),
-            new LootEntry(EnchantmentData.createEnchantedBook(
-                getEnchantmentInfoByName("Amplify"), 1, 100, true), 9, getEnchantmentInfoByName("Amplify")),
-            new LootEntry(new ItemStack(Material.EXPERIENCE_BOTTLE, 32), 10)
+            new LootEntry(customItemUtil.createCustomItem("Common Enchant"), 40),
+            new LootEntry(customItemUtil.createCustomItem("Uncommon Enchant"), 25),
+            new LootEntry(customItemUtil.createCustomItem("Rare Enchant"), 20),
+            new LootEntry(customItemUtil.createCustomItem("Epic Enchant"), 10),
+            new LootEntry(customItemUtil.createCustomItem("Legendary Enchant"), 5)
         ));
     }
 

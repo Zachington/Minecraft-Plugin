@@ -31,25 +31,28 @@ public class ScoreboardUtil {
 
         int line = 10;
 
+        obj.getScore("   ").setScore(line--);
+
         // Vault Balance
         double balance = VaultUtil.getEconomy(player);
-        obj.getScore(ChatColor.YELLOW + "Balance:").setScore(line--);
-        obj.getScore(ChatColor.WHITE + "$" + String.format("%.2f", balance)).setScore(line--);
+        obj.getScore(ChatColor.YELLOW + "Balance: " + ChatColor.WHITE + "$" + formatBalance(balance)).setScore(line--);
+
+        obj.getScore("     ").setScore(line--);
 
         // Placeholder Rank
-        obj.getScore(ChatColor.YELLOW + "Rank:").setScore(line--);
-        obj.getScore(ChatColor.WHITE + "Member").setScore(line--);
+        obj.getScore(ChatColor.YELLOW + "Rank: " + ChatColor.WHITE + "Member").setScore(line--);
+
+        obj.getScore("    ").setScore(line--);
 
         // Placeholder Quests
-        obj.getScore(ChatColor.YELLOW + "Quests Complete:").setScore(line--);
-        obj.getScore(ChatColor.WHITE + "0").setScore(line--);
+        obj.getScore(ChatColor.YELLOW + "Quests Complete:" + ChatColor.WHITE + "0").setScore(line--);
 
         // Space
-        obj.getScore(" ").setScore(line--);
+        obj.getScore("  ").setScore(line--);
 
         //Blocks Broken
-        obj.getScore(ChatColor.YELLOW + "Blocks Broken (Total): " + ChatColor.WHITE + String.valueOf(totalBroken)).setScore(line--);
-        obj.getScore(ChatColor.YELLOW + "Blocks Broken (Daily): " + ChatColor.WHITE + String.valueOf(dailyBroken)).setScore(line--);
+        obj.getScore(ChatColor.YELLOW + "Total Block: " + ChatColor.WHITE + String.valueOf(totalBroken)).setScore(line--);
+        obj.getScore(ChatColor.YELLOW + "DBM: " + ChatColor.WHITE + String.valueOf(dailyBroken)).setScore(line--);
 
         // Space
         obj.getScore(" ").setScore(line--);
@@ -62,4 +65,18 @@ public class ScoreboardUtil {
 
         player.setScoreboard(board);
     }
+
+    private static String formatBalance(double balance) {
+    long rounded = (long) balance; // Remove cents
+    if (rounded >= 1_000_000_000) {
+        return String.format("%.1fB", rounded / 1_000_000_000.0);
+    } else if (rounded >= 1_000_000) {
+        return String.format("%.1fM", rounded / 1_000_000.0);
+    } else if (rounded >= 1_000) {
+        return String.format("%.1fK", rounded / 1_000.0);
+    } else {
+        return String.valueOf(rounded);
+    }
+}
+
 }

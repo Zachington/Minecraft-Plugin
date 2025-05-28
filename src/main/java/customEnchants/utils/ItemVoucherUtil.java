@@ -106,4 +106,30 @@ public class ItemVoucherUtil {
         return loot;
     }
 
+    public static ItemStack getRandomEnchantedBookFromRarity(String rarity) {
+        List<EnchantmentData.EnchantmentInfo> matches = new ArrayList<>();
+
+        // Filter enchantments matching the rarity
+        for (EnchantmentData.EnchantmentInfo enchant : EnchantmentData.ENCHANTMENTS) {
+            if (enchant.rarity.equalsIgnoreCase(rarity)) {
+                matches.add(enchant);
+            }
+        }
+
+        // If none found, return null
+        if (matches.isEmpty()) return null;
+
+        // Pick random enchant from the list
+        EnchantmentData.EnchantmentInfo chosen = matches.get(random.nextInt(matches.size()));
+
+        // Random level between 1 and max level
+        int level = 1 + random.nextInt(chosen.maxLevel);
+
+        // Random success chance between 40% and 100%
+        int chance = 40 + random.nextInt(61); // 40 to 100 inclusive
+
+        // Create and return the book
+        return EnchantmentData.createEnchantedBook(chosen, level, chance, false);
+    }
+
 }

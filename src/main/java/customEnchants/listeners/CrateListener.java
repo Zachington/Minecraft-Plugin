@@ -75,7 +75,7 @@ public class CrateListener implements Listener {
                     if (now - lastUse < 300) return;
                     shiftRightCooldown.put(player, now);
                     //LOGGER.info("[Crate] Shift-right click handled for " + player.getName());
-                    handleShiftRightClick(player, clickedType);
+                    handleShiftRightClick(player, clickedType, loc);
                     event.setCancelled(true);
                 } else {
                     //LOGGER.info("[Crate] Regular right click handled for " + player.getName());
@@ -295,17 +295,17 @@ public class CrateListener implements Listener {
                     player.openInventory(gui);
 
                 } else {
-                    player.sendMessage("You must hold an Mining Key to open this.");
+                    player.sendMessage("You must hold a Mining Key to open this.");
                     pushPlayerBack(player, clickedBlockLoc);
                 }
             } else {
-                player.sendMessage("You must hold an Mining Key to open this");
+                player.sendMessage("You must hold a Mining Key to open this");
                 pushPlayerBack(player, clickedBlockLoc);
             }
     }
 }
     
-    private void handleShiftRightClick(Player player, Material clickedType) {
+    private void handleShiftRightClick(Player player, Material clickedType, Location clickedBlockLoc) {
         if (clickedType == Material.ENCHANTING_TABLE) {
             ItemStack handItem = player.getInventory().getItemInMainHand();
 
@@ -361,7 +361,8 @@ public class CrateListener implements Listener {
             }
 
             player.sendMessage("You must hold an Enchant Key to open this.");
-            pushPlayerBack(player, player.getLocation().getBlock().getLocation());
+            pushPlayerBack(player, clickedBlockLoc);
+
         } else if (clickedType == Material.DIAMOND_BLOCK) {
         ItemStack handItem = player.getInventory().getItemInMainHand();
 
@@ -396,7 +397,7 @@ public class CrateListener implements Listener {
             }
         }
         player.sendMessage("You must hold a Mining Key to open this.");
-        pushPlayerBack(player, player.getLocation().getBlock().getLocation());
+        pushPlayerBack(player, clickedBlockLoc);
     }
 }
         
@@ -404,8 +405,9 @@ public class CrateListener implements Listener {
     private void pushPlayerBack(Player player, Location blockLocation) {
         Location playerLoc = player.getLocation();
         double dx = playerLoc.getX() - blockLocation.getX();
+        double dy = playerLoc.getY() - blockLocation.getY();
         double dz = playerLoc.getZ() - blockLocation.getZ();
-        Vector pushVector = new Vector(dx, 0, dz).normalize().multiply(1);
+        Vector pushVector = new Vector(dx, dy, dz).normalize().multiply(1);
         Vector currentVelocity = player.getVelocity();
         player.setVelocity(new Vector(pushVector.getX(), currentVelocity.getY(), pushVector.getZ()));
     }

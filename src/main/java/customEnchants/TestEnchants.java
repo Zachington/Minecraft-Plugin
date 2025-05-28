@@ -107,9 +107,9 @@ public class TestEnchants extends JavaPlugin {
 
         // Your existing event registrations, commands, etc.
         World world = Bukkit.getWorld("world"); // or your actual world name
-        int xMin = -10, xMax = 10;
-        int yMin = -10, yMax = 10;
-        int zMin = -10, zMax = 20;
+        int xMin = 0, xMax = 16;
+        int yMin = -10, yMax = 5;
+        int zMin = 34, zMax = 50;
 
         PluginManager.getInstance().initialize();
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);

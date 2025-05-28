@@ -28,7 +28,12 @@ public class customItemUtil {
         "Transmutation Voucher",
         "Decoration Voucher",
         "$1500 Voucher",
-        "Key All Voucher"
+        "Key All Voucher",
+        "§fCommon Enchant",
+        "§2Uncommon Enchant",
+        "§3Rare Enchant",
+        "§5Epic Enchant",
+        "§6Legendary Enchant"
     };
 
     //Change these
@@ -45,7 +50,12 @@ public class customItemUtil {
         "Right click to open voucher",
         "Right click to open voucher",
         "Right click to open voucher",
-        "Right click to open voucher"
+        "Right click to open voucher",
+        "Right Click to receive random enchant",
+        "Right Click to receive random enchant",
+        "Right Click to receive random enchant",
+        "Right Click to receive random enchant",
+        "Right Click to receive random enchant"
     };
 
     public static final Material[] CUSTOM_ITEM_MATERIAL = {
@@ -61,13 +71,22 @@ public class customItemUtil {
         Material.FLOWER_BANNER_PATTERN,
         Material.FIELD_MASONED_BANNER_PATTERN,
         Material.PIGLIN_BANNER_PATTERN,
-        Material.BORDURE_INDENTED_BANNER_PATTERN
+        Material.BORDURE_INDENTED_BANNER_PATTERN,
+        Material.POPPED_CHORUS_FRUIT,
+        Material.POPPED_CHORUS_FRUIT,
+        Material.POPPED_CHORUS_FRUIT,
+        Material.POPPED_CHORUS_FRUIT,
+        Material.POPPED_CHORUS_FRUIT
     };
 
     //Change these
     public static final String[] CUSTOM_ITEM_GRADIENT_START = {
     null,
     "#00FFFF",
+    null,
+    null,
+    null,
+    null,
     null,
     null,
     null,
@@ -95,6 +114,11 @@ public class customItemUtil {
         null,
         null,
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
 };
 
@@ -106,7 +130,7 @@ public class customItemUtil {
 
     for (int i = 0; i < CUSTOM_ITEM.length; i++) {
         CustomItemInfo candidate = getCustomItemInfo(i);
-        if (candidate != null && candidate.getName().equalsIgnoreCase(itemName)) {
+        if (candidate != null && ChatColor.stripColor(candidate.getName()).equalsIgnoreCase(itemName)) {
             info = candidate;
             break;
         }
