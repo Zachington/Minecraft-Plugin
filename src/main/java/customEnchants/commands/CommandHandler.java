@@ -4,6 +4,7 @@ import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
 import customEnchants.utils.customItemUtil;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -92,6 +93,27 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        //key all
+        if (command.getName().equalsIgnoreCase("keyall")) {
+        if (!sender.hasPermission("customenchants.keyall")) {
+            sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
+            return true;
+        }
+
+        ItemStack voucher = customItemUtil.createCustomItem("Key All Voucher");
+        if (voucher == null) {
+            sender.sendMessage(ChatColor.RED + "Voucher item not found!");
+            return true;
+        }
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            onlinePlayer.getInventory().addItem(voucher);
+            onlinePlayer.sendTitle("§6Key All", "§aYou got a Key All Voucher!", 10, 70, 20);
+        }
+
+        sender.sendMessage(ChatColor.GREEN + "Given Key All Voucher to all online players.");
+        return true;
+    }
 
 
         //Give Custom Item
@@ -128,19 +150,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     return true;
 }
 
-
-
-
-    if (command.getName().equalsIgnoreCase("testblackscroll")) {
-    if (!(sender instanceof Player)) {
-        sender.sendMessage("Only players can use this command.");
-        return true;
-    }
-
-    Inventory gui = GuiUtil.blackScrollInventory(player); // Replace YourClassName with your class name
-    player.openInventory(gui);
-    return true;
-    }
+    
         return false; // command not handled here
     }
 
@@ -224,7 +234,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return completions;
     }
 }
-
 
 return Collections.emptyList();
     }

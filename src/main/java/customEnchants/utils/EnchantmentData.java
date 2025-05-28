@@ -24,7 +24,8 @@ public class EnchantmentData {
         "Unbreakable",
         "Magnet",
         "Preservation",
-        "Frost Touch"
+        "Frost Touch",
+        "Key Miner"
     };
     
     // Maximum levels for each enchantment (corresponds to ENCHANT_NAMES array)
@@ -38,6 +39,7 @@ public class EnchantmentData {
         1,  // Unbreakable
         3,  // Magnet
         8,   // Preservation
+        5,
         5
     };
     
@@ -52,7 +54,8 @@ public class EnchantmentData {
         "ALL",             // Unbreakable
         "PICKAXE",         // Magnet
         "ALL",             // Preservation 
-        "PICKAXE"          //Frost Touch
+        "PICKAXE",          //Frost Touch
+        "PICKAXE"
     };
     
     // Rarity levels with ChatColors (COMMON=WHITE, UNCOMMON=GREEN, RARE=BLUE, EPIC=PURPLE, LEGENDARY=GOLD, PRESTIGE=PINK)
@@ -66,7 +69,8 @@ public class EnchantmentData {
         "PRESTIGE+",   // Unbreakable
         "LEGENDARY",     // Magnet
         "EPIC",        //Preservation
-        "EPIC"
+        "EPIC",
+        "LEGENDARY"
     };
     
     // ChatColor mappings for each rarity
@@ -102,7 +106,8 @@ public class EnchantmentData {
         "Tool never breaks from durability damage",           // Unbreakable
         "Attracts nearby dropped items to player",             // Magnet
         "Chance to return durability to the tool",      //Preservation
-        "Chance to spawn ice around the player"         //Frost Touch
+        "Chance to spawn ice around the player",         //Frost Touch
+        "Chance to give keys"
     };
     
     // Proc chance percentages (0.0 to 1.0)
@@ -116,7 +121,8 @@ public class EnchantmentData {
         1.0,   // Unbreakable - Always active (passive)
         1.0,   // Magnet - Always active (passive)
         0.1,    // Preservation 5%
-        0.01    //Frost Touch 5%
+        0.01,    //Frost Touch 5%
+        0.05
         
     };
     

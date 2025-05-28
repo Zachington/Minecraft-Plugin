@@ -45,6 +45,15 @@
         <version>4.14.0</version>
         <scope>provided</scope>
     </dependency>
+
+    <dependency>
+        <groupId>net.milkbowl.vault</groupId>
+        <artifactId>Vault</artifactId>
+        <version>1.7</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/libs/Vault.jar</systemPath>
+    </dependency>
+
 </dependencies>
 
     <build>

@@ -13,3 +13,7 @@ commands:
     description: Gives a custom utility item
   testblackscroll:
     description: opens Black Scroll Gui
+  keyall:
+    description: Give Key All Voucher to all players
+    usage: /keyall
+    permission: customenchants.keyall

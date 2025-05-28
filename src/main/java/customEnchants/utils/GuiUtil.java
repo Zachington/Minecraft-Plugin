@@ -242,7 +242,6 @@ if (lootList != null) {
     return gui;
 }
 
-
     public static Inventory miningKeyInventory(Player player) {
     Inventory gui = Bukkit.createInventory(null, 54, "§3Mining Crate");
 
@@ -258,6 +257,22 @@ if (lootList != null) {
             gui.setItem(slotIndex, loot.item.clone()); // place the exact item
             slotIndex++;
         }
+    }
+
+    return gui;
+}
+
+    public static Inventory decorVoucher(Player player, List<ItemStack> items) {
+    Inventory gui = Bukkit.createInventory(null, 54, "Decoration Voucher");
+
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE),
+        range(0, 10), range(17, 19), range(26, 28), range(35, 37), range(44, 54));
+
+    int slotIndex = 10;
+    for (ItemStack item : items) {
+        if (slotIndex >= gui.getSize()) break;
+        gui.setItem(slotIndex, item.clone());
+        slotIndex++;
     }
 
     return gui;

@@ -3,6 +3,7 @@ package customEnchants.listeners;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
 import customEnchants.utils.GuiUtil.EnchantParseResult;
+import customEnchants.utils.customItemUtil;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -25,7 +26,31 @@ public class AnvilCombineListener implements Listener {
         ItemStack first = inv.getItem(0);
         ItemStack second = inv.getItem(1);
 
-        if (first == null || second == null) return;
+        if (first != null && first.getType() == Material.AIR) first = null;
+        if (second != null && second.getType() == Material.AIR) second = null;
+
+    // If both slots empty, do nothing
+    if (first == null && second == null) return;
+
+    // If only first slot has an item
+    if (first != null && second == null) {
+        handleSingleItemAnvil(event, first, inv);
+        return;
+    }
+
+    // If only second slot has an item (probably invalid for anvil, but let's be safe)
+    if (first == null && second != null) {
+        handleSingleItemAnvil(event, first, inv);
+        return;
+    }
+
+    // Now both items are non-null — do your combine logic here
+    if (isCustomItem(first) || isCustomItem(second)) {
+        event.setResult(null);
+        return;
+    }
+
+
 
         // 1) Handle enchanted book + enchanted book combination (existing logic)
         if (first.getType() == Material.ENCHANTED_BOOK && second.getType() == Material.ENCHANTED_BOOK) {
@@ -148,11 +173,19 @@ public class AnvilCombineListener implements Listener {
     }
 }
 
+    private void handleSingleItemAnvil(PrepareAnvilEvent event, ItemStack item, AnvilInventory inv) {
+    ItemStack first = inv.getItem(0);
+    ItemStack second = inv.getItem(1);
+
+    if (isCustomItem(first) || isCustomItem(second)) {
+        event.setResult(null);
+        return;
+    }
+}
 
 
 
 
-    // Helper: get repair cost safely from an ItemStack's meta
     private int getRepairCost(ItemStack item) {
         if (item == null) return 0;
         ItemMeta meta = item.getItemMeta();
@@ -271,8 +304,53 @@ public class AnvilCombineListener implements Listener {
             }
         };
     }
-
     private static class ToolEnchantInfo {
         final Map<String, Integer> map = new HashMap<>();
     }
+
+    private boolean isCustomItem(ItemStack item) {
+    if (item == null) {
+        return false;
+    }
+    if (!item.hasItemMeta()) {
+        return false;
+    }
+    ItemMeta meta = item.getItemMeta();
+
+    String displayName = meta.hasDisplayName() ? meta.getDisplayName() : "";
+    List<String> lore = meta.hasLore() ? meta.getLore() : Collections.emptyList();
+
+    for (int i = 0; i < customItemUtil.CUSTOM_ITEM.length; i++) {
+        customItemUtil.CustomItemInfo info = customItemUtil.getCustomItemInfo(i);
+        if (info == null) {
+            continue;
+        }
+
+        if (item.getType() != info.getMaterial()) {
+            continue;
+        }
+
+        String strippedDisplayName = ChatColor.stripColor(displayName);
+        String strippedExpectedName = ChatColor.stripColor(info.getName());
+        if (!strippedDisplayName.equalsIgnoreCase(strippedExpectedName)) {
+            continue;
+        }
+
+        if (lore.isEmpty()) {
+            continue;
+        }
+
+        String strippedLore = ChatColor.stripColor(lore.get(0));
+        String expectedLore = ChatColor.stripColor(info.getLore());
+
+        if (!strippedLore.equalsIgnoreCase(expectedLore)) {
+            continue;
+        }
+        return true;
+    }
+    return false;
+}
+
+
+
 }

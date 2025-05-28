@@ -24,7 +24,11 @@ public class customItemUtil {
         "Divine Key",
         "Durability Key",
         "Prestige Key",
-        "Prestige+ Key"
+        "Prestige+ Key",
+        "Transmutation Voucher",
+        "Decoration Voucher",
+        "$1500 Voucher",
+        "Key All Voucher"
     };
 
     //Change these
@@ -37,8 +41,11 @@ public class customItemUtil {
         "Use on Divine crate at /warp cartes",
         "Use on Durability crate at /warp crates",
         "Use on Prestige crate at /warp crates",    
-        "Use on Prestige+ crate at /warp crates"
-
+        "Use on Prestige+ crate at /warp crates",
+        "Right click to open voucher",
+        "Right click to open voucher",
+        "Right click to open voucher",
+        "Right click to open voucher"
     };
 
     public static final Material[] CUSTOM_ITEM_MATERIAL = {
@@ -50,13 +57,21 @@ public class customItemUtil {
         Material.TRIAL_KEY,
         Material.TRIAL_KEY,
         Material.OMINOUS_TRIAL_KEY,
-        Material.OMINOUS_TRIAL_KEY
+        Material.OMINOUS_TRIAL_KEY,
+        Material.FLOWER_BANNER_PATTERN,
+        Material.FIELD_MASONED_BANNER_PATTERN,
+        Material.PIGLIN_BANNER_PATTERN,
+        Material.BORDURE_INDENTED_BANNER_PATTERN
     };
 
     //Change these
     public static final String[] CUSTOM_ITEM_GRADIENT_START = {
     null,
     "#00FFFF",
+    null,
+    null,
+    null,
+    null,
     null,
     null,
     null,
@@ -70,6 +85,10 @@ public class customItemUtil {
     public static final String[] CUSTOM_ITEM_GRADIENT_END = {
         null,
         "#3C3C3C",
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,

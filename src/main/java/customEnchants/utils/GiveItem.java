@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.bukkit.Material;
+//import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class GiveItem {
@@ -25,10 +25,14 @@ public class GiveItem {
     public static class EnchantmentDropData {
         public static final Map<String, List<ItemDropEntry>> ENCHANT_DROP_MAP = new HashMap<>();
         static {
-            ENCHANT_DROP_MAP.put("Gold Digger", List.of(
-                new ItemDropEntry(new ItemStack(Material.DIAMOND), 0.1),
-                new ItemDropEntry(new ItemStack(Material.EMERALD), 0.3),
-                new ItemDropEntry(new ItemStack(Material.GOLD_INGOT), 0.5)
+            ENCHANT_DROP_MAP.put("Key Miner", List.of(
+                new ItemDropEntry(customItemUtil.createCustomItem("Mining Key"), 0.1),
+                new ItemDropEntry(customItemUtil.createCustomItem("Prison Key"), 0.1),
+                new ItemDropEntry(customItemUtil.createCustomItem("Enchant Key"), 0.05),
+                new ItemDropEntry(customItemUtil.createCustomItem("Divine Key"), 0.03),
+                new ItemDropEntry(customItemUtil.createCustomItem("Durability Key"), 0.02),
+                new ItemDropEntry(customItemUtil.createCustomItem("Prestige Key"), 0.01),
+                new ItemDropEntry(customItemUtil.createCustomItem("Prestige+ Key"), 0.01)
                 ));
     
 }
