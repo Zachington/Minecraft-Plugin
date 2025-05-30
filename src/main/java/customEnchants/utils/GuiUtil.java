@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import customEnchants.utils.crateTableUtil.LootEntry;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,6 +149,18 @@ public class GuiUtil {
         return "ALL".equals(toolTypes) ? "All Tools" : toolTypes.replace(",", ", ");
     }
 
+    private static ItemStack keyItemWithLore(Player player, String keyType) {
+    ItemStack item = customItemUtil.createCustomItem(keyType);
+    if (item == null || !item.hasItemMeta()) return item;
+
+    ItemMeta meta = item.getItemMeta();
+    List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+    lore.add(ChatColor.GRAY + "Keys: " + ClaimStorage.getKeyCount(player, keyType));
+    meta.setLore(lore);
+    item.setItemMeta(meta);
+
+    return item;
+}
     public static class EnchantParseResult {
         public final String name;
         public final int level;
@@ -244,8 +257,6 @@ public class GuiUtil {
     return gui;
 }
 
-
-
     public static Inventory miningKeyInventory(Player player) {
     Inventory gui = Bukkit.createInventory(null, 54, "§3Mining Crate");
 
@@ -280,6 +291,178 @@ public class GuiUtil {
     }
 
     return gui;
+}
+
+    public static Inventory claimInventory(Player player) {
+        Inventory gui = Bukkit.createInventory(null, 27, "Claim");
+
+        fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE),
+        range(0,10), range(11, 13), range(14, 16), range(17, 27));
+        
+        ItemStack trialKey = new ItemStack(Material.TRIAL_KEY);
+        ItemMeta trialKeyMeta = trialKey.getItemMeta();
+        trialKeyMeta.setDisplayName(ChatColor.GOLD + "Key Claim");
+        trialKey.setItemMeta(trialKeyMeta);
+
+        ItemStack prestige = new ItemStack(Material.END_CRYSTAL);
+        ItemMeta prestigeMeta = prestige.getItemMeta();
+        prestigeMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Prestige Claim");
+        prestige.setItemMeta(prestigeMeta);
+
+        ItemStack other = new ItemStack(Material.CHEST);
+        ItemMeta otherMeta = other.getItemMeta();
+        otherMeta.setDisplayName(ChatColor.WHITE + "Other Claims");
+        other.setItemMeta(otherMeta);
+
+
+        gui.setItem(10, trialKey);
+        gui.setItem(13, prestige);
+        gui.setItem(16, other);
+        
+        
+        
+        return gui;
+    }
+
+    public static Inventory guiKeyClaim(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 54, ChatColor.GOLD + "Key Claim");
+
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE), 
+        range(0, 10), range(17, 19), range(26, 28), range(35, 37), range(44, 54));
+
+    gui.setItem(10, keyItemWithLore(player, "Mining Key"));
+    gui.setItem(11, keyItemWithLore(player, "Prison Key"));
+    gui.setItem(12, keyItemWithLore(player, "Enchant Key"));
+    gui.setItem(13, keyItemWithLore(player, "Divine Key"));
+    gui.setItem(14, keyItemWithLore(player, "Durability Key"));
+
+    return gui;
+}
+
+    public static Inventory createExtractorStorageGUI(Player player, EssenceManager essenceManager) {
+    Inventory gui = Bukkit.createInventory(null, 45, ChatColor.DARK_GRAY + "Extractor Storage");
+    ItemStack filler = createPane(Material.GRAY_STAINED_GLASS_PANE);
+
+    // Fill all slots with gray panes
+    for (int i = 0; i < 45; i++) {
+        gui.setItem(i, filler);
+    }
+
+    int[] centerSlots = {12, 13, 14, 21, 22, 23, 30, 31, 32};
+    // Clear the center 3x3 grid
+    for (int slot : centerSlots) {
+        gui.setItem(slot, null);
+    }
+
+    // Load stored extractors from file and set them in center slots
+    essenceManager.loadExtractorInventory(player, gui);
+
+    return gui;
+}
+
+    public static Inventory essenceInventory(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 27, "Essence Menu");
+
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE),
+        range(0,10), range(11, 12), range(13, 14), range(15, 16), range(17, 27));
+
+    // Put items directly in the specific slots:
+    ItemStack pickaxe = new ItemStack(Material.DIAMOND_PICKAXE);
+    ItemMeta meta = pickaxe.getItemMeta();
+    if (meta != null) {
+        meta.setDisplayName(ChatColor.AQUA + "Extractors");
+        pickaxe.setItemMeta(meta);
+    }
+    gui.setItem(10, pickaxe);
+
+    ItemStack hoe = new ItemStack(Material.DIAMOND_HOE);
+    meta = hoe.getItemMeta();
+    if (meta != null) {
+        meta.setDisplayName(ChatColor.AQUA + "Plows");
+        hoe.setItemMeta(meta);
+    }
+    gui.setItem(12, hoe);
+
+    ItemStack fishingRod = new ItemStack(Material.FISHING_ROD);
+    meta = fishingRod.getItemMeta();
+    if (meta != null) {
+        meta.setDisplayName(ChatColor.AQUA + "Fishing Nets");
+        fishingRod.setItemMeta(meta);
+    }
+    gui.setItem(14, fishingRod);
+
+    ItemStack emeraldBlock = new ItemStack(Material.EMERALD_BLOCK);
+    meta = emeraldBlock.getItemMeta();
+    if (meta != null) {
+        meta.setDisplayName(ChatColor.AQUA + "Sell Essence");
+        emeraldBlock.setItemMeta(meta);
+    }
+    gui.setItem(16, emeraldBlock);
+
+    return gui;
+}
+
+
+    public static Inventory essenceSellInventory(Player player, EssenceManager essenceManager) {
+    Inventory gui = Bukkit.createInventory(null, 36, "Sell Essence");
+
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE),
+        range(0,11), range(13, 14), range(16, 20), range(22, 23), range(25, 36));
+
+    // Helper method to create dye item
+    BiConsumer<Integer, Material> createTierItem = (tier, material) -> {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            String display = switch (tier) {
+                case 1 -> ChatColor.RED + "Tier 1";
+                case 2 -> ChatColor.GOLD + "Tier 2";
+                case 3 -> ChatColor.YELLOW + "Tier 3";
+                case 4 -> ChatColor.GREEN + "Tier 4";
+                case 5 -> ChatColor.DARK_GREEN + "Tier 5";
+                case 6 -> ChatColor.BLUE + "Tier 6";
+                case 7 -> ChatColor.LIGHT_PURPLE + "Tier 7";
+                case 8 -> ChatColor.DARK_PURPLE + "Tier 8";
+                default -> "Unknown";
+            };
+            meta.setDisplayName(display);
+
+            int amount = essenceManager.getEssence(player, tier);
+            List<String> lore = new ArrayList<>();
+            lore.add(ChatColor.GRAY + "Click to sell");
+            lore.add(ChatColor.DARK_GRAY + "Amount: " + ChatColor.WHITE + amount);
+            meta.setLore(lore);
+
+            item.setItemMeta(meta);
+            gui.setItem(getSlotForTier(tier), item);
+        }
+    };
+
+    createTierItem.accept(1, Material.RED_DYE);
+    createTierItem.accept(2, Material.ORANGE_DYE);
+    createTierItem.accept(3, Material.YELLOW_DYE);
+    createTierItem.accept(4, Material.LIME_DYE);
+    createTierItem.accept(5, Material.GREEN_DYE);
+    createTierItem.accept(6, Material.BLUE_DYE);
+    createTierItem.accept(7, Material.MAGENTA_DYE);
+    createTierItem.accept(8, Material.PURPLE_DYE);
+
+    return gui;
+}
+
+// Maps tier to slot index
+    private static int getSlotForTier(int tier) {
+    return switch (tier) {
+        case 1 -> 11;
+        case 2 -> 12;
+        case 3 -> 14;
+        case 4 -> 15;
+        case 5 -> 20;
+        case 6 -> 21;
+        case 7 -> 23;
+        case 8 -> 24;
+        default -> 0;
+    };
 }
 
 

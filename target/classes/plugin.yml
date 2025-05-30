@@ -4,6 +4,8 @@ name: TestEnchants
 author: Zach
 api-version: 1.13
 
+softdepend: [Vault]
+
 commands:
   scrap:
     description: Opens the scrap GUI
@@ -17,3 +19,15 @@ commands:
     description: Give Key All Voucher to all players
     usage: /keyall
     permission: customenchants.keyall
+  claim:
+    description: Opens Claim menu
+    usage: /claim
+  extractor:
+    description: Opens extractor menu
+    usage: /extractor
+  essence:
+    description: Opens the Essence Menu GUI
+    usage: /essence
+  rankup:
+    description: rankup
+    usage: /rankup

@@ -12,8 +12,18 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
+import java.util.UUID;
+import org.bukkit.plugin.java.JavaPlugin;
+
 
 public class customItemUtil {
+    private static JavaPlugin plugin;
+
+    public static void setPlugin(JavaPlugin pluginInstance) {
+        plugin = pluginInstance;
+    }
     
     public static final String[] CUSTOM_ITEM = {
         "§8Black Scroll",
@@ -33,7 +43,24 @@ public class customItemUtil {
         "§2Uncommon Enchant",
         "§3Rare Enchant",
         "§5Epic Enchant",
-        "§6Legendary Enchant"
+        "§6Legendary Enchant",
+        "Coal Extractor",
+        "Copper Extractor",
+        "Iron Extractor",
+        "Redstone Extractor",
+        "Lapis Extractor",
+        "Gold Extractor",
+        "Diamond Extractor",
+        "Emerald Extractor",
+        "Deepslate Coal Extractor",
+        "Deepslate Copper Extractor",
+        "Deepslate Iron Extractor",
+        "Deepslate Redstone Extractor",
+        "Deepslate Lapis Extractor",
+        "Deepslate Gold Extractor",
+        "Deepslate Diamond Extractor",
+        "Deepslate Emerald Extractor",
+        "Nether Gold Extractor"
     };
 
     //Change these
@@ -55,7 +82,24 @@ public class customItemUtil {
         "Right Click to receive random enchant",
         "Right Click to receive random enchant",
         "Right Click to receive random enchant",
-        "Right Click to receive random enchant"
+        "Right Click to receive random enchant",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence",
+        "Break blocks to generate Essence"
     };
 
     public static final Material[] CUSTOM_ITEM_MATERIAL = {
@@ -76,13 +120,47 @@ public class customItemUtil {
         Material.POPPED_CHORUS_FRUIT,
         Material.POPPED_CHORUS_FRUIT,
         Material.POPPED_CHORUS_FRUIT,
-        Material.POPPED_CHORUS_FRUIT
+        Material.POPPED_CHORUS_FRUIT,
+        Material.COAL_ORE,
+        Material.COPPER_ORE,
+        Material.IRON_ORE,
+        Material.REDSTONE_ORE,
+        Material.LAPIS_ORE,
+        Material.GOLD_ORE,
+        Material.DIAMOND_ORE,
+        Material.EMERALD_ORE,
+        Material.DEEPSLATE_COAL_ORE,
+        Material.DEEPSLATE_COPPER_ORE,
+        Material.DEEPSLATE_IRON_ORE,
+        Material.DEEPSLATE_REDSTONE_ORE,
+        Material.DEEPSLATE_LAPIS_ORE,
+        Material.DEEPSLATE_GOLD_ORE,
+        Material.DEEPSLATE_DIAMOND_ORE,
+        Material.DEEPSLATE_EMERALD_ORE,
+        Material.NETHER_GOLD_ORE
     };
 
     //Change these
     public static final String[] CUSTOM_ITEM_GRADIENT_START = {
     null,
     "#00FFFF",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
     null,
     null,
     null,
@@ -105,6 +183,22 @@ public class customItemUtil {
     public static final String[] CUSTOM_ITEM_GRADIENT_END = {
         null,
         "#3C3C3C",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -158,10 +252,25 @@ public class customItemUtil {
         lore.add(ChatColor.GRAY + info.getLore());
         meta.setLore(lore);
 
+        // --- ADD UNIQUE ID FOR EXTRACTORS TO MAKE THEM NON-STACKABLE ---
+        if (isExtractor(info.getName())) {
+            // Generate unique UUID string
+            String uniqueID = UUID.randomUUID().toString();
+            NamespacedKey key = new NamespacedKey(plugin, "unique_extractor_id");
+            meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, uniqueID);
+        }
+
         item.setItemMeta(meta);
     }
 
     return item;
+}
+
+// Helper method to identify if an item is an extractor by name
+private static boolean isExtractor(String name) {
+    String stripped = ChatColor.stripColor(name).toLowerCase();
+    // Check if name contains "extractor" (case insensitive)
+    return stripped.contains("extractor");
 }
 
 
@@ -241,6 +350,7 @@ public class customItemUtil {
     return -1;
 }
 
+    
 
 }
 

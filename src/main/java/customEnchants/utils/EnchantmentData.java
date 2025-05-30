@@ -68,7 +68,7 @@ public class EnchantmentData {
         "LEGENDARY",  // Auto Smelt
         "PRESTIGE+",   // Unbreakable
         "LEGENDARY",     // Magnet
-        "EPIC",        //Preservation
+        "LEGENDARY",        //Preservation
         "EPIC",
         "LEGENDARY"
     };
@@ -99,7 +99,7 @@ public class EnchantmentData {
     public static final String[] ENCHANT_LORE = {
         "Breaks multiple blocks in a wall pattern",           // Wall Breaker
         "Breaks a 3x3x3 cube",                     // Blast
-        "Chance to give _____",         // Gold Digger
+        "Chance to give money when breaking blocks",         // Gold Digger
         "Increases other enchants proc chance",            // Amplify
         "Chance to spawn more ore",              // Ore Scavenger
         "Automatically smelts mined blocks",                   // Auto Smelt

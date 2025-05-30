@@ -1,8 +1,14 @@
 package customEnchants.commands;
 
+import customEnchants.TestEnchants;
+import customEnchants.managers.RankManager;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
+import customEnchants.utils.RankUtils;
+import customEnchants.utils.RankUtils.RankCost;
 import customEnchants.utils.customItemUtil;
+import net.milkbowl.vault.economy.Economy;
+import customEnchants.utils.EssenceManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -23,6 +29,15 @@ import java.util.Random;
 public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private final Random random = new Random();
+    private final Economy economy;
+    private final EssenceManager essenceManager;
+    private final RankManager rankManager;
+
+    public CommandHandler(TestEnchants plugin, Economy economy, RankManager rankManager) {
+        this.economy = economy;
+        this.rankManager = rankManager;
+        this.essenceManager = plugin.getEssenceManager();
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -31,169 +46,210 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        String cmd = command.getName().toLowerCase();
 
-        //Scrap menu
-        if (command.getName().equalsIgnoreCase("scrap")) {
-            Inventory gui = GuiUtil.createScrapGui(player);
-            player.openInventory(gui);
-            return true;
-        }
-
-
-        //Give Enchant 
-        if (command.getName().equalsIgnoreCase("giveenchant")) {
-            if (args.length < 1) {
-                player.sendMessage(ChatColor.RED + "Usage: /giveenchant <enchantName> [level] [chance]");
+        switch (cmd) {
+            case "scrap" -> {
+                Inventory gui = GuiUtil.createScrapGui(player);
+                player.openInventory(gui);
                 return true;
             }
-
-            String enchantName = args[0].replace('_', ' ');
-            int enchantIndex = EnchantmentData.getEnchantmentIndex(enchantName);
-            if (enchantIndex == -1) {
-                player.sendMessage(ChatColor.RED + "Unknown enchantment: " + enchantName);
-                player.sendMessage(ChatColor.GRAY + "Available enchantments: " + getAvailableEnchantsList());
-                return true;
-            }
-
-            EnchantmentData.EnchantmentInfo enchantInfo = EnchantmentData.getEnchantmentInfo(enchantIndex);
-            int level = 1;
-            Integer customChance = null;
-
-            if (args.length >= 2) {
-                try {
-                    level = Integer.parseInt(args[1]);
-                    if (level < 1 || level > enchantInfo.maxLevel) {
-                        player.sendMessage(ChatColor.RED + enchantName + " level must be between 1 and " + enchantInfo.maxLevel);
-                        return true;
-                    }
-                } catch (NumberFormatException e) {
-                    player.sendMessage(ChatColor.RED + "Level must be a number between 1 and " + enchantInfo.maxLevel);
+            case "giveenchant" -> {
+                if (args.length < 1) {
+                    player.sendMessage(ChatColor.RED + "Usage: /giveenchant <enchantName> [level] [chance]");
                     return true;
                 }
-            }
 
-            if (args.length >= 3) {
-                try {
-                    customChance = Integer.parseInt(args[2]);
-                    if (customChance < 1 || customChance > 100) {
-                        player.sendMessage(ChatColor.RED + "Chance must be between 1 and 100");
-                        return true;
-                    }
-                } catch (NumberFormatException e) {
-                    player.sendMessage(ChatColor.RED + "Chance must be a number between 1 and 100");
+                String enchantName = args[0].replace('_', ' ');
+                int enchantIndex = EnchantmentData.getEnchantmentIndex(enchantName);
+                if (enchantIndex == -1) {
+                    player.sendMessage(ChatColor.RED + "Unknown enchantment: " + enchantName);
+                    player.sendMessage(ChatColor.GRAY + "Available enchantments: " + getAvailableEnchantsList());
                     return true;
                 }
-            }
 
-            int chance = (customChance != null) ? customChance : generateRandomChance(enchantInfo.rarity);
+                EnchantmentData.EnchantmentInfo enchantInfo = EnchantmentData.getEnchantmentInfo(enchantIndex);
 
-            ItemStack book = EnchantmentData.createEnchantedBook(enchantInfo, level, chance, false);
+                int level = 1;
+                if (args.length >= 2) {
+                    try {
+                        level = Integer.parseInt(args[1]);
+                        if (level < 1 || level > enchantInfo.maxLevel) {
+                            player.sendMessage(ChatColor.RED + enchantName + " level must be between 1 and " + enchantInfo.maxLevel);
+                            return true;
+                        }
+                    } catch (NumberFormatException e) {
+                        player.sendMessage(ChatColor.RED + "Level must be a number between 1 and " + enchantInfo.maxLevel);
+                        return true;
+                    }
+                }
 
-            player.getInventory().addItem(book);
-            player.sendMessage(ChatColor.GREEN + "Given " + enchantInfo.name + " Level " + level + " with " + chance + "% chance");
-            return true;
-        }
+                Integer customChance = null;
+                if (args.length >= 3) {
+                    try {
+                        customChance = Integer.parseInt(args[2]);
+                        if (customChance < 1 || customChance > 100) {
+                            player.sendMessage(ChatColor.RED + "Chance must be between 1 and 100");
+                            return true;
+                        }
+                    } catch (NumberFormatException e) {
+                        player.sendMessage(ChatColor.RED + "Chance must be a number between 1 and 100");
+                        return true;
+                    }
+                }
 
-        //key all
-        if (command.getName().equalsIgnoreCase("keyall")) {
-        if (!sender.hasPermission("customenchants.keyall")) {
-            sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
-            return true;
-        }
+                int chance = (customChance != null) ? customChance : generateRandomChance(enchantInfo.rarity);
 
-        ItemStack voucher = customItemUtil.createCustomItem("Key All Voucher");
-        if (voucher == null) {
-            sender.sendMessage(ChatColor.RED + "Voucher item not found!");
-            return true;
-        }
+                ItemStack book = EnchantmentData.createEnchantedBook(enchantInfo, level, chance, false);
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            onlinePlayer.getInventory().addItem(voucher);
-            onlinePlayer.sendTitle("§6Key All", "§aYou got a Key All Voucher!", 10, 70, 20);
-        }
-
-        sender.sendMessage(ChatColor.GREEN + "Given Key All Voucher to all online players.");
-        return true;
-    }
-
-
-        //Give Custom Item
-        if (command.getName().equalsIgnoreCase("giveCustomItem")) {
-    if (args.length < 1) {
-        player.sendMessage(ChatColor.RED + "Usage: /giveCustomItem <itemName> [amount]");
-        return true;
-    }
-
-    // Extract item name (all args except last if it looks like a number)
-    String inputName;
-    int amount = 1;
-
-    if (args.length > 1) {
-        // Try parse last argument as amount
-        try {
-            amount = Integer.parseInt(args[args.length - 1]);
-            if (amount < 1) {
-                player.sendMessage(ChatColor.RED + "Amount must be at least 1.");
+                player.getInventory().addItem(book);
+                player.sendMessage(ChatColor.GREEN + "Given " + enchantInfo.name + " Level " + level + " with " + chance + "% chance");
                 return true;
             }
-            // Item name is all args except last
-            inputName = String.join(" ", Arrays.copyOf(args, args.length - 1)).replace('_', ' ').toLowerCase();
-        } catch (NumberFormatException e) {
-            // Last arg is not a number, treat whole input as item name
-            inputName = String.join(" ", args).replace('_', ' ').toLowerCase();
-        }
-    } else {
-        inputName = args[0].replace('_', ' ').toLowerCase();
-    }
+            case "keyall" -> {
+                if (!sender.hasPermission("customenchants.keyall")) {
+                    sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
+                    return true;
+                }
 
-    player.sendMessage(ChatColor.YELLOW + "Searching for custom item: " + inputName);
+                ItemStack voucher = customItemUtil.createCustomItem("Key All Voucher");
+                if (voucher == null) {
+                    sender.sendMessage(ChatColor.RED + "Voucher item not found!");
+                    return true;
+                }
 
-    customItemUtil.CustomItemInfo matchedInfo = null;
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    onlinePlayer.getInventory().addItem(voucher);
+                    onlinePlayer.sendTitle("§6Key All", "§aYou got a Key All Voucher!", 10, 70, 20);
+                }
 
-    for (int i = 0; i < customItemUtil.CUSTOM_ITEM.length; i++) {
-        customItemUtil.CustomItemInfo candidate = customItemUtil.getCustomItemInfo(i);
-        if (candidate == null) continue;
+                sender.sendMessage(ChatColor.GREEN + "Given Key All Voucher to all online players.");
+                return true;
+            }
+            case "givecustomitem" -> {
+                if (args.length < 1) {
+                    player.sendMessage(ChatColor.RED + "Usage: /giveCustomItem <itemName> [amount]");
+                    return true;
+                }
 
-        String rawName = candidate.getName();
-        String cleanName = ChatColor.stripColor(rawName);
-        if (cleanName == null || cleanName.trim().isEmpty()) {
-            cleanName = rawName.replaceAll("§[0-9A-FK-ORa-fk-or]", "");
-        }
+                String inputName;
+                int amount = 1;
 
-        if (cleanName.toLowerCase().equals(inputName)) {
-            matchedInfo = candidate;
-            break;
-        }
-    }
+                if (args.length > 1) {
+                    try {
+                        amount = Integer.parseInt(args[args.length - 1]);
+                        if (amount < 1) {
+                            player.sendMessage(ChatColor.RED + "Amount must be at least 1.");
+                            return true;
+                        }
+                        inputName = String.join(" ", Arrays.copyOf(args, args.length - 1)).replace('_', ' ').toLowerCase();
+                    } catch (NumberFormatException e) {
+                        inputName = String.join(" ", args).replace('_', ' ').toLowerCase();
+                    }
+                } else {
+                    inputName = args[0].replace('_', ' ').toLowerCase();
+                }
 
-    if (matchedInfo == null) {
-        player.sendMessage(ChatColor.RED + "Invalid custom item name: " + inputName);
+                player.sendMessage(ChatColor.YELLOW + "Searching for custom item: " + inputName);
+
+                customItemUtil.CustomItemInfo matchedInfo = null;
+                for (int i = 0; i < customItemUtil.CUSTOM_ITEM.length; i++) {
+                    customItemUtil.CustomItemInfo candidate = customItemUtil.getCustomItemInfo(i);
+                    if (candidate == null) continue;
+
+                    String rawName = candidate.getName();
+                    String cleanName = ChatColor.stripColor(rawName);
+                    if (cleanName == null || cleanName.trim().isEmpty()) {
+                        cleanName = rawName.replaceAll("§[0-9A-FK-ORa-fk-or]", "");
+                    }
+
+                    if (cleanName.toLowerCase().equals(inputName)) {
+                        matchedInfo = candidate;
+                        break;
+                    }
+                }
+
+                if (matchedInfo == null) {
+                    player.sendMessage(ChatColor.RED + "Invalid custom item name: " + inputName);
+                    return true;
+                }
+
+                player.sendMessage(ChatColor.YELLOW + "Matched item: " + matchedInfo.getName());
+
+                ItemStack customItem = customItemUtil.createCustomItem(matchedInfo.getName());
+
+                if (customItem == null) {
+                    player.sendMessage(ChatColor.RED + "Failed to create custom item.");
+                    return true;
+                }
+
+                customItem.setAmount(amount);
+
+                player.getInventory().addItem(customItem);
+                player.sendMessage(ChatColor.GREEN + "You have been given " + amount + "x: " + customItem.getItemMeta().getDisplayName());
+
+                return true;
+            }
+            case "claim" -> {
+                Inventory gui = GuiUtil.claimInventory(player);
+                player.openInventory(gui);
+                return true;
+            }
+            case "extractor" -> {
+                Inventory gui = GuiUtil.createExtractorStorageGUI(player, essenceManager);
+                player.openInventory(gui);
+                return true;
+            }
+            case "essence" -> {
+                Inventory gui = GuiUtil.essenceInventory(player);  // assuming essenceInventory is in GuiUtil
+                player.openInventory(gui);
+                return true;
+            }
+            case "rankup" -> {
+    String currentRank = RankUtils.getRank(player);
+    String nextRank = RankUtils.getNextRank(currentRank);
+
+    if (nextRank == null) {
+        player.sendMessage(ChatColor.RED + "You are already at the max rank!");
         return true;
     }
 
-    player.sendMessage(ChatColor.YELLOW + "Matched item: " + matchedInfo.getName());
-
-    ItemStack customItem = customItemUtil.createCustomItem(matchedInfo.getName());
-
-    if (customItem == null) {
-        player.sendMessage(ChatColor.RED + "Failed to create custom item.");
+    RankCost cost = RankUtils.getRankCost(nextRank, currentRank);
+    if (cost == null) {
+        player.sendMessage(ChatColor.RED + "Rankup cost could not be calculated.");
         return true;
     }
 
-    // Set amount on the item stack
-    customItem.setAmount(amount);
+    // Check essence with EssenceManager instance
+    int playerEssence = essenceManager.getEssence(player, cost.essenceTier);
+    if (playerEssence < cost.essence) {
+        player.sendMessage(ChatColor.RED + "You need §e" + cost.essence + " Tier " + cost.essenceTier + " Essence§c to rank up.");
+        return true;
+    }
 
-    player.getInventory().addItem(customItem);
-    player.sendMessage(ChatColor.GREEN + "You have been given " + amount + "x: " + customItem.getItemMeta().getDisplayName());
+    // Check money with Vault economy
+    double balance = economy.getBalance(player);
+    if (balance < cost.money) {
+        player.sendMessage(ChatColor.RED + "You need §a$" + String.format("%,.2f", cost.money) + "§c to rank up.");
+        return true;
+    }
 
+    // Remove essence and money
+    essenceManager.removeEssence(player, cost.essenceTier, cost.essence);
+    economy.withdrawPlayer(player, cost.money);
+
+    // Update rank in your player data system
+    rankManager.setRank(player, nextRank);
+
+    player.sendMessage(ChatColor.GREEN + "You ranked up to §e" + nextRank + "§a!");
     return true;
 }
 
+        }
 
 
 
 
-    
         return false; // command not handled here
     }
 
@@ -204,8 +260,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             case "RARE" -> 30 + random.nextInt(21);
             case "EPIC" -> 15 + random.nextInt(16);
             case "LEGENDARY" -> 5 + random.nextInt(11);
-            case "PRESTIGE" -> 1 + random.nextInt(5);
-            case "PRESTIGE+" -> 1 + random.nextInt(5);
+            case "PRESTIGE", "PRESTIGE+" -> 1 + random.nextInt(5);
             default -> 50;
         };
     }
@@ -218,9 +273,21 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return String.join(", ", enchants);
     }
 
+    public class Cost {
+    public int tier;
+    public int essence;
+
+    public Cost(int tier, int essence) {
+        this.tier = tier;
+        this.essence = essence;
+    }
+}
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (command.getName().equalsIgnoreCase("giveenchant")) {
+        String cmd = command.getName().toLowerCase();
+
+        if ("giveenchant".equals(cmd)) {
             if (args.length == 1) {
                 String partial = args[0].toLowerCase();
                 List<String> completions = new ArrayList<>();
@@ -240,7 +307,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     String partialLevel = args[1];
                     List<String> levelCompletions = new ArrayList<>();
                     for (int i = 1; i <= enchantInfo.maxLevel; i++) {
-                        String levelStr = String.valueOf(i);
+                        String levelStr = Integer.toString(i);
                         if (levelStr.startsWith(partialLevel)) {
                             levelCompletions.add(levelStr);
                         }
@@ -249,35 +316,38 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
             }
             if (args.length == 3) {
+                List<String> chances = Arrays.asList("5", "10", "15", "20", "25", "50", "75", "100");
                 String partialChance = args[2];
-                List<String> chanceCompletions = new ArrayList<>();
-                int[] commonChances = {10, 25, 50, 75, 90, 100};
-                for (int chance : commonChances) {
-                    String chanceStr = String.valueOf(chance);
-                    if (chanceStr.startsWith(partialChance)) {
-                        chanceCompletions.add(chanceStr);
+                List<String> completions = new ArrayList<>();
+                for (String c : chances) {
+                    if (c.startsWith(partialChance)) completions.add(c);
+                }
+                return completions;
+            }
+        }
+
+        if ("givecustomitem".equals(cmd)) {
+            if (args.length == 1) {
+                String partial = args[0].toLowerCase().replace('_', ' ');
+                List<String> completions = new ArrayList<>();
+                for (int i = 0; i < customItemUtil.CUSTOM_ITEM.length; i++) {
+                    customItemUtil.CustomItemInfo candidate = customItemUtil.getCustomItemInfo(i);
+                    if (candidate == null) continue;
+
+                    String rawName = candidate.getName();
+                    String cleanName = ChatColor.stripColor(rawName);
+                    if (cleanName == null || cleanName.trim().isEmpty()) {
+                        cleanName = rawName.replaceAll("§[0-9A-FK-ORa-fk-or]", "");
+                    }
+
+                    if (cleanName.toLowerCase().startsWith(partial)) {
+                        completions.add(cleanName.replace(' ', '_'));
                     }
                 }
-                return chanceCompletions;
-            }
-            return Collections.emptyList();
-        }
-        if (command.getName().equalsIgnoreCase("giveCustomItem")) {
-    if (args.length == 1) {
-        List<String> completions = new ArrayList<>();
-        String partial = args[0].replace('_', ' ').toLowerCase();
-
-        for (String itemName : customItemUtil.CUSTOM_ITEM) {
-            String stripped = ChatColor.stripColor(itemName).toLowerCase();
-            if (stripped.startsWith(partial)) {
-                completions.add(stripped.replace(' ', '_')); // return with underscores
+                return completions;
             }
         }
 
-        return completions;
-    }
-}
-
-return Collections.emptyList();
+        return Collections.emptyList();
     }
 }

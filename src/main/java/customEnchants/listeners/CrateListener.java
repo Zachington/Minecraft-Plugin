@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
@@ -89,24 +90,32 @@ public class CrateListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
+public void onInventoryClick(InventoryClickEvent event) {
+    if (!(event.getWhoClicked() instanceof Player)) return;
 
-        InventoryView view = event.getView();
-        String title = view.getTitle();
+    InventoryView view = event.getView();
+    String title = view.getTitle();
 
-        if (title.equals("§5Enchanter Crate") || title.equals("§3Mining Crate")) {
-            String openMethod = guiOpenMethod.get(player);
-            //LOGGER.info("[Crate] InventoryClick by " + player.getName() + " via " + openMethod);
+    if (title.equals("§5Enchanter Crate") || title.equals("§3Mining Crate")) {
+        int rawSlot = event.getRawSlot();
+        int topSize = view.getTopInventory().getSize();
 
-            if ("LEFT_CLICK".equals(openMethod) || "RIGHT_CLICK".equals(openMethod)) {
-                if (event.getRawSlot() < view.getTopInventory().getSize()) {
-                    event.setCancelled(true);
-                    return;
-                }
+        // Cancel any click inside the GUI slots
+        if (rawSlot < topSize) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Also cancel shift-clicks that try to put items into the GUI
+        if (event.isShiftClick()) {
+            ItemStack cursorItem = event.getCurrentItem();
+            if (cursorItem != null) {
+                // Prevent shift-click if it would place items into the GUI
+                event.setCancelled(true);
             }
         }
     }
+}
 
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {
@@ -124,6 +133,23 @@ public class CrateListener implements Listener {
         String method = guiOpenMethod.remove(player);
         if (!"RIGHT_CLICK".equals(method)) return;
         handleLootDistribution(player, view.getTopInventory(), "Mining Key");
+    }
+}
+
+    @EventHandler
+public void onInventoryDrag(InventoryDragEvent event) {
+    String title = event.getView().getTitle();
+    String strippedTitle = ChatColor.stripColor(title);
+
+    if (strippedTitle.equals("Mining Crate") 
+            || strippedTitle.equals("Enchanter Crate")) {
+        int guiSize = event.getView().getTopInventory().getSize();
+        for (int slot : event.getRawSlots()) {
+            if (slot < guiSize) {
+                event.setCancelled(true);
+                break;
+            }
+        }
     }
 }
 

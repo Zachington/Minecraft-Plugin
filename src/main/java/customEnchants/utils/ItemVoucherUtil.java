@@ -69,16 +69,24 @@ public class ItemVoucherUtil {
                 player.sendMessage(ChatColor.GOLD + "You received $1500!");
             }
             case KEY_ALL -> {
-            List<ItemStack> loot = getKeyAllLoot();
-            if (loot.isEmpty()) {
-                player.sendMessage(ChatColor.RED + "No loot configured for this voucher!");
+                List<ItemStack> loot = getKeyAllLoot();
+                if (loot.isEmpty()) {
+                    player.sendMessage(ChatColor.RED + "No loot configured for this voucher!");
                 return;
+                }
+
+                List<String> keyNames = new ArrayList<>();
+
+                for (ItemStack key : loot) {
+                    String keyName = ChatColor.stripColor(key.getItemMeta().getDisplayName());
+                    ClaimStorage.addKeys(player, keyName, 1); // add key count to claim storage
+                    keyNames.add(keyName);
+                }
+
+                String messageKeys = String.join(", ", keyNames);
+                player.sendMessage(ChatColor.GREEN + "Your keys (" + messageKeys + ") were added to the claim menu!");
             }
-            for (ItemStack reward : loot) {
-                player.getInventory().addItem(reward.clone());
-            }
-            player.sendMessage(ChatColor.GREEN + "You redeemed a Key All voucher!");
-            }
+
 
             default -> player.sendMessage(ChatColor.RED + "Unknown voucher type.");
         }

@@ -8,24 +8,25 @@ import org.bukkit.entity.Player;
 public class VaultUtil {
     private static Economy economy;
 
+    private static Economy econ = null;
+
     public static boolean setupEconomy() {
         if (Bukkit.getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
 
-        RegisteredServiceProvider<Economy> rsp = Bukkit.getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) return false;
+        RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
 
-        economy = rsp.getProvider();
-        return economy != null;
+        econ = rsp.getProvider();
+        return econ != null;
     }
 
-    public static double getEconomy(Player player) {
-    if (economy != null) {
-        return economy.getBalance(player);
+    public static Economy getEconomy() {
+        return econ;
     }
-    return 0;
-}
 
 
     public static boolean isEconomyAvailable() {

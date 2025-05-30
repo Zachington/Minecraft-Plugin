@@ -2,6 +2,7 @@ package customEnchants.listeners;
 
 import customEnchants.utils.GiveItem.EnchantmentDropData;
 import customEnchants.utils.GiveItem.ItemDropEntry;
+import customEnchants.utils.ClaimStorage;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.HeldToolInfo;
 import customEnchants.utils.VaultUtil;
@@ -51,8 +52,10 @@ public void onBlockBreak(BlockBreakEvent event) {
             double weight = Math.min(entry.baseChancePerLevel * keyMinerLevel, 1.0);
             cumulative += weight;
             if (r <= cumulative) {
-                // Drop this item once and break
-                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), entry.item.clone());
+                //Send to claim menu
+                String keyName = ChatColor.stripColor(entry.item.getItemMeta().getDisplayName());
+                ClaimStorage.addKeys(player, keyName, 1);
+                player.sendMessage(ChatColor.GREEN + "You received a " + keyName + "!");
                 break;
             }
         }
