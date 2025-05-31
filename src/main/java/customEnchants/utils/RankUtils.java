@@ -100,150 +100,150 @@ public class RankUtils {
     boundaryRankCosts.put("p23z_p24a", new RankCost(27000, 540, 7));
     boundaryRankCosts.put("p24z_p25a", new RankCost(28000, 560, 7));
 
-    // p25z -> c1p1a
-    boundaryRankCosts.put("p25z_c1p1a", new RankCost(30000, 600, 8));
+    // p25z -> a1p1a
+    boundaryRankCosts.put("p25z_a1p1a", new RankCost(30000, 600, 8));
 
-    // c1 boundaries
-boundaryRankCosts.put("c1p1z_c1p2a", new RankCost(5000, 100, 8));
-boundaryRankCosts.put("c1p2z_c1p3a", new RankCost(5500, 110, 8));
-boundaryRankCosts.put("c1p3z_c1p4a", new RankCost(6000, 120, 8));
-boundaryRankCosts.put("c1p4z_c1p5a", new RankCost(6500, 130, 8));
-boundaryRankCosts.put("c1p5z_c1p6a", new RankCost(7000, 140, 8));
-boundaryRankCosts.put("c1p6z_c1p7a", new RankCost(7500, 150, 8));
-boundaryRankCosts.put("c1p7z_c1p8a", new RankCost(8000, 160, 8));
-boundaryRankCosts.put("c1p8z_c1p9a", new RankCost(8500, 170, 8));
-boundaryRankCosts.put("c1p9z_c1p10a", new RankCost(9000, 180, 8));
-boundaryRankCosts.put("c1p10z_c1p11a", new RankCost(9500, 190, 8));
-boundaryRankCosts.put("c1p11z_c1p12a", new RankCost(10000, 200, 8));
-boundaryRankCosts.put("c1p12z_c1p13a", new RankCost(10500, 210, 8));
-boundaryRankCosts.put("c1p13z_c1p14a", new RankCost(11000, 220, 8));
-boundaryRankCosts.put("c1p14z_c1p15a", new RankCost(11500, 230, 8));
-boundaryRankCosts.put("c1p15z_c1p16a", new RankCost(12000, 240, 8));
-boundaryRankCosts.put("c1p16z_c1p17a", new RankCost(12500, 250, 8));
-boundaryRankCosts.put("c1p17z_c1p18a", new RankCost(13000, 260, 8));
-boundaryRankCosts.put("c1p18z_c1p19a", new RankCost(13500, 270, 8));
-boundaryRankCosts.put("c1p19z_c1p20a", new RankCost(14000, 280, 8));
-boundaryRankCosts.put("c1p20z_c1p21a", new RankCost(14500, 290, 8));
-boundaryRankCosts.put("c1p21z_c1p22a", new RankCost(15000, 300, 8));
-boundaryRankCosts.put("c1p22z_c1p23a", new RankCost(15500, 310, 8));
-boundaryRankCosts.put("c1p23z_c1p24a", new RankCost(16000, 320, 8));
-boundaryRankCosts.put("c1p24z_c1p25a", new RankCost(16500, 330, 8));
+    // a1 boundaries
+boundaryRankCosts.put("a1p1z_a1p2a", new RankCost(5000, 100, 8));
+boundaryRankCosts.put("a1p2z_a1p3a", new RankCost(5500, 110, 8));
+boundaryRankCosts.put("a1p3z_a1p4a", new RankCost(6000, 120, 8));
+boundaryRankCosts.put("a1p4z_a1p5a", new RankCost(6500, 130, 8));
+boundaryRankCosts.put("a1p5z_a1p6a", new RankCost(7000, 140, 8));
+boundaryRankCosts.put("a1p6z_a1p7a", new RankCost(7500, 150, 8));
+boundaryRankCosts.put("a1p7z_a1p8a", new RankCost(8000, 160, 8));
+boundaryRankCosts.put("a1p8z_a1p9a", new RankCost(8500, 170, 8));
+boundaryRankCosts.put("a1p9z_a1p10a", new RankCost(9000, 180, 8));
+boundaryRankCosts.put("a1p10z_a1p11a", new RankCost(9500, 190, 8));
+boundaryRankCosts.put("a1p11z_a1p12a", new RankCost(10000, 200, 8));
+boundaryRankCosts.put("a1p12z_a1p13a", new RankCost(10500, 210, 8));
+boundaryRankCosts.put("a1p13z_a1p14a", new RankCost(11000, 220, 8));
+boundaryRankCosts.put("a1p14z_a1p15a", new RankCost(11500, 230, 8));
+boundaryRankCosts.put("a1p15z_a1p16a", new RankCost(12000, 240, 8));
+boundaryRankCosts.put("a1p16z_a1p17a", new RankCost(12500, 250, 8));
+boundaryRankCosts.put("a1p17z_a1p18a", new RankCost(13000, 260, 8));
+boundaryRankCosts.put("a1p18z_a1p19a", new RankCost(13500, 270, 8));
+boundaryRankCosts.put("a1p19z_a1p20a", new RankCost(14000, 280, 8));
+boundaryRankCosts.put("a1p20z_a1p21a", new RankCost(14500, 290, 8));
+boundaryRankCosts.put("a1p21z_a1p22a", new RankCost(15000, 300, 8));
+boundaryRankCosts.put("a1p22z_a1p23a", new RankCost(15500, 310, 8));
+boundaryRankCosts.put("a1p23z_a1p24a", new RankCost(16000, 320, 8));
+boundaryRankCosts.put("a1p24z_a1p25a", new RankCost(16500, 330, 8));
 
-// c1 to c2 boundary
-boundaryRankCosts.put("c1p25z_c2p1a", new RankCost(35000, 700, 8));
+// a1 to a2 boundary
+boundaryRankCosts.put("a1p25z_a2p1a", new RankCost(35000, 700, 8));
 
-// c2 boundaries
-boundaryRankCosts.put("c2p1z_c2p2a", new RankCost(36000, 720,  8));
-boundaryRankCosts.put("c2p2z_c2p3a", new RankCost(36500, 730,  8));
-boundaryRankCosts.put("c2p3z_c2p4a", new RankCost(37000, 740,  8));
-boundaryRankCosts.put("c2p4z_c2p5a", new RankCost(37500, 750,  8));
-boundaryRankCosts.put("c2p5z_c2p6a", new RankCost(38000, 760,  8));
-boundaryRankCosts.put("c2p6z_c2p7a", new RankCost(38500, 770,  8));
-boundaryRankCosts.put("c2p7z_c2p8a", new RankCost(39000, 780,  8));
-boundaryRankCosts.put("c2p8z_c2p9a", new RankCost(39500, 790,  8));
-boundaryRankCosts.put("c2p9z_c2p10a", new RankCost(40000, 800,  8));
-boundaryRankCosts.put("c2p10z_c2p11a", new RankCost(40500, 810,  8));
-boundaryRankCosts.put("c2p11z_c2p12a", new RankCost(41000, 820,  8));
-boundaryRankCosts.put("c2p12z_c2p13a", new RankCost(41500, 830,  8));
-boundaryRankCosts.put("c2p13z_c2p14a", new RankCost(42000, 840,  8));
-boundaryRankCosts.put("c2p14z_c2p15a", new RankCost(42500, 850,  8));
-boundaryRankCosts.put("c2p15z_c2p16a", new RankCost(43000, 860,  8));
-boundaryRankCosts.put("c2p16z_c2p17a", new RankCost(43500, 870,  8));
-boundaryRankCosts.put("c2p17z_c2p18a", new RankCost(44000, 880,  8));
-boundaryRankCosts.put("c2p18z_c2p19a", new RankCost(44500, 890,  8));
-boundaryRankCosts.put("c2p19z_c2p20a", new RankCost(45000, 900,  8));
-boundaryRankCosts.put("c2p20z_c2p21a", new RankCost(45500, 910,  8));
-boundaryRankCosts.put("c2p21z_c2p22a", new RankCost(46000, 920,  8));
-boundaryRankCosts.put("c2p22z_c2p23a", new RankCost(46500, 930,  8));
-boundaryRankCosts.put("c2p23z_c2p24a", new RankCost(47000, 940,  8));
-boundaryRankCosts.put("c2p24z_c2p25a", new RankCost(47500, 950,  8));
+// a2 boundaries
+boundaryRankCosts.put("a2p1z_a2p2a", new RankCost(36000, 720,  8));
+boundaryRankCosts.put("a2p2z_a2p3a", new RankCost(36500, 730,  8));
+boundaryRankCosts.put("a2p3z_a2p4a", new RankCost(37000, 740,  8));
+boundaryRankCosts.put("a2p4z_a2p5a", new RankCost(37500, 750,  8));
+boundaryRankCosts.put("a2p5z_a2p6a", new RankCost(38000, 760,  8));
+boundaryRankCosts.put("a2p6z_a2p7a", new RankCost(38500, 770,  8));
+boundaryRankCosts.put("a2p7z_a2p8a", new RankCost(39000, 780,  8));
+boundaryRankCosts.put("a2p8z_a2p9a", new RankCost(39500, 790,  8));
+boundaryRankCosts.put("a2p9z_a2p10a", new RankCost(40000, 800,  8));
+boundaryRankCosts.put("a2p10z_a2p11a", new RankCost(40500, 810,  8));
+boundaryRankCosts.put("a2p11z_a2p12a", new RankCost(41000, 820,  8));
+boundaryRankCosts.put("a2p12z_a2p13a", new RankCost(41500, 830,  8));
+boundaryRankCosts.put("a2p13z_a2p14a", new RankCost(42000, 840,  8));
+boundaryRankCosts.put("a2p14z_a2p15a", new RankCost(42500, 850,  8));
+boundaryRankCosts.put("a2p15z_a2p16a", new RankCost(43000, 860,  8));
+boundaryRankCosts.put("a2p16z_a2p17a", new RankCost(43500, 870,  8));
+boundaryRankCosts.put("a2p17z_a2p18a", new RankCost(44000, 880,  8));
+boundaryRankCosts.put("a2p18z_a2p19a", new RankCost(44500, 890,  8));
+boundaryRankCosts.put("a2p19z_a2p20a", new RankCost(45000, 900,  8));
+boundaryRankCosts.put("a2p20z_a2p21a", new RankCost(45500, 910,  8));
+boundaryRankCosts.put("a2p21z_a2p22a", new RankCost(46000, 920,  8));
+boundaryRankCosts.put("a2p22z_a2p23a", new RankCost(46500, 930,  8));
+boundaryRankCosts.put("a2p23z_a2p24a", new RankCost(47000, 940,  8));
+boundaryRankCosts.put("a2p24z_a2p25a", new RankCost(47500, 950,  8));
 
-// c2 to c3 boundary
-boundaryRankCosts.put("c2p25z_c3p1a", new RankCost(40000, 800,  8));
+// a2 to a3 boundary
+boundaryRankCosts.put("a2p25z_a3p1a", new RankCost(40000, 800,  8));
 
-// c3 boundaries
-boundaryRankCosts.put("c3p1z_c3p2a", new RankCost(40500, 810,  8));
-boundaryRankCosts.put("c3p2z_c3p3a", new RankCost(41000, 820,  8));
-boundaryRankCosts.put("c3p3z_c3p4a", new RankCost(41500, 830,  8));
-boundaryRankCosts.put("c3p4z_c3p5a", new RankCost(42000, 840,  8));
-boundaryRankCosts.put("c3p5z_c3p6a", new RankCost(42500, 850,  8));
-boundaryRankCosts.put("c3p6z_c3p7a", new RankCost(43000, 860,  8));
-boundaryRankCosts.put("c3p7z_c3p8a", new RankCost(43500, 870,  8));
-boundaryRankCosts.put("c3p8z_c3p9a", new RankCost(44000, 880,  8));
-boundaryRankCosts.put("c3p9z_c3p10a", new RankCost(44500, 890,  8));
-boundaryRankCosts.put("c3p10z_c3p11a", new RankCost(45000, 900,  8));
-boundaryRankCosts.put("c3p11z_c3p12a", new RankCost(45500, 910,  8));
-boundaryRankCosts.put("c3p12z_c3p13a", new RankCost(46000, 920,  8));
-boundaryRankCosts.put("c3p13z_c3p14a", new RankCost(46500, 930,  8));
-boundaryRankCosts.put("c3p14z_c3p15a", new RankCost(47000, 940,  8));
-boundaryRankCosts.put("c3p15z_c3p16a", new RankCost(47500, 950,  8));
-boundaryRankCosts.put("c3p16z_c3p17a", new RankCost(48000, 960,  8));
-boundaryRankCosts.put("c3p17z_c3p18a", new RankCost(48500, 970,  8));
-boundaryRankCosts.put("c3p18z_c3p19a", new RankCost(49000, 980,  8));
-boundaryRankCosts.put("c3p19z_c3p20a", new RankCost(49500, 990,  8));
-boundaryRankCosts.put("c3p20z_c3p21a", new RankCost(50000, 1000,  8));
-boundaryRankCosts.put("c3p21z_c3p22a", new RankCost(50500, 1010,  8));
-boundaryRankCosts.put("c3p22z_c3p23a", new RankCost(51000, 1020,  8));
-boundaryRankCosts.put("c3p23z_c3p24a", new RankCost(51500, 1030,  8));
-boundaryRankCosts.put("c3p24z_c3p25a", new RankCost(52000, 1040,  8));
+// a3 boundaries
+boundaryRankCosts.put("a3p1z_a3p2a", new RankCost(40500, 810,  8));
+boundaryRankCosts.put("a3p2z_a3p3a", new RankCost(41000, 820,  8));
+boundaryRankCosts.put("a3p3z_a3p4a", new RankCost(41500, 830,  8));
+boundaryRankCosts.put("a3p4z_a3p5a", new RankCost(42000, 840,  8));
+boundaryRankCosts.put("a3p5z_a3p6a", new RankCost(42500, 850,  8));
+boundaryRankCosts.put("a3p6z_a3p7a", new RankCost(43000, 860,  8));
+boundaryRankCosts.put("a3p7z_a3p8a", new RankCost(43500, 870,  8));
+boundaryRankCosts.put("a3p8z_a3p9a", new RankCost(44000, 880,  8));
+boundaryRankCosts.put("a3p9z_a3p10a", new RankCost(44500, 890,  8));
+boundaryRankCosts.put("a3p10z_a3p11a", new RankCost(45000, 900,  8));
+boundaryRankCosts.put("a3p11z_a3p12a", new RankCost(45500, 910,  8));
+boundaryRankCosts.put("a3p12z_a3p13a", new RankCost(46000, 920,  8));
+boundaryRankCosts.put("a3p13z_a3p14a", new RankCost(46500, 930,  8));
+boundaryRankCosts.put("a3p14z_a3p15a", new RankCost(47000, 940,  8));
+boundaryRankCosts.put("a3p15z_a3p16a", new RankCost(47500, 950,  8));
+boundaryRankCosts.put("a3p16z_a3p17a", new RankCost(48000, 960,  8));
+boundaryRankCosts.put("a3p17z_a3p18a", new RankCost(48500, 970,  8));
+boundaryRankCosts.put("a3p18z_a3p19a", new RankCost(49000, 980,  8));
+boundaryRankCosts.put("a3p19z_a3p20a", new RankCost(49500, 990,  8));
+boundaryRankCosts.put("a3p20z_a3p21a", new RankCost(50000, 1000,  8));
+boundaryRankCosts.put("a3p21z_a3p22a", new RankCost(50500, 1010,  8));
+boundaryRankCosts.put("a3p22z_a3p23a", new RankCost(51000, 1020,  8));
+boundaryRankCosts.put("a3p23z_a3p24a", new RankCost(51500, 1030,  8));
+boundaryRankCosts.put("a3p24z_a3p25a", new RankCost(52000, 1040,  8));
 
-// c3 to c4 boundary
-boundaryRankCosts.put("c3p25z_c4p1a", new RankCost(45000, 900,  8));
+// a3 to a4 boundary
+boundaryRankCosts.put("a3p25z_a4p1a", new RankCost(45000, 900,  8));
 
-// c4 boundaries
-boundaryRankCosts.put("c4p1z_c4p2a", new RankCost(45500, 910,  8));
-boundaryRankCosts.put("c4p2z_c4p3a", new RankCost(46000, 920,  8));
-boundaryRankCosts.put("c4p3z_c4p4a", new RankCost(46500, 930,  8));
-boundaryRankCosts.put("c4p4z_c4p5a", new RankCost(47000, 940,  8));
-boundaryRankCosts.put("c4p5z_c4p6a", new RankCost(47500, 950,  8));
-boundaryRankCosts.put("c4p6z_c4p7a", new RankCost(48000, 960,  8));
-boundaryRankCosts.put("c4p7z_c4p8a", new RankCost(48500, 970,  8));
-boundaryRankCosts.put("c4p8z_c4p9a", new RankCost(49000, 980,  8));
-boundaryRankCosts.put("c4p9z_c4p10a", new RankCost(49500, 990,  8));
-boundaryRankCosts.put("c4p10z_c4p11a", new RankCost(50000, 1000,  8));
-boundaryRankCosts.put("c4p11z_c4p12a", new RankCost(50500, 1010,  8));
-boundaryRankCosts.put("c4p12z_c4p13a", new RankCost(51000, 1020,  8));
-boundaryRankCosts.put("c4p13z_c4p14a", new RankCost(51500, 1030, 17));
-boundaryRankCosts.put("c4p14z_c4p15a", new RankCost(52000, 1040, 17));
-boundaryRankCosts.put("c4p15z_c4p16a", new RankCost(52500, 1050, 17));
-boundaryRankCosts.put("c4p16z_c4p17a", new RankCost(53000, 1060, 17));
-boundaryRankCosts.put("c4p17z_c4p18a", new RankCost(53500, 1070, 17));
-boundaryRankCosts.put("c4p18z_c4p19a", new RankCost(54000, 1080, 17));
-boundaryRankCosts.put("c4p19z_c4p20a", new RankCost(54500, 1090, 18));
-boundaryRankCosts.put("c4p20z_c4p21a", new RankCost(55000, 1100, 18));
-boundaryRankCosts.put("c4p21z_c4p22a", new RankCost(55500, 1110, 18));
-boundaryRankCosts.put("c4p22z_c4p23a", new RankCost(56000, 1120, 18));
-boundaryRankCosts.put("c4p23z_c4p24a", new RankCost(56500, 1130, 18));
-boundaryRankCosts.put("c4p24z_c4p25a", new RankCost(57000, 1140, 18));
+// a4 boundaries
+boundaryRankCosts.put("a4p1z_a4p2a", new RankCost(45500, 910,  8));
+boundaryRankCosts.put("a4p2z_a4p3a", new RankCost(46000, 920,  8));
+boundaryRankCosts.put("a4p3z_a4p4a", new RankCost(46500, 930,  8));
+boundaryRankCosts.put("a4p4z_a4p5a", new RankCost(47000, 940,  8));
+boundaryRankCosts.put("a4p5z_a4p6a", new RankCost(47500, 950,  8));
+boundaryRankCosts.put("a4p6z_a4p7a", new RankCost(48000, 960,  8));
+boundaryRankCosts.put("a4p7z_a4p8a", new RankCost(48500, 970,  8));
+boundaryRankCosts.put("a4p8z_a4p9a", new RankCost(49000, 980,  8));
+boundaryRankCosts.put("a4p9z_a4p10a", new RankCost(49500, 990,  8));
+boundaryRankCosts.put("a4p10z_a4p11a", new RankCost(50000, 1000,  8));
+boundaryRankCosts.put("a4p11z_a4p12a", new RankCost(50500, 1010,  8));
+boundaryRankCosts.put("a4p12z_a4p13a", new RankCost(51000, 1020,  8));
+boundaryRankCosts.put("a4p13z_a4p14a", new RankCost(51500, 1030, 17));
+boundaryRankCosts.put("a4p14z_a4p15a", new RankCost(52000, 1040, 17));
+boundaryRankCosts.put("a4p15z_a4p16a", new RankCost(52500, 1050, 17));
+boundaryRankCosts.put("a4p16z_a4p17a", new RankCost(53000, 1060, 17));
+boundaryRankCosts.put("a4p17z_a4p18a", new RankCost(53500, 1070, 17));
+boundaryRankCosts.put("a4p18z_a4p19a", new RankCost(54000, 1080, 17));
+boundaryRankCosts.put("a4p19z_a4p20a", new RankCost(54500, 1090, 18));
+boundaryRankCosts.put("a4p20z_a4p21a", new RankCost(55000, 1100, 18));
+boundaryRankCosts.put("a4p21z_a4p22a", new RankCost(55500, 1110, 18));
+boundaryRankCosts.put("a4p22z_a4p23a", new RankCost(56000, 1120, 18));
+boundaryRankCosts.put("a4p23z_a4p24a", new RankCost(56500, 1130, 18));
+boundaryRankCosts.put("a4p24z_a4p25a", new RankCost(57000, 1140, 18));
 
-// c4 to c5 boundary
-boundaryRankCosts.put("c4p25z_c5p1a", new RankCost(50000, 1000,  8));
+// a4 to a5 boundary
+boundaryRankCosts.put("a4p25z_a5p1a", new RankCost(50000, 1000,  8));
 
-// c5 boundaries
-boundaryRankCosts.put("c5p1z_c5p2a", new RankCost(50500, 1010,  8));
-boundaryRankCosts.put("c5p2z_c5p3a", new RankCost(51000, 1020,  8));
-boundaryRankCosts.put("c5p3z_c5p4a", new RankCost(51500, 1030,  8));
-boundaryRankCosts.put("c5p4z_c5p5a", new RankCost(52000, 1040,  8));
-boundaryRankCosts.put("c5p5z_c5p6a", new RankCost(52500, 1050,  8));
-boundaryRankCosts.put("c5p6z_c5p7a", new RankCost(53000, 1060,  8));
-boundaryRankCosts.put("c5p7z_c5p8a", new RankCost(53500, 1070,  8));
-boundaryRankCosts.put("c5p8z_c5p9a", new RankCost(54000, 1080,  8));
-boundaryRankCosts.put("c5p9z_c5p10a", new RankCost(54500, 1090,  8));
-boundaryRankCosts.put("c5p10z_c5p11a", new RankCost(55000, 1100,  8));
-boundaryRankCosts.put("c5p11z_c5p12a", new RankCost(55500, 1110,  8));
-boundaryRankCosts.put("c5p12z_c5p13a", new RankCost(56000, 1120,  8));
-boundaryRankCosts.put("c5p13z_c5p14a", new RankCost(56500, 1130,  8));
-boundaryRankCosts.put("c5p14z_c5p15a", new RankCost(57000, 1140,  8));
-boundaryRankCosts.put("c5p15z_c5p16a", new RankCost(57500, 1150,  8));
-boundaryRankCosts.put("c5p16z_c5p17a", new RankCost(58000, 1160,  8));
-boundaryRankCosts.put("c5p17z_c5p18a", new RankCost(58500, 1170,  8));
-boundaryRankCosts.put("c5p18z_c5p19a", new RankCost(59000, 1180,  8));
-boundaryRankCosts.put("c5p19z_c5p20a", new RankCost(59500, 1190,  8));
-boundaryRankCosts.put("c5p20z_c5p21a", new RankCost(60000, 1200,  8));
-boundaryRankCosts.put("c5p21z_c5p22a", new RankCost(60500, 1210,  8));
-boundaryRankCosts.put("c5p22z_c5p23a", new RankCost(61000, 1220,  8));
-boundaryRankCosts.put("c5p23z_c5p24a", new RankCost(61500, 1230,  8));
-boundaryRankCosts.put("c5p24z_c5p25a", new RankCost(62000, 1240,  8));
+// a5 boundaries
+boundaryRankCosts.put("a5p1z_a5p2a", new RankCost(50500, 1010,  8));
+boundaryRankCosts.put("a5p2z_a5p3a", new RankCost(51000, 1020,  8));
+boundaryRankCosts.put("a5p3z_a5p4a", new RankCost(51500, 1030,  8));
+boundaryRankCosts.put("a5p4z_a5p5a", new RankCost(52000, 1040,  8));
+boundaryRankCosts.put("a5p5z_a5p6a", new RankCost(52500, 1050,  8));
+boundaryRankCosts.put("a5p6z_a5p7a", new RankCost(53000, 1060,  8));
+boundaryRankCosts.put("a5p7z_a5p8a", new RankCost(53500, 1070,  8));
+boundaryRankCosts.put("a5p8z_a5p9a", new RankCost(54000, 1080,  8));
+boundaryRankCosts.put("a5p9z_a5p10a", new RankCost(54500, 1090,  8));
+boundaryRankCosts.put("a5p10z_a5p11a", new RankCost(55000, 1100,  8));
+boundaryRankCosts.put("a5p11z_a5p12a", new RankCost(55500, 1110,  8));
+boundaryRankCosts.put("a5p12z_a5p13a", new RankCost(56000, 1120,  8));
+boundaryRankCosts.put("a5p13z_a5p14a", new RankCost(56500, 1130,  8));
+boundaryRankCosts.put("a5p14z_a5p15a", new RankCost(57000, 1140,  8));
+boundaryRankCosts.put("a5p15z_a5p16a", new RankCost(57500, 1150,  8));
+boundaryRankCosts.put("a5p16z_a5p17a", new RankCost(58000, 1160,  8));
+boundaryRankCosts.put("a5p17z_a5p18a", new RankCost(58500, 1170,  8));
+boundaryRankCosts.put("a5p18z_a5p19a", new RankCost(59000, 1180,  8));
+boundaryRankCosts.put("a5p19z_a5p20a", new RankCost(59500, 1190,  8));
+boundaryRankCosts.put("a5p20z_a5p21a", new RankCost(60000, 1200,  8));
+boundaryRankCosts.put("a5p21z_a5p22a", new RankCost(60500, 1210,  8));
+boundaryRankCosts.put("a5p22z_a5p23a", new RankCost(61000, 1220,  8));
+boundaryRankCosts.put("a5p23z_a5p24a", new RankCost(61500, 1230,  8));
+boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
 
 }
 
@@ -254,7 +254,7 @@ boundaryRankCosts.put("c5p24z_c5p25a", new RankCost(62000, 1240,  8));
 }
 
     public static RankCost getRankCost(String rank) {
-    // For boundary ranks like "p1z_p2a", "c1p10z_c1p11a", etc.
+    // For boundary ranks like "p1z_p2a", "a1p10z_a1p11a", etc.
     return boundaryRankCosts.get(rank);
 }
 
@@ -327,43 +327,44 @@ boundaryRankCosts.put("c5p24z_c5p25a", new RankCost(62000, 1240,  8));
 
     // Get the next rank
     public static String getNextRank(String currentRank) {
-        if (currentRank.matches("^[a-z]$")) {
-            char next = (char)(currentRank.charAt(0) + 1);
-            return next <= 'z' ? String.valueOf(next) : "p1a";
-        }
-
-        if (currentRank.matches("^p(\\d+)([a-z])$")) {
-            int prestige = Integer.parseInt(currentRank.substring(1, currentRank.length() - 1));
-            char letter = currentRank.charAt(currentRank.length() - 1);
-
-            if (letter < 'z') {
-                return "p" + prestige + (char)(letter + 1);
-            } else if (prestige < 25) {
-                return "p" + (prestige + 1) + "a";
-            } else {
-                return "c1p1a";
-            }
-        }
-
-        if (currentRank.matches("^c(\\d+)p(\\d+)([a-z])$")) {
-            String[] parts = currentRank.substring(1).split("p");
-            int c = Integer.parseInt(parts[0]);
-            int p = Integer.parseInt(parts[1].replaceAll("[^0-9]", ""));
-            char letter = currentRank.charAt(currentRank.length() - 1);
-
-            if (letter < 'z') {
-                return "c" + c + "p" + p + (char)(letter + 1);
-            } else if (p < 25) {
-                return "c" + c + "p" + (p + 1) + "a";
-            } else if (c < 5) {
-                return "c" + (c + 1) + "p1a";
-            } else {
-                return null; // Max rank reached
-            }
-        }
-
-        return null;
+    if (currentRank.matches("^[a-z]$")) {
+        char next = (char)(currentRank.charAt(0) + 1);
+        return next <= 'z' ? String.valueOf(next) : "p1a";
     }
+
+    if (currentRank.matches("^p(\\d+)([a-z])$")) {
+        int prestige = Integer.parseInt(currentRank.substring(1, currentRank.length() - 1));
+        char letter = currentRank.charAt(currentRank.length() - 1);
+
+        if (letter < 'z') {
+            return "p" + prestige + (char)(letter + 1);
+        } else if (prestige < 25) {
+            return "p" + (prestige + 1) + "a";
+        } else {
+            return "a1p1a";
+        }
+    }
+
+    if (currentRank.matches("^a(\\d+)p(\\d+)([a-z])$")) {
+        String[] parts = currentRank.substring(1).split("p");
+        int ascension = Integer.parseInt(parts[0]);
+        int prestige = Integer.parseInt(parts[1].replaceAll("[^0-9]", ""));
+        char letter = currentRank.charAt(currentRank.length() - 1);
+
+        if (letter < 'z') {
+            return "a" + ascension + "p" + prestige + (char)(letter + 1);
+        } else if (prestige < 25) {
+            return "a" + ascension + "p" + (prestige + 1) + "a";
+        } else if (ascension < 5) {
+            return "a" + (ascension + 1) + "p1a";
+        } else {
+            return null; // Max rank reached
+        }
+    }
+
+    return null;
+}
+
 
     // Check if rank is valid
     public static boolean isValidRank(String rank) {
@@ -398,27 +399,33 @@ boundaryRankCosts.put("c5p24z_c5p25a", new RankCost(62000, 1240,  8));
     public static String formatRankName(String rank) {
     if (rank == null || rank.isEmpty()) return "";
 
+    rank = rank.toLowerCase();
+
+    // Single letter rank (e.g. "g")
     if (rank.matches("^[a-z]$")) {
-        // Single letter rank: uppercase
         return rank.toUpperCase();
     }
 
-    if (rank.matches("^p(\\d+)([a-z])$")) {
-        int prestige = Integer.parseInt(rank.replaceAll("^p(\\d+)([a-z])$", "$1"));
+    // Prestige rank: p#letter (e.g. "p25z")
+    if (rank.matches("^p(\\d+)[a-z]$")) {
+        int prestige = Integer.parseInt(rank.replaceAll("^p(\\d+)[a-z]$", "$1"));
         char letter = rank.charAt(rank.length() - 1);
         return "P" + prestige + " " + Character.toUpperCase(letter);
     }
 
-    if (rank.matches("^c(\\d+)p(\\d+)([a-z])$")) {
-        String[] parts = rank.substring(1).split("p");
-        int c = Integer.parseInt(parts[0]);
-        int p = Integer.parseInt(parts[1].replaceAll("[^0-9]", ""));
+    // Ascension rank: a#p#letter (e.g. "a1p1a")
+    if (rank.matches("^a\\d+p\\d+[a-z]$")) {
+        String[] parts = rank.split("p");
+        int ascension = Integer.parseInt(parts[0].substring(1)); // skip "a"
+        int prestige = Integer.parseInt(parts[1].replaceAll("[^0-9]", ""));
         char letter = rank.charAt(rank.length() - 1);
-        return "C" + c + "P" + p + " " + Character.toUpperCase(letter);
+        return "A" + ascension + " P" + prestige + " " + Character.toUpperCase(letter);
     }
 
-    return rank; // fallback, just return original
+    // Fallback
+    return rank;
 }
+
 
     public static boolean essenceCostApplies(String currentRank, String nextRank) {
     if (currentRank == null || nextRank == null) return true;
@@ -444,18 +451,68 @@ boundaryRankCosts.put("c5p24z_c5p25a", new RankCost(62000, 1240,  8));
 }
 
     public static boolean isBoundaryUpgrade(String from, String to) {
-        // Check if from rank ends with 'z' and to rank ends with 'a'
-        if (from.length() < 2 || to.length() < 2) return false;
-        if (from.charAt(from.length() - 1) == 'z' && to.charAt(to.length() - 1) == 'a') {
-            // Extra check: from and to ranks are consecutive boundary steps (e.g. p1z->p2a, c1p25z->c2p1a)
-            // Could be extended here if needed
-            return true;
-        }
-        return false;
+    if (from == null || to == null) return false;
+
+    from = from.toLowerCase();
+    to = to.toLowerCase();
+
+    boolean fromEndsWithZ = from.endsWith("z");
+    boolean toEndsWithA = to.endsWith("a");
+
+    // e.g., z -> p1a, p1z -> p2a, a1p4z -> a2p1a
+    return fromEndsWithZ && toEndsWithA;
+}
+
+    public static boolean isPrestigeUpgrade(String from, String to) {
+    if (from == null || to == null) return false;
+
+    from = from.toLowerCase();
+    to = to.toLowerCase();
+
+    boolean fromEndsWithZ = from.matches(".*p\\d+z$");
+    boolean toEndsWithA = to.matches(".*p\\d+a$");
+
+    return fromEndsWithZ && toEndsWithA;
+}
+
+
+    public static boolean isAscendUpgrade(String from, String to) {
+    if (from == null || to == null) return false;
+
+    from = from.toLowerCase();
+    to = to.toLowerCase();
+
+    boolean fromEndsWithMax = from.matches(".*p25z$");
+    boolean toIsNextAscension = to.matches("a\\d+p1a$");
+
+    return fromEndsWithMax && toIsNextAscension;
+}
+
+
+    public static String formatRankTierOnly(String rank) {
+    if (rank == null || rank.isEmpty()) return "";
+
+    rank = rank.toLowerCase();
+
+    if (rank.matches("^p\\d+[a-z]$")) {
+        int prestige = Integer.parseInt(rank.replaceAll("^p(\\d+)[a-z]$", "$1"));
+        return "P" + prestige;
     }
 
+    if (rank.matches("^a\\d+p\\d+[a-z]$")) {
+        String[] parts = rank.split("p");
+        int ascension = Integer.parseInt(parts[0].substring(1)); // a#
+        return "A" + ascension;
+    }
 
+    return rank;
+}
 
+    public static String formatRankPrestigeOnly(String rank) {
+    if (rank == null || !rank.toLowerCase().contains("p")) return "";
 
+    String prestige = rank.replaceAll(".*p(\\d+)[a-z]$", "$1");
+    return "P" + prestige;
+}
 
 }

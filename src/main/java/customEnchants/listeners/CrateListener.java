@@ -90,7 +90,7 @@ public class CrateListener implements Listener {
     }
 
     @EventHandler
-public void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) {
     if (!(event.getWhoClicked() instanceof Player)) return;
 
     InventoryView view = event.getView();
@@ -137,7 +137,7 @@ public void onInventoryClick(InventoryClickEvent event) {
 }
 
     @EventHandler
-public void onInventoryDrag(InventoryDragEvent event) {
+    public void onInventoryDrag(InventoryDragEvent event) {
     String title = event.getView().getTitle();
     String strippedTitle = ChatColor.stripColor(title);
 

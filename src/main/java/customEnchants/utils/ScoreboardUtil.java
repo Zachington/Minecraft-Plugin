@@ -47,8 +47,8 @@ public class ScoreboardUtil {
 
         obj.getScore("     ").setScore(line--);
 
-        String displayRank = rank.toUpperCase();
-        obj.getScore(ChatColor.YELLOW + "Rank: " + ChatColor.WHITE + displayRank).setScore(line--);
+        
+        obj.getScore(ChatColor.YELLOW + "Rank: " + ChatColor.WHITE + formatRankFancy(rank)).setScore(line--);
         
         obj.getScore("    ").setScore(line--);
 
@@ -86,5 +86,32 @@ public class ScoreboardUtil {
         return String.valueOf(rounded);
     }
 }
+
+    public static String formatRankFancy(String rank) {
+    if (rank == null || rank.isEmpty()) return "§7[?]";
+
+    String upper = rank.toUpperCase();
+
+    // Matches something like A1P4G, A2P10Z, etc.
+    if (upper.matches("[A-Z]\\d+[A-Z]\\d+[A-Z]")) {
+        // Example: A2P10Z -> prefix=A2, middle=P10, suffix=Z
+        String prefix = upper.replaceAll("^([A-Z]\\d+)[A-Z]\\d+[A-Z]$", "$1");
+        String middle = upper.replaceAll("^[A-Z]\\d+([A-Z]\\d+)[A-Z]$", "$1");
+        String suffix = upper.replaceAll(".*([A-Z])$", "$1");
+
+        return "§6" + prefix + " §f[" + "§d" + middle + "§f] §f[" + suffix + "]";
+    }
+
+    // Matches something like P25Z
+    if (upper.matches("[A-Z]\\d+[A-Z]")) {
+        String middle = upper.substring(0, upper.length() - 1);
+        String suffix = upper.substring(upper.length() - 1);
+        return "§f[" + "§d" + middle + "§f] §f[" + suffix + "]";
+    }
+
+    // Single rank like "G"
+    return "§f[" + upper + "]";
+}
+
 
 }

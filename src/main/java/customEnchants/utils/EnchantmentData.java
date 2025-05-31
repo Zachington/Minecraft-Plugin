@@ -121,7 +121,7 @@ public class EnchantmentData {
         1.0,   // Unbreakable - Always active (passive)
         1.0,   // Magnet - Always active (passive)
         0.1,    // Preservation 5%
-        0.01,    //Frost Touch 5%
+        0.01,    //Frost Touch 1%
         0.05
         
     };

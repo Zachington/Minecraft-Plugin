@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
 
@@ -60,6 +61,9 @@ public class TestEnchants extends JavaPlugin {
         // Setup economy with Vault
         if (!VaultUtil.setupEconomy()) {
             getLogger().severe("Vault or economy plugin not found! Disabling plugin.");
+            for (Plugin p : getServer().getPluginManager().getPlugins()) {
+        getLogger().info("Plugin detected: " + p.getName() + " - Enabled: " + p.isEnabled());
+    }
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -138,12 +142,13 @@ public class TestEnchants extends JavaPlugin {
         getCommand("scrap").setExecutor(handler);
         getCommand("giveCustomItem").setExecutor(handler);
         getCommand("giveCustomItem").setTabCompleter(handler);
-        getCommand("testblackscroll").setExecutor(handler);
         getCommand("keyall").setExecutor(handler);
         getCommand("claim").setExecutor(handler);
         getCommand("extractor").setExecutor(handler);
         this.getCommand("essence").setExecutor(handler);
         getCommand("rankup").setExecutor(handler);
+        getCommand("setrank").setExecutor(handler);
+        getCommand("essencenotif").setExecutor(handler);
     }
 
     private void scheduleScoreboardUpdates() {

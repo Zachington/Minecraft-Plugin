@@ -1,6 +1,7 @@
 package customEnchants.commands;
 
 import customEnchants.TestEnchants;
+import customEnchants.listeners.EssenceGenerationListener;
 import customEnchants.managers.RankManager;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
@@ -26,12 +27,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+
+
 public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private final Random random = new Random();
     private final Economy economy;
     private final EssenceManager essenceManager;
     private final RankManager rankManager;
+    
 
     public CommandHandler(TestEnchants plugin, Economy economy, RankManager rankManager) {
         this.economy = economy;
@@ -150,7 +154,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     inputName = args[0].replace('_', ' ').toLowerCase();
                 }
 
-                player.sendMessage(ChatColor.YELLOW + "Searching for custom item: " + inputName);
 
                 customItemUtil.CustomItemInfo matchedInfo = null;
                 for (int i = 0; i < customItemUtil.CUSTOM_ITEM.length; i++) {
@@ -174,7 +177,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                player.sendMessage(ChatColor.YELLOW + "Matched item: " + matchedInfo.getName());
 
                 ItemStack customItem = customItemUtil.createCustomItem(matchedInfo.getName());
 
@@ -237,15 +239,74 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     // Remove essence and money
     essenceManager.removeEssence(player, cost.essenceTier, cost.essence);
     economy.withdrawPlayer(player, cost.money);
-
+    String oldRank = RankUtils.getRank(player);
     // Update rank in your player data system
     rankManager.setRank(player, nextRank);
 
-    player.sendMessage(ChatColor.GREEN + "You ranked up to §e" + nextRank + "§a!");
+
+
+    player.sendMessage(ChatColor.GREEN + "You ranked up to " + RankUtils.formatRankName(nextRank) + ChatColor.GREEN + "!");
+
+    
+    String newRank = nextRank;
+
+if (RankUtils.isAscendUpgrade(oldRank, newRank)) {
+    Bukkit.broadcastMessage("§6" + player.getName() + " §ehas §4Ascended §eto: " + ChatColor.DARK_RED + RankUtils.formatRankTierOnly(newRank) + "§e!");
+} else if (RankUtils.isPrestigeUpgrade(oldRank, newRank)) {
+    Bukkit.broadcastMessage("§6" + player.getName() + " §ehas §dPrestiged §eto: " + ChatColor.LIGHT_PURPLE + RankUtils.formatRankPrestigeOnly(newRank) + "§e!");
+}
+
+    return true;}       
+            case "setrank" -> {
+    if (!sender.hasPermission("customenchants.setrank")) {
+        sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
+        return true;
+    }
+
+    if (args.length != 2) {
+        sender.sendMessage(ChatColor.RED + "Usage: /setrank <player> <rank>");
+        return true;
+    }
+
+    Player target = Bukkit.getPlayerExact(args[0]);
+    if (target == null) {
+        sender.sendMessage(ChatColor.RED + "Player not found.");
+        return true;
+    }
+
+    String newRank = args[1].toLowerCase();
+
+    rankManager.setRank(target, newRank);
+
+    sender.sendMessage(ChatColor.GREEN + "Set " + target.getName() + "'s rank to " + newRank.toUpperCase() + ".");
+    if (target.isOnline()) {
+        target.sendMessage(ChatColor.GREEN + "Your rank has been set to " + newRank.toUpperCase() + ".");
+        // Optionally update scoreboard immediately
+        TestEnchants.getInstance().getScoreboardUtil().updateScoreboard(target);
+    }
+
+    return true;
+}
+            case "essencenotif" -> {
+    if (EssenceGenerationListener.essenceNotifDisabled.contains(player.getUniqueId())) {
+        EssenceGenerationListener.essenceNotifDisabled.remove(player.getUniqueId());
+        player.sendMessage(ChatColor.GREEN + "Essence notifications are now ENABLED.");
+    } else {
+        EssenceGenerationListener.essenceNotifDisabled.add(player.getUniqueId());
+        player.sendMessage(ChatColor.RED + "Essence notifications are now DISABLED.");
+    }
     return true;
 }
 
-        }
+
+
+
+
+
+        
+
+
+}
 
 
 
@@ -348,6 +409,28 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
         }
 
+        if ("setrank".equals(cmd)) {
+    if (args.length == 1) {
+        String partialPlayer = args[0].toLowerCase();
+        List<String> matchingPlayers = new ArrayList<>();
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getName().toLowerCase().startsWith(partialPlayer)) {
+                matchingPlayers.add(online.getName());
+            }
+        }
+        return matchingPlayers;
+    } 
+}
+
         return Collections.emptyList();
     }
+
+
+
+
+
+
+    
+
+
 }

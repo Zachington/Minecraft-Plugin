@@ -18,8 +18,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 
 public class EssenceGenerationListener implements Listener {
 
@@ -135,7 +138,9 @@ public class EssenceGenerationListener implements Listener {
             if (random.nextInt(100) < 50) {  // change 100 to 20 for normal use
                 int amount = config.minAmount + random.nextInt(config.maxAmount - config.minAmount + 1);
                 essenceManager.addEssence(player, config.tier, amount);
-                player.sendMessage(ChatColor.GREEN + "You found Essence Tier " + config.tier + " x" + amount + "!");
+                if (!isEssenceNotifDisabled(player)) {
+                    player.sendMessage(ChatColor.GREEN + "You found Essence Tier " + config.tier + " x" + amount + "!");
+                }
             }
         }
     }
@@ -163,4 +168,22 @@ public class EssenceGenerationListener implements Listener {
             this.maxAmount = maxAmount;
         }
     }
+
+    public static Set<UUID> essenceNotifDisabled = new HashSet<>();
+
+public boolean isEssenceNotifDisabled(Player player) {
+    return essenceNotifDisabled.contains(player.getUniqueId());
+}
+
+public void toggleEssenceNotif(Player player) {
+    UUID id = player.getUniqueId();
+    if (essenceNotifDisabled.contains(id)) {
+        essenceNotifDisabled.remove(id);
+        player.sendMessage(ChatColor.GREEN + "Essence notifications enabled.");
+    } else {
+        essenceNotifDisabled.add(id);
+        player.sendMessage(ChatColor.RED + "Essence notifications disabled.");
+    }
+}
+
 }

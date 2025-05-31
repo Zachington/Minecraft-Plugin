@@ -11,14 +11,14 @@ commands:
     description: Opens the scrap GUI
   giveenchant:
     description: Gives a custom enchanted book
+    permission: customEnchants.giveenchant
   giveCustomItem:
     description: Gives a custom utility item
-  testblackscroll:
-    description: opens Black Scroll Gui
+    permission: customEnchants.giveCustomItem
   keyall:
     description: Give Key All Voucher to all players
     usage: /keyall
-    permission: customenchants.keyall
+    permission: customEnchants.keyall
   claim:
     description: Opens Claim menu
     usage: /claim
@@ -31,3 +31,10 @@ commands:
   rankup:
     description: rankup
     usage: /rankup
+  setrank:
+    description: Set a player's rank.
+    usage: /setrank <player> <rank>
+    permission: customEnchants.setrank
+  essencenotif:
+    description: Enables or disables essence notifications
+    usage: /essencenotif
