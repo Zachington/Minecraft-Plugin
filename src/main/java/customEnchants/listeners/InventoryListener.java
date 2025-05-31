@@ -2,6 +2,7 @@ package customEnchants.listeners;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,10 +10,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.inventory.meta.Damageable;
 
-
+import customEnchants.TestEnchants;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.InventoryParser;
+import customEnchants.utils.customItemUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -72,9 +76,57 @@ public class InventoryListener implements Listener {
         } else {
             return;
         }
+        
+    }
+    //Durability Shard
+    if (cursor != null && cursor.hasItemMeta() && clicked != null && clicked.getType() != Material.AIR) {
+    ItemMeta cursorMeta = cursor.getItemMeta();
+
+    // Check if cursor is a Durability Shard by your custom method
+    if (customItemUtil.isDurabilityShard(cursor)) {
+        ItemMeta meta = clicked.getItemMeta();
+        if (meta == null || !(meta instanceof Damageable)) {
+            return;
+        }
+
+        Damageable damageable = (Damageable) meta;
+        int currentDamage = damageable.getDamage();
+
+        if (currentDamage <= 0) {
+            player.sendMessage(ChatColor.RED + "This item is already fully repaired!");
+            return;
+        }
+
+        // Get durability value from shard PersistentData
+        NamespacedKey key = new NamespacedKey(TestEnchants.getInstance(), "durability_value");
+        Integer durabilityValue = cursorMeta.getPersistentDataContainer().get(key, PersistentDataType.INTEGER);
+
+        if (durabilityValue == null || durabilityValue <= 0) {
+            player.sendMessage(ChatColor.RED + "Durability Shards only work on equipment");
+            return;
+        }
+
+        int newDamage = currentDamage - durabilityValue;
+        if (newDamage < 0) newDamage = 0; // Clamp to 0 (fully repaired)
+
+        damageable.setDamage(newDamage);
+        clicked.setItemMeta((ItemMeta) damageable);  // Apply meta back
+
+        // Consume one shard from cursor
+        cursor.setAmount(cursor.getAmount() - 1);
+        if (cursor.getAmount() <= 0) {
+            event.setCursor(null);
+        } else {
+            event.setCursor(cursor);
+        }
+
+        player.sendMessage(ChatColor.GREEN + "Repaired item by " + durabilityValue + " durability!");
+        event.setCancelled(true);
     }
 }
 
+
+}
 
     private void handleInventoryInteraction(InventoryClickEvent event, Player player) {
         ItemStack cursor = event.getCursor();
@@ -164,7 +216,6 @@ public class InventoryListener implements Listener {
             }
         };
     }
-
 
     private boolean canApplyToTool(String name, Material type) {
         int id = EnchantmentData.getEnchantmentIndex(name);
@@ -271,8 +322,6 @@ public class InventoryListener implements Listener {
         return lore;
     }
 
-    
-
     private int getRarityRank(String rarity) {
         return switch (rarity.toLowerCase()) {
             case "common" -> 1;
@@ -285,7 +334,6 @@ public class InventoryListener implements Listener {
             default -> 0;
         };
     }
-
     private static class EnchantmentBookInfo {
         final String name;
         final int level;
@@ -297,7 +345,6 @@ public class InventoryListener implements Listener {
             this.successRate = successRate;
         }
     }
-
     private static class ToolEnchantInfo {
         final Map<String, Integer> map = new HashMap<>();
     }

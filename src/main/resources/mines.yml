@@ -1,0 +1,30 @@
+mines:
+  minea:
+    useChunkReset: false
+    region:
+      world: world
+      x1: 78
+      y1: -6
+      z1: -17
+      x2: 59
+      y2: -36
+      z2: -36
+    blocks:
+      STONE: 70
+      COAL_ORE: 20
+      DIAMOND_ORE: 10
+  
+  mineb:
+    useChunkReset: true
+    region:
+      world: world
+      x1: 102
+      y1: -6
+      z1: -12
+      x2: 131
+      y2: -53
+      z2: -41
+    blocks:
+      STONE: 70
+      COAL_ORE: 20
+      DIAMOND_ORE: 10

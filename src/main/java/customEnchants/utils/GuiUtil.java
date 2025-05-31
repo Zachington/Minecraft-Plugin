@@ -268,6 +268,78 @@ public class GuiUtil {
     if (lootList != null) {
         int slotIndex = 10; // choose your starting slot (avoid background slots)
         for (LootEntry loot : lootList) {
+            while (slotIndex < gui.getSize() && gui.getItem(slotIndex) != null) {
+                slotIndex++;
+            }
+            if (slotIndex >= gui.getSize()) break; // safety check
+            gui.setItem(slotIndex, loot.item.clone()); // place the exact item
+            slotIndex++;
+        }
+    }
+
+    return gui;
+}
+
+    public static Inventory prisonKeyInventory(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 54, "§1Prison Crate");
+
+    // Fill background slots with gray panes
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE), 
+        range(0, 10), range(17, 19), range(26, 28), range(35, 37), range(44, 54));
+
+    List<LootEntry> lootList = crateTableUtil.LOOT_TABLES.get("Prison Key");
+    if (lootList != null) {
+        int slotIndex = 10; // choose your starting slot (avoid background slots)
+        for (LootEntry loot : lootList) {
+            while (slotIndex < gui.getSize() && gui.getItem(slotIndex) != null) {
+                slotIndex++;
+            }
+            if (slotIndex >= gui.getSize()) break; // safety check
+            gui.setItem(slotIndex, loot.item.clone()); // place the exact item
+            slotIndex++;
+        }
+    }
+
+    return gui;
+}
+
+    public static Inventory divineKeyInventory(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 54, "§cDivine Crate");
+
+    // Fill background slots with gray panes
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE), 
+        range(0, 10), range(17, 19), range(26, 28), range(35, 37), range(44, 54));
+
+    List<LootEntry> lootList = crateTableUtil.LOOT_TABLES.get("Divine Key");
+    if (lootList != null) {
+        int slotIndex = 10; // choose your starting slot (avoid background slots)
+        for (LootEntry loot : lootList) {
+            while (slotIndex < gui.getSize() && gui.getItem(slotIndex) != null) {
+                slotIndex++;
+            }
+            if (slotIndex >= gui.getSize()) break; // safety check
+            gui.setItem(slotIndex, loot.item.clone()); // place the exact item
+            slotIndex++;
+        }
+    }
+
+    return gui;
+}
+
+    public static Inventory durabilityKeyInventory(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 54, "§8Durability Crate");
+
+    // Fill background slots with gray panes
+    fillSlots(gui, createPane(Material.GRAY_STAINED_GLASS_PANE), 
+        range(0, 10), range(17, 19), range(26, 28), range(35, 37), range(44, 54));
+
+    List<LootEntry> lootList = crateTableUtil.LOOT_TABLES.get("Durability Key");
+    if (lootList != null) {
+        int slotIndex = 10; // choose your starting slot (avoid background slots)
+        for (LootEntry loot : lootList) {
+            while (slotIndex < gui.getSize() && gui.getItem(slotIndex) != null) {
+                slotIndex++;
+            }
             if (slotIndex >= gui.getSize()) break; // safety check
             gui.setItem(slotIndex, loot.item.clone()); // place the exact item
             slotIndex++;
@@ -402,7 +474,6 @@ public class GuiUtil {
     return gui;
 }
 
-
     public static Inventory essenceSellInventory(Player player, EssenceManager essenceManager) {
     Inventory gui = Bukkit.createInventory(null, 36, "Sell Essence");
 
@@ -450,7 +521,6 @@ public class GuiUtil {
     return gui;
 }
 
-// Maps tier to slot index
     private static int getSlotForTier(int tier) {
     return switch (tier) {
         case 1 -> 11;

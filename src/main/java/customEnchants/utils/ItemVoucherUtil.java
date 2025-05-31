@@ -8,36 +8,65 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 
+import customEnchants.utils.EnchantmentData.EnchantmentInfo;
+
 import java.util.*;
 
 public class ItemVoucherUtil {
 
     public enum VoucherType {
-        TRANSMUTATION,
-        DECORATION,
-        MONEY_1500,
-        KEY_ALL
+    TRANSMUTATION,
+    DECORATION,
+    MONEY_1500,
+    KEY_ALL,
+    PRESERVATION
+}
+
+// Loot tables for the vouchers (example items)
+public static final Map<VoucherType, List<ItemStack>> LOOT_TABLES = new HashMap<>();
+public static final Map<VoucherType, List<crateTableUtil.LootEntry>> WEIGHTED_LOOT_TABLES = new HashMap<>();
+private static final Random random = new Random();
+
+static {
+    LOOT_TABLES.put(VoucherType.TRANSMUTATION, List.of(
+        new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1),
+        new ItemStack(Material.NETHERITE_INGOT, 1)
+    ));
+
+    LOOT_TABLES.put(VoucherType.DECORATION, List.of(
+        new ItemStack(Material.BLACKSTONE, 32),
+        new ItemStack(Material.GLOWSTONE, 5)
+    ));
+
+    EnchantmentInfo preservation = EnchantmentData.getEnchantmentInfoByName("Preservation");
+
+    if (preservation != null) {
+    Map<Integer, Double> levelWeights = Map.of(
+        1, 20.0,
+        2, 18.0,
+        3, 16.0,
+        4, 14.0,
+        5, 12.0,
+        6, 10.0,
+        7, 6.0,
+        8, 4.0
+    );
+
+    List<crateTableUtil.LootEntry> preservationLoot = new ArrayList<>();
+    for (Map.Entry<Integer, Double> entry : levelWeights.entrySet()) {
+        int level = entry.getKey();
+        double weight = entry.getValue();
+        ItemStack book = EnchantmentData.createEnchantedBook(preservation, level, 50, false);
+        preservationLoot.add(new crateTableUtil.LootEntry(book, weight));
     }
 
-    // Loot tables for the vouchers (example items)
-    public static final Map<VoucherType, List<ItemStack>> LOOT_TABLES = new HashMap<>();
-    private static final Random random = new Random();
+    WEIGHTED_LOOT_TABLES.put(VoucherType.PRESERVATION, preservationLoot);
+    } else {
+    WEIGHTED_LOOT_TABLES.put(VoucherType.PRESERVATION, Collections.emptyList());
+}
 
-    static {
-        LOOT_TABLES.put(VoucherType.TRANSMUTATION, List.of(
-            new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1),
-            new ItemStack(Material.NETHERITE_INGOT, 1)
-        ));
-
-        LOOT_TABLES.put(VoucherType.DECORATION, List.of(
-            new ItemStack(Material.BLACKSTONE, 32),
-            new ItemStack(Material.GLOWSTONE, 5)
-        ));
-
-        // MONEY_1500 voucher has no loot table, it just gives money
-        LOOT_TABLES.put(VoucherType.MONEY_1500, Collections.emptyList());
-
-    }
+    LOOT_TABLES.put(VoucherType.MONEY_1500, Collections.emptyList());
+}
 
     
 
@@ -86,6 +115,17 @@ public class ItemVoucherUtil {
                 String messageKeys = String.join(", ", keyNames);
                 player.sendMessage(ChatColor.GREEN + "Your keys (" + messageKeys + ") were added to the claim menu!");
             }
+            case PRESERVATION -> {
+                List<crateTableUtil.LootEntry> lootTable = WEIGHTED_LOOT_TABLES.get(type);
+                if (lootTable == null || lootTable.isEmpty()) {
+                    player.sendMessage(ChatColor.RED + "No loot configured for this voucher!");
+                return;
+                }
+
+                ItemStack reward = getWeightedRandomItem(lootTable);
+                player.getInventory().addItem(reward);
+                player.sendMessage(ChatColor.GREEN + "You redeemed a Preservation voucher!");
+                }
 
 
             default -> player.sendMessage(ChatColor.RED + "Unknown voucher type.");
@@ -139,5 +179,20 @@ public class ItemVoucherUtil {
         // Create and return the book
         return EnchantmentData.createEnchantedBook(chosen, level, chance, false);
     }
+
+    public static ItemStack getWeightedRandomItem(List<crateTableUtil.LootEntry> entries) {
+    double totalWeight = entries.stream().mapToDouble(e -> e.chance).sum();
+    double r = Math.random() * totalWeight;
+
+    double cumulative = 0.0;
+    for (crateTableUtil.LootEntry entry : entries) {
+        cumulative += entry.chance;
+        if (r <= cumulative) {
+            return entry.item.clone();
+        }
+    }
+
+    return entries.get(entries.size() - 1).item.clone(); // Fallback
+}
 
 }

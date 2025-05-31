@@ -17,6 +17,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 
 
@@ -297,6 +299,30 @@ if (RankUtils.isAscendUpgrade(oldRank, newRank)) {
     }
     return true;
 }
+            case "resetmine" -> {
+    if (!sender.hasPermission("customenchants.resetmine")) {
+        sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
+        return true;
+    }
+
+    if (args.length != 1) {
+        sender.sendMessage(ChatColor.RED + "Usage: /resetmine <mineName>");
+        return true;
+    }
+
+    String mineName = args[0].toLowerCase();
+    
+    // Call your mine reset logic here
+    boolean success = TestEnchants.getInstance().getMineManager().resetMine(mineName, TestEnchants.getInstance());
+
+    if (success) {
+        sender.sendMessage(ChatColor.GREEN + "Mine '" + mineName + "' has been reset.");
+    } else {
+        sender.sendMessage(ChatColor.RED + "Mine '" + mineName + "' does not exist or could not be reset.");
+    }
+
+    return true;
+}
 
 
 
@@ -304,6 +330,8 @@ if (RankUtils.isAscendUpgrade(oldRank, newRank)) {
 
 
         
+
+
 
 
 }
@@ -420,6 +448,27 @@ if (RankUtils.isAscendUpgrade(oldRank, newRank)) {
         }
         return matchingPlayers;
     } 
+}
+
+        if ("resetmine".equals(cmd)) {
+    if (args.length == 1) {
+        String partial = args[0].toLowerCase();
+        YamlConfiguration config = TestEnchants.getInstance().getMineManager().getMinesConfig();
+        if (config == null || config.getConfigurationSection("mines") == null) {
+            return Collections.emptyList();
+        }
+
+        Set<String> mineNames = config.getConfigurationSection("mines").getKeys(false);
+        List<String> completions = new ArrayList<>();
+
+        for (String name : mineNames) {
+            if (name.toLowerCase().startsWith(partial)) {
+                completions.add(name); // preserve original case for display
+            }
+        }
+
+        return completions;
+    }
 }
 
         return Collections.emptyList();

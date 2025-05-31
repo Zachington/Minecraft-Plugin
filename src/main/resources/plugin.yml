@@ -38,3 +38,7 @@ commands:
   essencenotif:
     description: Enables or disables essence notifications
     usage: /essencenotif
+  resetmine:
+    description: Resets a mine
+    usage: /resetmine <mine name>
+    permission: customEnchants.resetmine

@@ -34,6 +34,7 @@ public void onVoucherUse(PlayerInteractEvent event) {
         case "Decoration Voucher" -> VoucherType.DECORATION;
         case "$1500 Voucher" -> VoucherType.MONEY_1500;
         case "Key All Voucher" -> VoucherType.KEY_ALL;
+        case "Preservation Voucher" -> VoucherType.PRESERVATION;
         default -> null;
     };
 

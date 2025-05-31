@@ -96,7 +96,12 @@ public class CrateListener implements Listener {
     InventoryView view = event.getView();
     String title = view.getTitle();
 
-    if (title.equals("§5Enchanter Crate") || title.equals("§3Mining Crate")) {
+    if (title.equals("§5Enchanter Crate") 
+    || title.equals("§3Mining Crate") 
+    || title.equals("§1Prison Crate") 
+    || title.equals("§cDivine Crate") 
+    || title.equals("§8Durability Crate")) {
+
         int rawSlot = event.getRawSlot();
         int topSize = view.getTopInventory().getSize();
 
@@ -133,6 +138,21 @@ public class CrateListener implements Listener {
         String method = guiOpenMethod.remove(player);
         if (!"RIGHT_CLICK".equals(method)) return;
         handleLootDistribution(player, view.getTopInventory(), "Mining Key");
+    }
+    else if (title.equals("§8Durability Crate")) {
+        String method = guiOpenMethod.remove(player);
+        if (!"RIGHT_CLICK".equals(method)) return;
+        handleLootDistribution(player, view.getTopInventory(), "Durability Key");
+    }
+    else if (title.equals("§cDivine Crate")) {
+        String method = guiOpenMethod.remove(player);
+        if (!"RIGHT_CLICK".equals(method)) return;
+        handleLootDistribution(player, view.getTopInventory(), "Divine Key");
+    }
+    else if (title.equals("§1Prison Crate")) {
+        String method = guiOpenMethod.remove(player);
+        if (!"RIGHT_CLICK".equals(method)) return;
+        handleLootDistribution(player, view.getTopInventory(), "Prison Key");
     }
 }
 
@@ -246,7 +266,16 @@ public class CrateListener implements Listener {
             }
 
             topInv.setItem(chosenSlot, null);
-            player.sendMessage("You received: " + chosenItem.getType().name());
+            ItemMeta meta = chosenItem.getItemMeta();
+            String itemName;
+
+            if (meta != null && meta.hasDisplayName()) {
+                itemName = ChatColor.stripColor(meta.getDisplayName());
+            } else {
+                itemName = chosenItem.getType().name().replace('_', ' ').toLowerCase();
+                itemName = itemName.substring(0, 1).toUpperCase() + itemName.substring(1);
+            }
+            player.sendMessage("§aYou received: " + itemName);
             player.closeInventory();
             return;
         }
@@ -256,7 +285,6 @@ public class CrateListener implements Listener {
     }
 }.runTaskTimer(TestEnchants.getInstance(), 10L, 2L);
 }
-
 
     public static ItemStack getRandomLoot(String lootTableName) {
         List<LootEntry> lootEntries = crateTableUtil.LOOT_TABLES.get(lootTableName);
@@ -281,7 +309,19 @@ public class CrateListener implements Listener {
         guiOpenMethod.put(player, "LEFT_CLICK");
         return true;
     } else if (clickedType == Material.DIAMOND_BLOCK) {
+        player.openInventory(GuiUtil.divineKeyInventory(player));
+        guiOpenMethod.put(player, "LEFT_CLICK");
+        return true;
+    } else if (clickedType == Material.BEDROCK) {
+        player.openInventory(GuiUtil.durabilityKeyInventory(player));
+        guiOpenMethod.put(player, "LEFT_CLICK");
+        return true;
+    } else if (clickedType == Material.CREAKING_HEART) {
         player.openInventory(GuiUtil.miningKeyInventory(player));
+        guiOpenMethod.put(player, "LEFT_CLICK");
+        return true;
+    } else if (clickedType == Material.CRYING_OBSIDIAN) {
+        player.openInventory(GuiUtil.prisonKeyInventory(player));
         guiOpenMethod.put(player, "LEFT_CLICK");
         return true;
     }
@@ -319,6 +359,56 @@ public class CrateListener implements Listener {
 
             if (isValidCustomItem(handItem)) {
                 String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
+                if (plainName.equalsIgnoreCase("Divine Key")) {
+                    if (handItem.getAmount() <= 1) {
+                        player.getInventory().setItemInMainHand(null);
+                    } else {
+                        handItem.setAmount(handItem.getAmount() - 1);
+                        player.getInventory().setItemInMainHand(handItem);
+                    }
+
+                    Inventory gui = GuiUtil.divineKeyInventory(player);
+                    guiOpenMethod.put(player, "RIGHT_CLICK");
+                    player.openInventory(gui);
+
+                } else {
+                    player.sendMessage("You must hold a Divine Key to open this.");
+                    pushPlayerBack(player, clickedBlockLoc);
+                }
+            } else {
+                player.sendMessage("You must hold a Divine Key to open this");
+                pushPlayerBack(player, clickedBlockLoc);
+            }
+        } else if (clickedType == Material.BEDROCK) {
+        ItemStack handItem = player.getInventory().getItemInMainHand();
+
+            if (isValidCustomItem(handItem)) {
+                String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
+                if (plainName.equalsIgnoreCase("Durability Key")) {
+                    if (handItem.getAmount() <= 1) {
+                        player.getInventory().setItemInMainHand(null);
+                    } else {
+                        handItem.setAmount(handItem.getAmount() - 1);
+                        player.getInventory().setItemInMainHand(handItem);
+                    }
+
+                    Inventory gui = GuiUtil.durabilityKeyInventory(player);
+                    guiOpenMethod.put(player, "RIGHT_CLICK");
+                    player.openInventory(gui);
+
+                } else {
+                    player.sendMessage("You must hold a Durability Key to open this.");
+                    pushPlayerBack(player, clickedBlockLoc);
+                }
+            } else {
+                player.sendMessage("You must hold a Durability Key to open this");
+                pushPlayerBack(player, clickedBlockLoc);
+            }
+        } else if (clickedType == Material.CREAKING_HEART) {
+        ItemStack handItem = player.getInventory().getItemInMainHand();
+
+            if (isValidCustomItem(handItem)) {
+                String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
                 if (plainName.equalsIgnoreCase("Mining Key")) {
                     if (handItem.getAmount() <= 1) {
                         player.getInventory().setItemInMainHand(null);
@@ -339,106 +429,107 @@ public class CrateListener implements Listener {
                 player.sendMessage("You must hold a Mining Key to open this");
                 pushPlayerBack(player, clickedBlockLoc);
             }
-    }
-}
-    
-    private void handleShiftRightClick(Player player, Material clickedType, Location clickedBlockLoc) {
-        if (clickedType == Material.ENCHANTING_TABLE) {
-            ItemStack handItem = player.getInventory().getItemInMainHand();
+        }   else if (clickedType == Material.CRYING_OBSIDIAN) {
+        ItemStack handItem = player.getInventory().getItemInMainHand();
 
             if (isValidCustomItem(handItem)) {
                 String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
-
-                if (plainName.equalsIgnoreCase("Enchant Key")) {
-                    int amount = Math.min(handItem.getAmount(), 32);
-                    //LOGGER.info("[Crate] " + player.getName() + " is opening " + amount + " keys (shift-click)");
-
-                    handItem.setAmount(handItem.getAmount() - amount);
-                    if (handItem.getAmount() <= 0) {
+                if (plainName.equalsIgnoreCase("Prison Key")) {
+                    if (handItem.getAmount() <= 1) {
                         player.getInventory().setItemInMainHand(null);
                     } else {
+                        handItem.setAmount(handItem.getAmount() - 1);
                         player.getInventory().setItemInMainHand(handItem);
                     }
 
-                    for (int i = 0; i < amount; i++) {
-                        ItemStack loot = getRandomLoot("Enchant Key");
-                        if (loot == null) {
-                            player.sendMessage("No loot available.");
-                            //LOGGER.warning("[Crate] No loot during shift-click for " + player.getName());
-                            break;
-                        }
+                    Inventory gui = GuiUtil.prisonKeyInventory(player);
+                    guiOpenMethod.put(player, "RIGHT_CLICK");
+                    player.openInventory(gui);
 
-                        if (loot.hasItemMeta()) {
-                            ItemMeta meta = loot.getItemMeta();
-                            if (meta.hasLore()) {
-                                List<String> lore = new ArrayList<>(meta.getLore());
-                                int randomChance = 1 + random.nextInt(100);
-                                for (int j = 0; j < lore.size(); j++) {
-                                    String line = ChatColor.stripColor(lore.get(j));
-                                    if (line.startsWith("Success Rate:")) {
-                                        lore.set(j, ChatColor.GREEN + "Success Rate: " + randomChance + "%");
-                                        break;
-                                    }
-                                }
-                                meta.setLore(lore);
-                                loot.setItemMeta(meta);
-                            }
-                        }
-
-                        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(loot);
-                        if (!leftover.isEmpty()) {
-                            player.getWorld().dropItemNaturally(player.getLocation(), loot);
-                        }
-                    }
-
-                    player.sendMessage("You received " + amount + " item" + (amount > 1 ? "s" : "") + " from the Enchant Key crate.");
-                    guiOpenMethod.remove(player);
-                    return;
-                }
-            }
-
-            player.sendMessage("You must hold an Enchant Key to open this.");
-            pushPlayerBack(player, clickedBlockLoc);
-
-        } else if (clickedType == Material.DIAMOND_BLOCK) {
-        ItemStack handItem = player.getInventory().getItemInMainHand();
-
-        if (isValidCustomItem(handItem)) {
-            String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
-            if (plainName.equalsIgnoreCase("Mining Key")) {
-                int amount = Math.min(handItem.getAmount(), 32);
-
-                handItem.setAmount(handItem.getAmount() - amount);
-                if (handItem.getAmount() <= 0) {
-                    player.getInventory().setItemInMainHand(null);
                 } else {
-                    player.getInventory().setItemInMainHand(handItem);
+                    player.sendMessage("You must hold a Prison Key to open this.");
+                    pushPlayerBack(player, clickedBlockLoc);
                 }
-
-                for (int i = 0; i < amount; i++) {
-                    ItemStack loot = getRandomLoot("Mining Key");
-                    if (loot == null) {
-                        player.sendMessage("No loot available.");
-                        break;
-                    }
-
-                    HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(loot);
-                    if (!leftover.isEmpty()) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), loot);
-                    }
-                }
-
-                player.sendMessage("You received " + amount + " item" + (amount > 1 ? "s" : "") + " from the Mining Key crate.");
-                guiOpenMethod.remove(player);
-                return;
+            } else {
+                player.sendMessage("You must hold a Prison Key to open this");
+                pushPlayerBack(player, clickedBlockLoc);
             }
         }
-        player.sendMessage("You must hold a Mining Key to open this.");
-        pushPlayerBack(player, clickedBlockLoc);
-    }
 }
-        
 
+    private void handleShiftRightClick(Player player, Material clickedType, Location clickedBlockLoc) {
+    ItemStack handItem = player.getInventory().getItemInMainHand();
+    if (!isValidCustomItem(handItem)) {
+        player.sendMessage("You must hold a valid crate key to open this.");
+        pushPlayerBack(player, clickedBlockLoc);
+        return;
+    }
+
+    String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
+    String crateType = null;
+
+    // Match clicked block and key name to crate type
+    if (clickedType == Material.ENCHANTING_TABLE && plainName.equalsIgnoreCase("Enchant Key")) {
+        crateType = "Enchant Key";
+    } else if (clickedType == Material.DIAMOND_BLOCK && plainName.equalsIgnoreCase("Divine Key")) {
+        crateType = "Divine Key";
+    } else if (clickedType == Material.BEDROCK && plainName.equalsIgnoreCase("Durability Key")) {
+        crateType = "Durability Key";
+    } else if (clickedType == Material.CREAKING_HEART && plainName.equalsIgnoreCase("Mining Key")) {
+        crateType = "Mining Key";
+    } else if (clickedType == Material.CRYING_OBSIDIAN && plainName.equalsIgnoreCase("Prison Key")) {
+        crateType = "Prison Key";
+    }
+
+    if (crateType == null) {
+        player.sendMessage("You must hold the correct key to open this crate.");
+        pushPlayerBack(player, clickedBlockLoc);
+        return;
+    }
+
+    int amount = Math.min(handItem.getAmount(), 32);
+    handItem.setAmount(handItem.getAmount() - amount);
+    if (handItem.getAmount() <= 0) {
+        player.getInventory().setItemInMainHand(null);
+    } else {
+        player.getInventory().setItemInMainHand(handItem);
+    }
+
+    for (int i = 0; i < amount; i++) {
+        ItemStack loot = getRandomLoot(crateType);
+        if (loot == null) {
+            player.sendMessage("No loot available.");
+            break;
+        }
+
+        if (loot.hasItemMeta()) {
+            ItemMeta meta = loot.getItemMeta();
+            if (meta.hasLore()) {
+                List<String> lore = new ArrayList<>(meta.getLore());
+                int randomChance = 1 + random.nextInt(100);
+                for (int j = 0; j < lore.size(); j++) {
+                    String line = ChatColor.stripColor(lore.get(j));
+                    if (line.startsWith("Success Rate:")) {
+                        lore.set(j, ChatColor.GREEN + "Success Rate: " + randomChance + "%");
+                        break;
+                    }
+                }
+                meta.setLore(lore);
+                loot.setItemMeta(meta);
+            }
+        }
+
+        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(loot);
+        if (!leftover.isEmpty()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), loot);
+        }
+    }
+
+    player.sendMessage("You received " + amount + " item" + (amount > 1 ? "s" : "") + " from the " + crateType + " crate.");
+    guiOpenMethod.remove(player);
+}
+
+        
     private void pushPlayerBack(Player player, Location blockLocation) {
         Location playerLoc = player.getLocation();
         double dx = playerLoc.getX() - blockLocation.getX();

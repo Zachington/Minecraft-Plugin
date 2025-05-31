@@ -475,7 +475,6 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     return fromEndsWithZ && toEndsWithA;
 }
 
-
     public static boolean isAscendUpgrade(String from, String to) {
     if (from == null || to == null) return false;
 
@@ -487,7 +486,6 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
 
     return fromEndsWithMax && toIsNextAscension;
 }
-
 
     public static String formatRankTierOnly(String rank) {
     if (rank == null || rank.isEmpty()) return "";

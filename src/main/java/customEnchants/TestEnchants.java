@@ -6,16 +6,20 @@ import java.time.ZoneId;
 import java.util.Map;
 import java.util.HashMap;
 
+
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
 
+
 import customEnchants.managers.PluginManager;
 import customEnchants.managers.RankManager;
+import customEnchants.managers.MineResetManager;
 import customEnchants.utils.EssenceManager;
 import customEnchants.utils.ScoreboardUtil;
 import customEnchants.utils.StatTracker;
@@ -42,6 +46,8 @@ import customEnchants.listeners.ClaimMenuListener;
 
 import customEnchants.commands.CommandHandler;
 
+
+
 public class TestEnchants extends JavaPlugin {
 
     private static TestEnchants instance;
@@ -51,12 +57,14 @@ public class TestEnchants extends JavaPlugin {
     private RankManager rankManager;
     private Economy economy;
     private ScoreboardUtil scoreboardUtil;
+    private MineResetManager mineManager;
 
     @Override
     public void onEnable() {
         instance = this;
         customItemUtil.setPlugin(this);
-        
+
+        saveResource("mines.yml", false); // Copies default from jar if it doesn't exist
 
         // Setup economy with Vault
         if (!VaultUtil.setupEconomy()) {
@@ -83,6 +91,7 @@ public class TestEnchants extends JavaPlugin {
         this.rankManager = new RankManager();
         this.scoreboardUtil = new ScoreboardUtil(this);
         this.economy = VaultUtil.getEconomy();
+        mineManager = new MineResetManager(this);
 
         // Initialize plugin manager
         PluginManager.getInstance().initialize();
@@ -99,6 +108,7 @@ public class TestEnchants extends JavaPlugin {
         scheduleStatTrackerSaves();
         scheduleDailyReset();
         scheduleHourlyVoucherGiveaway();
+        scheduleStaggeredMineResets();
 
         getLogger().info("CustomEnchant has been enabled!");
     }
@@ -149,6 +159,7 @@ public class TestEnchants extends JavaPlugin {
         getCommand("rankup").setExecutor(handler);
         getCommand("setrank").setExecutor(handler);
         getCommand("essencenotif").setExecutor(handler);
+        getCommand("resetmine").setExecutor(handler);
     }
 
     private void scheduleScoreboardUpdates() {
@@ -235,6 +246,42 @@ public class TestEnchants extends JavaPlugin {
 
     public ScoreboardUtil getScoreboardUtil() {
         return scoreboardUtil;
+    }
+
+    private void scheduleStaggeredMineResets() {
+    YamlConfiguration config = mineManager.getMinesConfig();
+    if (config == null) {
+        getLogger().warning("Mines config not loaded!");
+        return;
+    }
+
+    if (config.getConfigurationSection("mines") == null) {
+        getLogger().warning("No 'mines' section found in mines.yml!");
+        return;
+    }
+
+    Map<String, Object> mines = config.getConfigurationSection("mines").getValues(false);
+
+    int delayBetween = 28 * 20; // 28 seconds in ticks
+    int resetInterval = 20 * 60 * 20; // 20 minutes in ticks
+    int initialDelay = 0;
+
+    for (String mineName : mines.keySet()) {
+        final String mine = mineName;
+        Bukkit.getScheduler().runTaskTimer(this,
+            () -> mineManager.resetMine(mine, this),
+            initialDelay,
+            resetInterval
+        );
+        initialDelay += delayBetween;
+    }
+}
+
+
+
+    
+    public MineResetManager getMineManager() {
+        return mineManager;
     }
 
 }
