@@ -38,7 +38,7 @@ public class EnchantmentData {
         1,  // Auto Smelt
         1,  // Unbreakable
         3,  // Magnet
-        8,   // Preservation
+        10,   // Preservation
         5,
         5
     };
@@ -264,6 +264,14 @@ public class EnchantmentData {
         };
     }
 
+    public static String getRarity(String enchantName) {
+    for (int i = 0; i < ENCHANT_NAMES.length; i++) {
+        if (ENCHANT_NAMES[i].equalsIgnoreCase(enchantName)) {
+            return ENCHANT_RARITY[i];
+        }
+    }
+    return null;
+}
 
 
 

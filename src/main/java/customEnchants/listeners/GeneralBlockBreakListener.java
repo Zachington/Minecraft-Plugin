@@ -12,9 +12,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import customEnchants.utils.EnchantmentData;
+import customEnchants.utils.RankUtils;
 import customEnchants.utils.StatTracker;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import customEnchants.utils.HeldToolInfo;
 
 public class GeneralBlockBreakListener implements Listener {
     private final StatTracker stats;
@@ -50,6 +54,23 @@ public class GeneralBlockBreakListener implements Listener {
                 }
             }
         }
+
+        HeldToolInfo tool = HeldToolInfo.fromItem(item);
+        for (String enchant : tool.customEnchants.keySet()) {
+            String rarity = EnchantmentData.getRarity(enchant);
+    if ("PRESTIGE".equalsIgnoreCase(rarity) && !RankUtils.isAtLeastP1a(player)) {
+        player.sendMessage(ChatColor.RED + "You must be Prestige I (p1a) to use tools with " + enchant + "!");
+        event.setCancelled(true);
+        return;
+    }
+    if ("PRESTIGE+".equalsIgnoreCase(rarity) && !RankUtils.isAtLeastP10a(player)) {
+        player.sendMessage(ChatColor.RED + "You must be Prestige X (p10a) to use tools with " + enchant + "!");
+        event.setCancelled(true);
+        return;
+    }
+}
+
+
 
         UUID uuid = player.getUniqueId();
         stats.incrementPlayerStat(uuid, "blocks_broken");

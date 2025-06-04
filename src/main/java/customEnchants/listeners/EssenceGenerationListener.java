@@ -2,9 +2,12 @@ package customEnchants.listeners;
 
 import customEnchants.utils.EssenceManager;
 import customEnchants.utils.customItemUtil;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,8 +20,11 @@ import org.bukkit.inventory.ItemStack;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -28,6 +34,9 @@ public class EssenceGenerationListener implements Listener {
 
     private final EssenceManager essenceManager;
     private final Random random = new Random();
+    private static File file;
+    private static FileConfiguration config;    
+    
 
     // Map extractorIndex -> TierAmountRange (tier and min/max amount)
     private final Map<Integer, TierAmountRange> extractorConfig = new HashMap<>();
@@ -171,11 +180,11 @@ public class EssenceGenerationListener implements Listener {
 
     public static Set<UUID> essenceNotifDisabled = new HashSet<>();
 
-public boolean isEssenceNotifDisabled(Player player) {
+    public boolean isEssenceNotifDisabled(Player player) {
     return essenceNotifDisabled.contains(player.getUniqueId());
 }
 
-public void toggleEssenceNotif(Player player) {
+    public void toggleEssenceNotif(Player player) {
     UUID id = player.getUniqueId();
     if (essenceNotifDisabled.contains(id)) {
         essenceNotifDisabled.remove(id);
@@ -185,5 +194,39 @@ public void toggleEssenceNotif(Player player) {
         player.sendMessage(ChatColor.RED + "Essence notifications disabled.");
     }
 }
+
+    public static void init(File pluginFolder) {
+        file = new File(pluginFolder, "essence_prefs.yml");
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                Bukkit.getLogger().severe("Could not create essence_prefs.yml");
+            }
+        }
+        config = YamlConfiguration.loadConfiguration(file);
+        loadPreferences();
+    }
+
+    private static void loadPreferences() {
+        List<String> list = config.getStringList("disabled");
+        for (String uuid : list) {
+            try {
+                essenceNotifDisabled.add(UUID.fromString(uuid));
+            } catch (IllegalArgumentException ignored) {}
+        }
+    }
+
+    public static void savePreferences() {
+        List<String> list = essenceNotifDisabled.stream()
+            .map(UUID::toString)
+            .toList();
+        config.set("disabled", list);
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            Bukkit.getLogger().severe("Could not save essence_prefs.yml");
+        }
+    }
 
 }

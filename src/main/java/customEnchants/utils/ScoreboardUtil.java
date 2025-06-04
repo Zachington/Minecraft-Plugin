@@ -37,7 +37,7 @@ public class ScoreboardUtil {
         Objective obj = board.registerNewObjective("info", "dummy", ChatColor.GREEN + "Minecraft Server Name");
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        int line = 10;
+        int line = 12;
 
         obj.getScore("   ").setScore(line--);
 

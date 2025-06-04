@@ -20,6 +20,7 @@ import org.bukkit.ChatColor;
 import customEnchants.managers.PluginManager;
 import customEnchants.managers.RankManager;
 import customEnchants.managers.MineResetManager;
+import customEnchants.utils.ClaimStorage;
 import customEnchants.utils.EssenceManager;
 import customEnchants.utils.ScoreboardUtil;
 import customEnchants.utils.StatTracker;
@@ -41,6 +42,7 @@ import customEnchants.listeners.BlockBreakListener;
 import customEnchants.listeners.CrateListener;
 import customEnchants.listeners.GeneralBlockBreakListener;
 import customEnchants.listeners.PlayerQuitListener;
+import customEnchants.listeners.RngBlockBreak;
 import customEnchants.listeners.SetOwnerListener;
 import customEnchants.listeners.ClaimMenuListener;
 
@@ -65,6 +67,8 @@ public class TestEnchants extends JavaPlugin {
         customItemUtil.setPlugin(this);
 
         saveResource("mines.yml", false); // Copies default from jar if it doesn't exist
+        ClaimStorage.init(getDataFolder());
+        EssenceGenerationListener.init(getDataFolder());
 
         // Setup economy with Vault
         if (!VaultUtil.setupEconomy()) {
@@ -119,6 +123,8 @@ public class TestEnchants extends JavaPlugin {
         if (statTracker != null) {
             statTracker.save();
         }
+        ClaimStorage.saveKeys();
+        EssenceGenerationListener.savePreferences();
         getLogger().info("CustomEnchant has been disabled!");
     }
 
@@ -143,6 +149,7 @@ public class TestEnchants extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GeneralBlockBreakListener(statTracker, this), this);
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(statTracker), this);
         getServer().getPluginManager().registerEvents(new EssenceMenuListener(this), this);
+        getServer().getPluginManager().registerEvents(new RngBlockBreak(this, statTracker), this);
 
     }
 
@@ -277,9 +284,6 @@ public class TestEnchants extends JavaPlugin {
     }
 }
 
-
-
-    
     public MineResetManager getMineManager() {
         return mineManager;
     }

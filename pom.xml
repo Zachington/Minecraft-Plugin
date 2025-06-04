@@ -53,7 +53,6 @@
         <scope>system</scope>
         <systemPath>${project.basedir}/libs/Vault.jar</systemPath>
     </dependency>
-
 </dependencies>
 
     <build>

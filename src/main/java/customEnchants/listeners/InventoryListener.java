@@ -13,9 +13,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.inventory.meta.Damageable;
 
-import customEnchants.TestEnchants;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.InventoryParser;
+import customEnchants.utils.RankUtils;
 import customEnchants.utils.customItemUtil;
 
 import java.util.*;
@@ -38,7 +38,7 @@ public class InventoryListener implements Listener {
         handleInventoryInteraction(event, player);
 
         //Dust Application
-        if (cursor != null && cursor.getType() == Material.SUGAR) {
+    if (cursor != null && cursor.getType() == Material.SUGAR) {
     int cursorRarity = InventoryParser.itemRarity(cursor);
     int clickedRarity = InventoryParser.itemRarity(clicked);
 
@@ -76,54 +76,52 @@ public class InventoryListener implements Listener {
         } else {
             return;
         }
-        
+        return;
     }
     //Durability Shard
     if (cursor != null && cursor.hasItemMeta() && clicked != null && clicked.getType() != Material.AIR) {
-    ItemMeta cursorMeta = cursor.getItemMeta();
-
-    // Check if cursor is a Durability Shard by your custom method
     if (customItemUtil.isDurabilityShard(cursor)) {
-        ItemMeta meta = clicked.getItemMeta();
-        if (meta == null || !(meta instanceof Damageable)) {
+        ItemMeta clickedMeta = clicked.getItemMeta();
+        player.sendMessage(ChatColor.GRAY + "DEBUG: Durability shard detected.");
+        if (!(clickedMeta instanceof Damageable damageable)) {
+            player.sendMessage(ChatColor.RED + "You can only repair damageable items!");
             return;
         }
 
-        Damageable damageable = (Damageable) meta;
         int currentDamage = damageable.getDamage();
-
         if (currentDamage <= 0) {
             player.sendMessage(ChatColor.RED + "This item is already fully repaired!");
             return;
         }
 
-        // Get durability value from shard PersistentData
-        NamespacedKey key = new NamespacedKey(TestEnchants.getInstance(), "durability_value");
+        ItemMeta cursorMeta = cursor.getItemMeta();
+        NamespacedKey key = customItemUtil.DURABILITY_KEY;
         Integer durabilityValue = cursorMeta.getPersistentDataContainer().get(key, PersistentDataType.INTEGER);
 
         if (durabilityValue == null || durabilityValue <= 0) {
-            player.sendMessage(ChatColor.RED + "Durability Shards only work on equipment");
+            player.sendMessage(ChatColor.RED + "This Durability Shard has no power left!");
             return;
         }
 
-        int newDamage = currentDamage - durabilityValue;
-        if (newDamage < 0) newDamage = 0; // Clamp to 0 (fully repaired)
-
+        int newDamage = Math.max(0, currentDamage - durabilityValue);
         damageable.setDamage(newDamage);
-        clicked.setItemMeta((ItemMeta) damageable);  // Apply meta back
+        clicked.setItemMeta((ItemMeta) damageable); // Safe cast back to ItemMeta
 
-        // Consume one shard from cursor
-        cursor.setAmount(cursor.getAmount() - 1);
-        if (cursor.getAmount() <= 0) {
+        // Reduce shard amount
+        int newAmount = cursor.getAmount() - 1;
+        if (newAmount <= 0) {
             event.setCursor(null);
         } else {
+            cursor.setAmount(newAmount);
             event.setCursor(cursor);
         }
 
         player.sendMessage(ChatColor.GREEN + "Repaired item by " + durabilityValue + " durability!");
         event.setCancelled(true);
+        return;
     }
 }
+
 
 
 }
@@ -149,6 +147,20 @@ public class InventoryListener implements Listener {
 
         ToolEnchantInfo tool = parseTool(clicked);
         if (!canAddEnchant(tool, book, clicked.getType(), player)) return;
+
+        String rarity = EnchantmentData.getRarity(book.name);
+
+        if ("PRESTIGE".equalsIgnoreCase(rarity) && !RankUtils.isAtLeastP1a(player)) {
+            player.sendMessage(ChatColor.RED + "You must be at least Prestige 1 to use this enchantment.");
+            event.setCancelled(true);
+        return;
+        }
+
+        if ("PRESTIGE+".equalsIgnoreCase(rarity) && !RankUtils.isAtLeastP10a(player)) {
+            player.sendMessage(ChatColor.RED + "You must be at least Prestige 10 to use this enchantment.");
+            event.setCancelled(true);
+        return;
+        }
 
         if (random.nextInt(100) < book.successRate) {
             applyEnchant(clicked, tool, book);

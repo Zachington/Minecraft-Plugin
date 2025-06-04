@@ -513,4 +513,54 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     return "P" + prestige;
 }
 
+    public static int compareRanks(String r1, String r2) {
+        return Integer.compare(getValue(r1), getValue(r2));
+    }
+
+    private static int getValue(String rank) {
+        if (rank == null || rank.isEmpty()) return 0;
+        rank = rank.toLowerCase();
+
+        int prestige = 0;
+        StringBuilder number = new StringBuilder();
+        int i = 0;
+
+        // Handle single-letter legacy ranks like "a"
+        if (rank.length() == 1) return rank.charAt(0) - 'a' + 1;
+
+        while (i < rank.length()) {
+            if (rank.charAt(i) == 'p') {
+                i++;
+                while (i < rank.length() && Character.isDigit(rank.charAt(i))) {
+                    number.append(rank.charAt(i++));
+                }
+                prestige += Integer.parseInt(number.toString());
+                number.setLength(0);
+            } else if (Character.isDigit(rank.charAt(i))) {
+                while (i < rank.length() && Character.isDigit(rank.charAt(i))) {
+                    number.append(rank.charAt(i++));
+                }
+                prestige += Integer.parseInt(number.toString()) * 1000; // Era level
+                number.setLength(0);
+            } else if (Character.isLetter(rank.charAt(i))) {
+                prestige += (rank.charAt(i) - 'a' + 1);
+                i++;
+            } else {
+                i++;
+            }
+        }
+
+        return prestige;
+    }
+
+    public static boolean isAtLeastP1a(Player player) {
+        return compareRanks(getRank(player), "p1a") >= 0;
+    }
+
+    public static boolean isAtLeastP10a(Player player) {
+        return compareRanks(getRank(player), "p10a") >= 0;
+    }
+
+
+
 }

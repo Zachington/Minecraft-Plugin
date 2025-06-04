@@ -5,6 +5,7 @@ author: Zach
 api-version: 1.13
 
 softdepend: [Vault]
+depend: [Paper]
 
 commands:
   scrap:

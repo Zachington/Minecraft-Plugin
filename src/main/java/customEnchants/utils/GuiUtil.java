@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class GuiUtil {
 
     // Regex pattern to extract level and chance from lore
-    private static final Pattern LEVEL_PATTERN = Pattern.compile("(.+) ([IVXLCDM]+)$");
+    private static final Pattern LEVEL_PATTERN = Pattern.compile("(.+) ((?:[IV]{1,3}|IV|V)|\\d+)$");
     private static final Pattern CHANCE_PATTERN = Pattern.compile("Success Rate: (\\d+(?:\\.\\d+)?)%");
 
     //Use EnchantmentData createEnchantedBook this is only for anvils 
