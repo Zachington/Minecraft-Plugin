@@ -1,7 +1,9 @@
 package customEnchants.utils;
 
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
@@ -21,10 +23,17 @@ public class crateTableUtil {
 
         // Mining Key loot
         LOOT_TABLES.put("Mining Key", Arrays.asList(
-            new LootEntry(new ItemStack(Material.DIAMOND, 16), 40),
-            new LootEntry(new ItemStack(Material.EMERALD, 8), 30),
-            new LootEntry(new ItemStack(Material.IRON_INGOT, 32), 30)
-        ));
+    new LootEntry(new ItemStack(Material.IRON_BLOCK, 16), 20),
+    new LootEntry(new ItemStack(Material.COPPER_BLOCK, 16), 20),
+    new LootEntry(new ItemStack(Material.GOLD_BLOCK, 16), 20),
+    new LootEntry(new ItemStack(Material.DIAMOND, 3), 20),
+    new LootEntry(new ItemStack(Material.DIAMOND, 5), 10),
+    new LootEntry(new ItemStack(Material.IRON_PICKAXE), 5),
+    new LootEntry(createEnchantedPickaxe(Material.IRON_PICKAXE), 0.9),
+    new LootEntry(new ItemStack(Material.DIAMOND_PICKAXE), 4),
+    new LootEntry(createEnchantedPickaxe(Material.DIAMOND_PICKAXE), 0.1)
+));
+
 
 
 
@@ -52,13 +61,13 @@ public class crateTableUtil {
         ));
 
         LOOT_TABLES.put("Durability Key", Arrays.asList(
-            new LootEntry(customItemUtil.createDurabilityShard(1), 10),
-            new LootEntry(customItemUtil.createDurabilityShard(2), 10),
-            new LootEntry(customItemUtil.createDurabilityShard(3), 10),
-            new LootEntry(customItemUtil.createDurabilityShard(4), 10),
-            new LootEntry(customItemUtil.createDurabilityShard(5), 10),
-            new LootEntry(customItemUtil.createDurabilityShard(6), 10),
-            new LootEntry(customItemUtil.createDurabilityShard(7), 10),
+            new LootEntry(customItemUtil.createCustomItem("Durability Shard Tier 1"), 10),
+            new LootEntry(customItemUtil.createCustomItem("Durability Shard Tier 2"), 10),
+            new LootEntry(customItemUtil.createCustomItem("Durability Shard Tier 3"), 10),
+            new LootEntry(customItemUtil.createCustomItem("Durability Shard Tier 4"), 10),
+            new LootEntry(customItemUtil.createCustomItem("Durability Shard Tier 5"), 10),
+            new LootEntry(customItemUtil.createCustomItem("Durability Shard Tier 6"), 10),
+            new LootEntry(customItemUtil.createCustomItem("Durability Shard Tier 7"), 10),
             new LootEntry(customItemUtil.createCustomItem("Preservation Voucher"), 30)
         ));
 
@@ -104,4 +113,17 @@ public class crateTableUtil {
         this.enchantmentInfo = enchantmentInfo;
     }
 }
+
+private static ItemStack createEnchantedPickaxe(Material type) {
+    ItemStack pick = new ItemStack(type);
+    ItemMeta meta = pick.getItemMeta();
+    if (meta != null) {
+        meta.addEnchant(Enchantment.EFFICIENCY, 5, true);      // Efficiency V
+        meta.addEnchant(Enchantment.FORTUNE, 3, true); // Fortune III
+        meta.addEnchant(Enchantment.UNBREAKING, 3, true);     // Unbreaking III
+        pick.setItemMeta(meta);
+    }
+    return pick;
+}
+
 }

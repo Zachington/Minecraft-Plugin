@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
+
 import org.bukkit.entity.Zombie;
 
 import customEnchants.utils.GoblinUtil;
@@ -139,7 +140,10 @@ public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
     goblinEntity.setMetadata("customDrops", new FixedMetadataValue(plugin, goblin.drops));
     goblinEntity.setMetadata("goblinHits", new FixedMetadataValue(plugin, 0)); 
     goblinEntity.setMetadata("goblinOwner", new FixedMetadataValue(plugin, player.getUniqueId().toString()));
+
+
 }
+
 
 
     private int getLastGoblinSpawnBlocks(UUID uuid) {

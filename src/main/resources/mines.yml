@@ -10,9 +10,8 @@ mines:
       y2: -36
       z2: -36
     blocks:
-      STONE: 70
-      COAL_ORE: 20
-      DIAMOND_ORE: 10
+      STONE: 99
+      COAL_ORE: 1
   
   mineb:
     useChunkReset: true
@@ -25,6 +24,80 @@ mines:
       y2: -53
       z2: -41
     blocks:
-      STONE: 70
-      COAL_ORE: 20
-      DIAMOND_ORE: 10
+      STONE: 98
+      COAL_ORE: 2
+
+  minec:
+    useChunkReset: true
+    region:
+      world: world
+      x1: 66
+      y1: -6
+      z1: -88
+      x2: 37
+      y2: -53
+      z2: -59
+    blocks:
+      STONE: 97
+      COAL_ORE: 3
+  
+  mined:
+    useChunkReset: true
+    region:
+      world: world
+      x1: 114
+      y1: -6
+      z1: -88
+      x2: 143
+      y2: -53
+      z2: -59
+    blocks:
+      STONE: 96
+      COAL_ORE: 4
+
+  minee:
+    useChunkReset: true
+    region:
+      world: world
+      x1: 114
+      y1: -6
+      z1: -110
+      x2: 143
+      y2: -53
+      z2: -139
+    blocks:
+      STONE: 95
+      COAL_ORE: 4
+      COPPER_ORE: 1
+
+  minef:
+    useChunkReset: true
+    region:
+      world: world
+      x1: 66
+      y1: -6
+      z1: -110
+      x2: 37
+      y2: -53
+      z2: -139
+    blocks:
+      STONE: 95
+      COAL_ORE: 3.5
+      COPPER_ORE: 1.5
+
+  mineg:
+    useChunkReset: true
+    region:
+      world: mine_world
+      x1: 22
+      y1: 99
+      z1: 5
+      x2: -22
+      y2: 0
+      z2: 49
+    blocks:
+      ANDESITE: 95
+      COAL_ORE: 3
+      COPPER_ORE: 1.9
+      AMETHYST_BLOCK: 0.1
+

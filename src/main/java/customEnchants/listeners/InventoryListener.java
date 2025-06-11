@@ -2,7 +2,6 @@ package customEnchants.listeners;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,13 +9,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.inventory.meta.Damageable;
+
 
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.InventoryParser;
 import customEnchants.utils.RankUtils;
-import customEnchants.utils.customItemUtil;
+
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -78,49 +76,49 @@ public class InventoryListener implements Listener {
         }
         return;
     }
+    
     //Durability Shard
-    if (cursor != null && cursor.hasItemMeta() && clicked != null && clicked.getType() != Material.AIR) {
-    if (customItemUtil.isDurabilityShard(cursor)) {
-        ItemMeta clickedMeta = clicked.getItemMeta();
-        player.sendMessage(ChatColor.GRAY + "DEBUG: Durability shard detected.");
-        if (!(clickedMeta instanceof Damageable damageable)) {
-            player.sendMessage(ChatColor.RED + "You can only repair damageable items!");
-            return;
+    if (cursor != null && cursor.hasItemMeta() && cursor.getItemMeta().hasLore()) {
+    List<String> lore = cursor.getItemMeta().getLore();
+    if (lore != null && !lore.isEmpty()) {
+        for (String line : lore) {
+            String cleanLine = ChatColor.stripColor(line).toLowerCase();
+            if (cleanLine.contains("durability")) {
+                java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("repair (\\d+) durability").matcher(cleanLine);
+                if (matcher.find()) {
+                    int repairAmount = Integer.parseInt(matcher.group(1));
+                    if (clicked != null && clicked.getType() != Material.AIR && clicked.getItemMeta() != null) {
+                        if (clicked.getType().getMaxDurability() > 0) {
+                            short currentDurability = clicked.getDurability();
+
+                            if (currentDurability == 0) {
+                                player.sendMessage(ChatColor.YELLOW + "This item is already fully repaired!");
+                                return;
+                            }
+
+                            int newDurability = currentDurability - repairAmount;
+                            if (newDurability < 0) newDurability = 0;
+
+                            clicked.setDurability((short) newDurability);
+
+                            cursor.setAmount(cursor.getAmount() - 1);
+                            if (cursor.getAmount() <= 0) {
+                                event.setCursor(null);
+                            } else {
+                                event.setCursor(cursor);
+                            }
+
+                            player.sendMessage(ChatColor.GREEN + "Repaired " + repairAmount + " durability on your " + ChatColor.WHITE + clicked.getType().toString().toLowerCase().replace("_", " "));
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
+                }
+            }
         }
-
-        int currentDamage = damageable.getDamage();
-        if (currentDamage <= 0) {
-            player.sendMessage(ChatColor.RED + "This item is already fully repaired!");
-            return;
-        }
-
-        ItemMeta cursorMeta = cursor.getItemMeta();
-        NamespacedKey key = customItemUtil.DURABILITY_KEY;
-        Integer durabilityValue = cursorMeta.getPersistentDataContainer().get(key, PersistentDataType.INTEGER);
-
-        if (durabilityValue == null || durabilityValue <= 0) {
-            player.sendMessage(ChatColor.RED + "This Durability Shard has no power left!");
-            return;
-        }
-
-        int newDamage = Math.max(0, currentDamage - durabilityValue);
-        damageable.setDamage(newDamage);
-        clicked.setItemMeta((ItemMeta) damageable); // Safe cast back to ItemMeta
-
-        // Reduce shard amount
-        int newAmount = cursor.getAmount() - 1;
-        if (newAmount <= 0) {
-            event.setCursor(null);
-        } else {
-            cursor.setAmount(newAmount);
-            event.setCursor(cursor);
-        }
-
-        player.sendMessage(ChatColor.GREEN + "Repaired item by " + durabilityValue + " durability!");
-        event.setCancelled(true);
-        return;
     }
 }
+
 
 
 
@@ -280,11 +278,12 @@ public class InventoryListener implements Listener {
                 player.sendMessage(ChatColor.RED + book.name + " is already maxed out!");
                 return false;
             }
-            if (book.level != current) {
-                player.sendMessage(ChatColor.RED + "To upgrade " + book.name + ", use a Level " + current + " book.");
-                return false;
+            if (book.level < current) {
+            player.sendMessage(ChatColor.RED + "This book is too weak to apply. You already have Level " + current + ".");
+            return false;
             }
-        } else if (tool.map.size() >= getMaxEnchantCount(type)) {
+
+        } else if (tool.map.size() >= RankUtils.getMaxEnchantCount(player, type)) {
             player.sendMessage(ChatColor.RED + "This item already has the max number of enchantments!");
             return false;
         }
@@ -292,29 +291,40 @@ public class InventoryListener implements Listener {
         return true;
     }
 
-    private int getMaxEnchantCount(Material type) {
-        return type.toString().contains("NETHERITE") ? 10 : 9;
-    }
-
     private void applyEnchant(ItemStack tool, ToolEnchantInfo toolInfo, EnchantmentBookInfo book) {
-        ItemMeta meta = tool.getItemMeta();
-        if (meta == null) return;
+    ItemMeta meta = tool.getItemMeta();
+    if (meta == null) return;
 
-        int newLevel = book.level;
-        if (toolInfo.map.containsKey(book.name)) {
-            int current = toolInfo.map.get(book.name);
+    int newLevel;
+    if (toolInfo.map.containsKey(book.name)) {
+        int current = toolInfo.map.get(book.name);
+        if (book.level > current) {
+            // Book is higher level: just upgrade directly to book.level
+            newLevel = book.level;
+        } else if (book.level == current) {
+            // Book level equals current: apply +1 logic capped at maxLevel
             newLevel = Math.min(current + 1, EnchantmentData.getEnchantmentInfo(
-                    EnchantmentData.getEnchantmentIndex(book.name)).maxLevel);
+                EnchantmentData.getEnchantmentIndex(book.name)).maxLevel);
+        } else {
+            // Book level lower than current, don't apply any change
+            // You can just keep current level or return early if you want
+            newLevel = current;
         }
-
-        toolInfo.map.put(book.name, newLevel);
-        if (book.name.equalsIgnoreCase("Unbreakable")) {
-            toolInfo.map.remove("Preservation");
-        }
-
-        meta.setLore(buildLore(tool, toolInfo));
-        tool.setItemMeta(meta);
+    } else {
+        // No current enchantment, just set to book's level
+        newLevel = book.level;
     }
+
+    toolInfo.map.put(book.name, newLevel);
+
+    if (book.name.equalsIgnoreCase("Unbreakable")) {
+        toolInfo.map.remove("Preservation");
+    }
+
+    meta.setLore(buildLore(tool, toolInfo));
+    tool.setItemMeta(meta);
+}
+
 
     private List<String> buildLore(ItemStack tool, ToolEnchantInfo info) {
         List<String> lore = new ArrayList<>();

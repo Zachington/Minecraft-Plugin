@@ -61,8 +61,7 @@ public class EssenceGenerationListener implements Listener {
         extractorConfig.put(31, new TierAmountRange(7, 1, 2));
         extractorConfig.put(32, new TierAmountRange(7, 1, 3));
         extractorConfig.put(33, new TierAmountRange(8, 1, 2));
-        extractorConfig.put(34, new TierAmountRange(8, 2, 3));
-        extractorConfig.put(35, new TierAmountRange(8, 3, 7));
+        extractorConfig.put(34, new TierAmountRange(8, 3, 7));
     }
 
     @EventHandler

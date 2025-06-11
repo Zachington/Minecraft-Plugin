@@ -43,7 +43,6 @@ import customEnchants.listeners.CrateListener;
 import customEnchants.listeners.GeneralBlockBreakListener;
 import customEnchants.listeners.PlayerQuitListener;
 import customEnchants.listeners.RngBlockBreak;
-import customEnchants.listeners.SetOwnerListener;
 import customEnchants.listeners.ClaimMenuListener;
 
 import customEnchants.commands.CommandHandler;
@@ -144,7 +143,6 @@ public class TestEnchants extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new VoucherListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(essenceManager), this);
         getServer().getPluginManager().registerEvents(new ClaimMenuListener(), this);
-        getServer().getPluginManager().registerEvents(new SetOwnerListener(this), this);
         getServer().getPluginManager().registerEvents(new EssenceGenerationListener(this, essenceManager), this);
         getServer().getPluginManager().registerEvents(new GeneralBlockBreakListener(statTracker, this), this);
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(statTracker), this);

@@ -121,7 +121,12 @@ public void onInventoryClick(InventoryClickEvent event) {
 
             view.getTopInventory().setItem(13, null);
             programmaticClosures.add(player.getUniqueId());
-            Bukkit.getScheduler().runTaskLater(plugin, player::closeInventory, 1L);
+            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    player.closeInventory();
+                }
+            }, 1L);
         }
         return; // End Black Scroll GUI logic
     }

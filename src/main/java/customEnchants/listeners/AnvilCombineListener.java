@@ -4,9 +4,12 @@ import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
 import customEnchants.utils.GuiUtil.EnchantParseResult;
 import customEnchants.utils.customItemUtil;
+import customEnchants.utils.RankUtils;
+
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
@@ -17,6 +20,7 @@ import org.bukkit.inventory.meta.Repairable;
 
 import java.util.*;
 import java.lang.reflect.Field;
+
 
 public class AnvilCombineListener implements Listener {
 
@@ -143,10 +147,16 @@ public class AnvilCombineListener implements Listener {
     }
 
     // Enforce max number of enchants
-    int maxEnchants = getMaxEnchantCount(first.getType());
+    Player player = (Player) event.getView().getPlayer();
+    int maxEnchants = RankUtils.getMaxEnchantCount(player, first.getType());
+
     if (combinedEnchants.size() > maxEnchants) {
-        combinedEnchants = limitEnchantsByRarity(combinedEnchants, maxEnchants);
+        player.sendMessage(ChatColor.RED + "You cannot apply more than " + maxEnchants + " enchantments for your rank.");
+        event.setResult(null); // Cancel the combine
+        return;
     }
+    combinedEnchants = limitEnchantsByRarity(combinedEnchants, maxEnchants);
+
 
     ItemStack result = first.clone();
     ItemMeta meta = result.getItemMeta();
@@ -227,10 +237,6 @@ public class AnvilCombineListener implements Listener {
             });
 
         return lore;
-    }
-
-    private int getMaxEnchantCount(Material type) {
-        return type.toString().contains("NETHERITE") ? 10 : 9;
     }
 
     private int getRarityRank(String rarity) {

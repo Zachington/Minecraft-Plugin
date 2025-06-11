@@ -3,6 +3,7 @@ package customEnchants.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
@@ -560,6 +561,35 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     public static boolean isAtLeastP10a(Player player) {
         return compareRanks(getRank(player), "p10a") >= 0;
     }
+
+    public static int getMaxEnchantCount(Player player, Material type) {
+    String rank = getRank(player); // e.g. "a", "p1a", "p5a"
+
+    int baseMax = 5;
+    int maxAtCap = 9;
+
+    int prestige = 0;
+
+    if (rank != null && rank.matches("^p(\\d+)[a-z]$")) {
+        prestige = Integer.parseInt(rank.replaceAll("^p(\\d+)[a-z]$", "$1"));
+    }
+
+    int maxEnchantsByRank;
+
+    if (prestige == 0) {
+        maxEnchantsByRank = baseMax;
+    } else {
+        maxEnchantsByRank = baseMax + (prestige - 1);
+    }
+
+    if (maxEnchantsByRank > maxAtCap) maxEnchantsByRank = maxAtCap;
+
+    if (type.toString().contains("NETHERITE")) {
+        maxEnchantsByRank++;
+    }
+
+    return maxEnchantsByRank;
+}
 
 
 

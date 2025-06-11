@@ -25,7 +25,8 @@ public class EnchantmentData {
         "Magnet",
         "Preservation",
         "Frost Touch",
-        "Key Miner"
+        "Key Miner",
+        "Delayed Dynamite"
     };
     
     // Maximum levels for each enchantment (corresponds to ENCHANT_NAMES array)
@@ -40,7 +41,8 @@ public class EnchantmentData {
         3,  // Magnet
         10,   // Preservation
         5,
-        5
+        5,
+        3
     };
     
     // Tool types that can receive each enchantment
@@ -55,6 +57,7 @@ public class EnchantmentData {
         "PICKAXE",         // Magnet
         "ALL",             // Preservation 
         "PICKAXE",          //Frost Touch
+        "PICKAXE",
         "PICKAXE"
     };
     
@@ -70,7 +73,8 @@ public class EnchantmentData {
         "LEGENDARY",     // Magnet
         "LEGENDARY",        //Preservation
         "EPIC",
-        "LEGENDARY"
+        "LEGENDARY",
+        "UNCOMMON"
     };
     
     // ChatColor mappings for each rarity
@@ -107,7 +111,8 @@ public class EnchantmentData {
         "Attracts nearby dropped items to player",             // Magnet
         "Chance to return durability to the tool",      //Preservation
         "Chance to spawn ice around the player",         //Frost Touch
-        "Chance to give keys"
+        "Chance to give keys",
+        "Spawns a block of coal that explodes after being mined"
     };
     
     // Proc chance percentages (0.0 to 1.0)
@@ -122,7 +127,8 @@ public class EnchantmentData {
         1.0,   // Magnet - Always active (passive)
         0.1,    // Preservation 5%
         0.01,    //Frost Touch 1%
-        0.05
+        0.05,
+        1
         
     };
     

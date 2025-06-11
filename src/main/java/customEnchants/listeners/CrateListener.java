@@ -25,7 +25,6 @@ import customEnchants.utils.crateTableUtil.LootEntry;
 
 public class CrateListener implements Listener {
 
-    //private static final LOGGER LOGGER = Bukkit.get//LOGGER();
 
     private final World world;
     private final int xMin, xMax, yMin, yMax, zMin, zMax;
@@ -529,7 +528,6 @@ public class CrateListener implements Listener {
     guiOpenMethod.remove(player);
 }
 
-        
     private void pushPlayerBack(Player player, Location blockLocation) {
         Location playerLoc = player.getLocation();
         double dx = playerLoc.getX() - blockLocation.getX();

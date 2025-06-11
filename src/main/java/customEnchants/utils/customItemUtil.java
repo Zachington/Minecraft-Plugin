@@ -2,7 +2,6 @@ package customEnchants.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -14,12 +13,10 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import java.util.UUID;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import customEnchants.TestEnchants;
 
 
 public class customItemUtil {
@@ -112,13 +109,13 @@ public class customItemUtil {
         "Break blocks to generate Essence",
         "Break blocks to generate Essence",
         "Break blocks to generate Essence",//35
-        "Drag and drop onto a piece of equipment to repair some durability",
-        "Drag and drop onto a piece of equipment to repair some durability",
-        "Drag and drop onto a piece of equipment to repair some durability",
-        "Drag and drop onto a piece of equipment to repair some durability",
-        "Drag and drop onto a piece of equipment to repair some durability",//40
-        "Drag and drop onto a piece of equipment to repair some durability",
-        "Drag and drop onto a piece of equipment to repair some durability",
+        "Drag and drop onto equipment to repair 25 Durability",
+        "Drag and drop onto equipment to repair 50 Durability",
+        "Drag and drop onto equipment to repair 75 Durability",
+        "Drag and drop onto equipment to repair 100 Durability",
+        "Drag and drop onto equipment to repair 150 Durability",//40
+        "Drag and drop onto equipment to repair 200 Durability",
+        "Drag and drop onto equipment to repair 250 Durability",
         "Right Click to get a Preservation book of a random level"
     };
 
@@ -390,56 +387,6 @@ public class customItemUtil {
     return -1;
 }
 
-    public static final NamespacedKey DURABILITY_KEY = new NamespacedKey("enchants", "durability_value");
-
-    private static final Map<Integer, Integer> DURABILITY_VALUES = Map.of(
-    1, 25,
-    2, 50,
-    3, 75,
-    4,125,
-    5, 175,
-    6, 225,
-    7, 275
-);
-
-    public static ItemStack createDurabilityShard(int tier) {
-    if (tier < 1 || tier > 7) return null;
-
-    int index = 35 + (tier - 1);
-    int durabilityValue = DURABILITY_VALUES.getOrDefault(tier, 10);
-
-    ItemStack shard = new ItemStack(CUSTOM_ITEM_MATERIAL[index]);
-    ItemMeta meta = shard.getItemMeta();
-
-    if (meta != null) {
-        meta.setDisplayName(CUSTOM_ITEM[index]);
-
-        List<String> lore = new ArrayList<>();
-        lore.add(CUSTOM_ITEM_LORE[index]);
-        lore.add("§7Restores §e" + durabilityValue + "§7 durability");
-        meta.setLore(lore);
-
-        NamespacedKey key = new NamespacedKey(TestEnchants.getInstance(), "durability_value");
-        meta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, durabilityValue);
-
-        shard.setItemMeta(meta);
-    }
-
-    return shard;
-}
-
-    public static boolean isDurabilityShard(ItemStack item) {
-    if (item == null || item.getType() != Material.PRISMARINE_CRYSTALS) return false;
-    ItemMeta meta = item.getItemMeta();
-    return meta != null && meta.getPersistentDataContainer().has(DURABILITY_KEY, PersistentDataType.INTEGER);
-}
-
-    public static int getDurabilityValue(ItemStack item) {
-    if (!isDurabilityShard(item)) return 0;
-    ItemMeta meta = item.getItemMeta();
-    PersistentDataContainer container = meta.getPersistentDataContainer();
-    return container.getOrDefault(DURABILITY_KEY, PersistentDataType.INTEGER, 0);
-}
 
 }
 
