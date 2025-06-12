@@ -33,6 +33,11 @@ public class BlockBreaker {
     public static int breakBlastArea(Block baseBlock, Player player, ItemStack tool, int blastLevel, int autoSmeltLevel) {
         if (!shouldProc(tool, "Blast", blastLevel)) return 0;
 
+        HeldToolInfo toolInfo = HeldToolInfo.fromItem(tool);
+        if (!RankUtils.canUseEnchants(toolInfo, player)) {
+            return 0;
+        }
+
         int broken = 0;
         BlockFace facing = getFacingDirection(player);
         Block center = baseBlock.getRelative(facing);
@@ -69,6 +74,11 @@ public class BlockBreaker {
 
     public static int breakWallBreakerArea(Block baseBlock, Player player, ItemStack tool, int wallBreakerLevel, int autoSmeltLevel) {
         if (!shouldProc(tool, "Wall Breaker", wallBreakerLevel)) return 0;
+
+        HeldToolInfo toolInfo = HeldToolInfo.fromItem(tool);
+        if (!RankUtils.canUseEnchants(toolInfo, player)) {
+            return 0;
+        }
 
         int broken = 0;
         BlockFace facing = getFacingDirection(player);

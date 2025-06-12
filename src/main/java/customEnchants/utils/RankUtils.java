@@ -1,12 +1,15 @@
 package customEnchants.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.ChatColor;
 
 import customEnchants.TestEnchants;
 
@@ -41,40 +44,37 @@ public class RankUtils {
     private static final Map<Character, RankCost> baseRankCosts = new HashMap<>();
 
     static {
-    baseRankCosts.put('a', new RankCost(1000, 10, 1));
-    baseRankCosts.put('b', new RankCost(1250, 12, 1));
-    baseRankCosts.put('c', new RankCost(1500, 14, 1));
-    baseRankCosts.put('d', new RankCost(1750, 16, 1));
-    baseRankCosts.put('e', new RankCost(2000, 18, 1));
-    baseRankCosts.put('f', new RankCost(2250, 20, 1));
-    baseRankCosts.put('g', new RankCost(2500, 22, 1));
-    baseRankCosts.put('h', new RankCost(2750, 24, 1));
-    baseRankCosts.put('i', new RankCost(3000, 26, 1));
-    baseRankCosts.put('j', new RankCost(3250, 28, 1));
-    baseRankCosts.put('k', new RankCost(3500, 30, 1));
-    baseRankCosts.put('l', new RankCost(3750, 32, 1));
-    baseRankCosts.put('m', new RankCost(4000, 34, 1));
-    
-    // From n to z, essence tier changes to 2
-    baseRankCosts.put('n', new RankCost(4250, 36, 2));
-    baseRankCosts.put('o', new RankCost(4500, 38, 2));
-    baseRankCosts.put('p', new RankCost(4750, 40, 2));
-    baseRankCosts.put('q', new RankCost(5000, 42, 2));
-    baseRankCosts.put('r', new RankCost(5250, 44, 2));
-    baseRankCosts.put('s', new RankCost(5500, 46, 2));
-    baseRankCosts.put('t', new RankCost(5750, 48, 2));
-    baseRankCosts.put('u', new RankCost(6000, 50, 2));
-    baseRankCosts.put('v', new RankCost(6250, 52, 2));
-    baseRankCosts.put('w', new RankCost(6500, 54, 2));
-    baseRankCosts.put('x', new RankCost(6750, 56, 2));
-    baseRankCosts.put('y', new RankCost(7000, 58, 2));
-    baseRankCosts.put('z', new RankCost(7250, 60, 2));
+    baseRankCosts.put('b', new RankCost(1000, 100, 1)); 
+    baseRankCosts.put('c', new RankCost(1450, 155, 1));
+    baseRankCosts.put('d', new RankCost(2100, 240, 1));
+    baseRankCosts.put('e', new RankCost(3000, 375, 1));
+    baseRankCosts.put('f', new RankCost(4400, 580, 1));
+    baseRankCosts.put('g', new RankCost(6400, 900, 1));
+    baseRankCosts.put('h', new RankCost(9200, 1400, 1));
+    baseRankCosts.put('i', new RankCost(13300, 2200, 1));
+    baseRankCosts.put('j', new RankCost(19300, 1000, 2));
+    baseRankCosts.put('k', new RankCost(27900, 1340, 2));
+    baseRankCosts.put('l', new RankCost(40400, 1800, 2));
+    baseRankCosts.put('m', new RankCost(58400, 2400, 2));
+    baseRankCosts.put('n', new RankCost(84600, 3250, 2));
+    baseRankCosts.put('o', new RankCost(122400, 4300, 2));
+    baseRankCosts.put('p', new RankCost(177300, 5800, 2));
+    baseRankCosts.put('q', new RankCost(256600, 7800, 2));
+    baseRankCosts.put('r', new RankCost(371500, 10000, 2));
+    baseRankCosts.put('s', new RankCost(537700, 5000, 3));
+    baseRankCosts.put('t', new RankCost(778300, 6100, 3));
+    baseRankCosts.put('u', new RankCost(1126500, 7500, 3));
+    baseRankCosts.put('v', new RankCost(1630700, 9000,3));
+    baseRankCosts.put('w', new RankCost(2360400, 11000, 3));
+    baseRankCosts.put('x', new RankCost(3416700, 13500, 3));
+    baseRankCosts.put('y', new RankCost(4945700, 16500, 3));
+    baseRankCosts.put('z', new RankCost(7158900, 20000, 3));
 }
 
     private static final Map<String, RankCost> boundaryRankCosts = new HashMap<>();
 
     static {
-    boundaryRankCosts.put("z_p1a", new RankCost(5000, 100, 3));
+    boundaryRankCosts.put("z_p1a", new RankCost(10000000, 25000, 3));
     // p1z->p2a to p24z->p25a
     boundaryRankCosts.put("p1z_p2a", new RankCost(5000, 100, 3));
     boundaryRankCosts.put("p2z_p3a", new RankCost(6000, 120, 3));
@@ -427,7 +427,6 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     return rank;
 }
 
-
     public static boolean essenceCostApplies(String currentRank, String nextRank) {
     if (currentRank == null || nextRank == null) return true;
 
@@ -591,6 +590,30 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     return maxEnchantsByRank;
 }
 
+    public static boolean canUseEnchants(HeldToolInfo tool, Player player) {
+    String playerRank = getRank(player);
+    List<String> failMessages = new ArrayList<>();
+
+    for (String enchant : tool.customEnchants.keySet()) {
+        String rarity = EnchantmentData.getRarity(enchant);
+
+        if ("PRESTIGE".equalsIgnoreCase(rarity)) {
+            if (compareRanks(playerRank, "p1a") < 1) {
+                failMessages.add("You must be Prestige 1 to use tools with " + enchant + "!");
+            }
+        } else if ("PRESTIGE+".equalsIgnoreCase(rarity)) {
+            if (compareRanks(playerRank, "p10a") < 1) {
+                failMessages.add("You must be Prestige 10 to use tools with " + enchant + "!");
+            }
+        }
+    }
+
+    if (!failMessages.isEmpty()) {
+        player.sendMessage(ChatColor.RED + failMessages.get(0)); // only send first message
+        return false;
+    }
+    return true;
+}
 
 
 }

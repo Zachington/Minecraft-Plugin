@@ -26,7 +26,15 @@ public class EnchantmentData {
         "Preservation",
         "Frost Touch",
         "Key Miner",
-        "Delayed Dynamite"
+        "Delayed Dynamite",
+        "Regenerate",
+        "Conjure",
+        "Xp Syphon",
+        "Light Weight",
+        "Speed Breaker",
+        "Sprinter",
+        "Bounder",
+        "Vein Miner"
     };
     
     // Maximum levels for each enchantment (corresponds to ENCHANT_NAMES array)
@@ -42,7 +50,15 @@ public class EnchantmentData {
         10,   // Preservation
         5,
         5,
-        3
+        3,
+        4,
+        3,
+        5,
+        3,
+        5,
+        3,
+        3,
+        5
     };
     
     // Tool types that can receive each enchantment
@@ -58,23 +74,39 @@ public class EnchantmentData {
         "ALL",             // Preservation 
         "PICKAXE",          //Frost Touch
         "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "ALL",
+        "ALL",
+        "ALL",
+        "ALL",
+        "ALL",
         "PICKAXE"
     };
     
     // Rarity levels with ChatColors (COMMON=WHITE, UNCOMMON=GREEN, RARE=BLUE, EPIC=PURPLE, LEGENDARY=GOLD, PRESTIGE=PINK)
     public static final String[] ENCHANT_RARITY = {
-        "PRESTIGE",   // Wall Breaker
-        "PRESTIGE",   // Blast
-        "EPIC",       // Gold Digger
-        "RARE",       // Amplify
-        "UNCOMMON",   // Ore Scavenger
-        "LEGENDARY",  // Auto Smelt
-        "PRESTIGE+",   // Unbreakable
-        "LEGENDARY",     // Magnet
-        "LEGENDARY",        //Preservation
-        "EPIC",
-        "LEGENDARY",
-        "UNCOMMON"
+        "PRESTIGE",     // Wall Breaker
+        "PRESTIGE",     // Blast
+        "PRESTIGE",     // Gold Digger
+        "LEGENDARY",    // Amplify
+        "UNCOMMON",     // Ore Scavenger
+        "PRESTIGE+",    // Auto Smelt
+        "PRESTIGE+",    // Unbreakable
+        "PRESTIGE",     // Magnet
+        "LEGENDARY",    //Preservation
+        "EPIC",         //Frost touch
+        "LEGENDARY",    //Key miner
+        "UNCOMMON",     //Delayed dynamite
+        "UNCOMMON",     //Regenerate
+        "RARE",         //Conjure
+        "EPIC",         //Xp syphon
+        "LEGENDARY",    //Light Weight
+        "PRESTIGE",     //Speed breaker
+        "COMMON",       //sprinter
+        "COMMON",       //bounder
+        "LEGENDARY"     //vein miner
     };
     
     // ChatColor mappings for each rarity
@@ -112,7 +144,15 @@ public class EnchantmentData {
         "Chance to return durability to the tool",      //Preservation
         "Chance to spawn ice around the player",         //Frost Touch
         "Chance to give keys",
-        "Spawns a block of coal that explodes after being mined"
+        "Spawns a block of coal that explodes after being mined",
+        "Chance to regenerate ore blocks",
+        "Chance to upgrade ore to block form",
+        "Chance for any block to drop xp",
+        "Chance to give haste when breaking blocks",
+        "Chance to give haste when breaking blocks",
+        "Chance to give speed when breaking blocks",
+        "Chance to give jump boost when breaking blocks",
+        "Chance to break connected ores in a 3 block radius"
     };
     
     // Proc chance percentages (0.0 to 1.0)
@@ -127,9 +167,16 @@ public class EnchantmentData {
         1.0,   // Magnet - Always active (passive)
         0.1,    // Preservation 5%
         0.01,    //Frost Touch 1%
-        0.05,
-        1
-        
+        0.05,   //Key miner
+        .05,    //delayed dynamite
+        1,       //regenerate
+        1,
+        1,
+        .3,
+        .3,
+        .1,
+        .1,
+        .1
     };
     
     // Helper method to get rarity color by rarity name

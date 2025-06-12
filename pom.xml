@@ -27,6 +27,11 @@
             <id>papermc-experimental</id>
             <url>https://repo.papermc.io/repository/maven-experimental/</url>
         </repository>
+
+        <repository>
+            <id>enginehub</id>
+            <url>https://maven.enginehub.org/repo/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -57,6 +62,20 @@
         <version>1.7</version>
         <scope>system</scope>
         <systemPath>${project.basedir}/libs/Vault.jar</systemPath>
+    </dependency>
+
+    <dependency>
+        <groupId>com.sk89q.worldedit</groupId>
+        <artifactId>worldedit-bukkit</artifactId>
+        <version>7.3.13</version> <!-- match your installed version -->
+        <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>com.sk89q.worldguard</groupId>
+        <artifactId>worldguard-bukkit</artifactId>
+        <version>7.0.13</version> <!-- use your installed version -->
+        <scope>provided</scope>
     </dependency>
 </dependencies>
 

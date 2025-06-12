@@ -10,7 +10,7 @@ public class RankManager {
 
     // Remove rankKey field and constructor entirely
 
-    public String getRank(Player player) {
+    public static String getRank(Player player) {
         PersistentDataContainer container = player.getPersistentDataContainer();
         String rank = container.get(RankUtils.rankKey, PersistentDataType.STRING);
         if (rank == null) rank = "a";

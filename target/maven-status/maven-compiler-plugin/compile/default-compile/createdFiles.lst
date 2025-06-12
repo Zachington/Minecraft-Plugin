@@ -10,6 +10,7 @@ customEnchants\managers\PluginManager.class
 customEnchants\utils\crateTableUtil$LootEntry.class
 customEnchants\utils\ScoreboardUtil.class
 customEnchants\listeners\BlackScrollListener.class
+customEnchants\listeners\RegionBlockBreakListener.class
 customEnchants\TestEnchants.class
 customEnchants\listeners\InventoryListener$ToolEnchantInfo.class
 customEnchants\utils\customItemUtil$GradientUtil.class
@@ -46,12 +47,11 @@ customEnchants\utils\StructureUtil$BlockDistance.class
 customEnchants\listeners\PlayerListener.class
 customEnchants\utils\customItemUtil$CustomItemInfo.class
 customEnchants\utils\GoblinUtil.class
-customEnchants\utils\Utils.class
 customEnchants\listeners\ClaimMenuListener.class
 customEnchants\utils\HeldToolInfo.class
 customEnchants\listeners\InventoryListener.class
+customEnchants\utils\EnchantFunctionUtil$1.class
 customEnchants\commands\CommandHandler.class
-customEnchants\listeners\GiveItemListener.class
 customEnchants\utils\GuiUtil.class
 customEnchants\utils\RankUtils.class
 customEnchants\commands\CommandHandler$Cost.class

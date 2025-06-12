@@ -259,37 +259,53 @@ public class InventoryListener implements Listener {
     }
 
     private boolean canAddEnchant(ToolEnchantInfo tool, EnchantmentBookInfo book, Material type, Player player) {
-        int id = EnchantmentData.getEnchantmentIndex(book.name);
-        if (id == -1) {
-            player.sendMessage(ChatColor.RED + "Unknown enchantment: " + book.name);
+    int id = EnchantmentData.getEnchantmentIndex(book.name);
+    if (id == -1) {
+        player.sendMessage(ChatColor.RED + "Unknown enchantment: " + book.name);
+        return false;
+    }
+
+    EnchantmentData.EnchantmentInfo info = EnchantmentData.getEnchantmentInfo(id);
+
+    // Rank checks for Prestige and Prestige+
+    String rarity = EnchantmentData.getRarity(book.name);
+    String playerRank = RankUtils.getRank(player);
+
+    if ("PRESTIGE".equalsIgnoreCase(rarity)) {
+        if (RankUtils.compareRanks(playerRank, "p1a") < 0) {
+            player.sendMessage(ChatColor.RED + "You must be Prestige 1 to apply " + book.name + "!");
             return false;
         }
-
-        EnchantmentData.EnchantmentInfo info = EnchantmentData.getEnchantmentInfo(id);
-
-        if (book.name.equalsIgnoreCase("Preservation") && tool.map.containsKey("Unbreakable")) {
-            player.sendMessage(ChatColor.RED + "Preservation cannot be used on Unbreakable items!");
+    } else if ("PRESTIGE+".equalsIgnoreCase(rarity)) {
+        if (RankUtils.compareRanks(playerRank, "p10a") < 0) {
+            player.sendMessage(ChatColor.RED + "You must be Prestige 10 to apply " + book.name + "!");
             return false;
         }
+    }
 
-        if (tool.map.containsKey(book.name)) {
-            int current = tool.map.get(book.name);
-            if (current >= info.maxLevel) {
-                player.sendMessage(ChatColor.RED + book.name + " is already maxed out!");
-                return false;
-            }
-            if (book.level < current) {
+    if (book.name.equalsIgnoreCase("Preservation") && tool.map.containsKey("Unbreakable")) {
+        player.sendMessage(ChatColor.RED + "Preservation cannot be used on Unbreakable items!");
+        return false;
+    }
+
+    if (tool.map.containsKey(book.name)) {
+        int current = tool.map.get(book.name);
+        if (current >= info.maxLevel) {
+            player.sendMessage(ChatColor.RED + book.name + " is already maxed out!");
+            return false;
+        }
+        if (book.level < current) {
             player.sendMessage(ChatColor.RED + "This book is too weak to apply. You already have Level " + current + ".");
             return false;
-            }
-
-        } else if (tool.map.size() >= RankUtils.getMaxEnchantCount(player, type)) {
-            player.sendMessage(ChatColor.RED + "This item already has the max number of enchantments!");
-            return false;
         }
-
-        return true;
+    } else if (tool.map.size() >= RankUtils.getMaxEnchantCount(player, type)) {
+        player.sendMessage(ChatColor.RED + "This item already has the max number of enchantments!");
+        return false;
     }
+
+    return true;
+}
+
 
     private void applyEnchant(ItemStack tool, ToolEnchantInfo toolInfo, EnchantmentBookInfo book) {
     ItemMeta meta = tool.getItemMeta();

@@ -9,11 +9,11 @@ C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\j
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\EssenceGenerationListener.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\EssenceMenuListener.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\GeneralBlockBreakListener.java
-C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\GiveItemListener.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\InventoryListener.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\MagnetListener.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\PlayerListener.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\PlayerQuitListener.java
+C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\RegionBlockBreakListener.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\RngBlockBreak.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\listeners\VoucherListener.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\managers\MineResetManager.java
@@ -26,6 +26,7 @@ C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\j
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\ClaimStorage.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\crateTableUtil.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\customItemUtil.java
+C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\EnchantFunctionUtil.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\EnchantmentData.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\EssenceManager.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\GiveItem.java
@@ -38,5 +39,4 @@ C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\j
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\ScoreboardUtil.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\StatTracker.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\StructureUtil.java
-C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\Utils.java
 C:\Users\zacha\Downloads\Temp Empty\Plugins\Enchants 3.0\TestEnchants\src\main\java\customEnchants\utils\VaultUtil.java

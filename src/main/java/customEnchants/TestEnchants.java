@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
-
+import org.bukkit.Location;
 
 import customEnchants.managers.PluginManager;
 import customEnchants.managers.RankManager;
@@ -34,7 +34,6 @@ import customEnchants.listeners.DurabilityEnchantListener;
 import customEnchants.listeners.EnchantScrapListener;
 import customEnchants.listeners.EssenceGenerationListener;
 import customEnchants.listeners.EssenceMenuListener;
-import customEnchants.listeners.GiveItemListener;
 import customEnchants.listeners.MagnetListener;
 import customEnchants.listeners.PlayerListener;
 import customEnchants.listeners.VoucherListener;
@@ -42,6 +41,7 @@ import customEnchants.listeners.BlockBreakListener;
 import customEnchants.listeners.CrateListener;
 import customEnchants.listeners.GeneralBlockBreakListener;
 import customEnchants.listeners.PlayerQuitListener;
+import customEnchants.listeners.RegionBlockBreakListener;
 import customEnchants.listeners.RngBlockBreak;
 import customEnchants.listeners.ClaimMenuListener;
 
@@ -92,7 +92,7 @@ public class TestEnchants extends JavaPlugin {
         this.essenceManager = new EssenceManager(this);
         this.statTracker = new StatTracker(getDataFolder());
         this.rankManager = new RankManager();
-        this.scoreboardUtil = new ScoreboardUtil(this);
+        this.scoreboardUtil = new ScoreboardUtil();
         this.economy = VaultUtil.getEconomy();
         mineManager = new MineResetManager(this);
 
@@ -133,7 +133,6 @@ public class TestEnchants extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
-        getServer().getPluginManager().registerEvents(new GiveItemListener(), this);
         getServer().getPluginManager().registerEvents(new MagnetListener(), this);
         getServer().getPluginManager().registerEvents(new DurabilityEnchantListener(), this);
         getServer().getPluginManager().registerEvents(new AnvilCombineListener(), this);
@@ -148,6 +147,7 @@ public class TestEnchants extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(statTracker), this);
         getServer().getPluginManager().registerEvents(new EssenceMenuListener(this), this);
         getServer().getPluginManager().registerEvents(new RngBlockBreak(this, statTracker), this);
+        getServer().getPluginManager().registerEvents(new RegionBlockBreakListener(), this);
 
     }
 
@@ -273,17 +273,99 @@ public class TestEnchants extends JavaPlugin {
 
     for (String mineName : mines.keySet()) {
         final String mine = mineName;
-        Bukkit.getScheduler().runTaskTimer(this,
-            () -> mineManager.resetMine(mine, this),
-            initialDelay,
-            resetInterval
-        );
+        Bukkit.getScheduler().runTaskTimer(this, () -> {
+
+            // Warnings
+            int[] warnings = {60, 30, 10, 5};
+            for (int warn : warnings) {
+                Bukkit.getScheduler().runTaskLater(this, () -> {
+                sendMineWarning(mine, warn);
+                }, (60 - warn) * 20L);
+            }
+
+            // Teleport players 1 second before reset
+            Bukkit.getScheduler().runTaskLater(this, () -> {
+                teleportPlayersOutOfMine(mine);
+            }, (60 - 1) * 20L);
+
+            // Actual reset after 60 seconds
+            Bukkit.getScheduler().runTaskLater(this, () -> {
+                mineManager.resetMine(mine, this);
+            }, 60 * 20L);
+
+        }, initialDelay, resetInterval);
+        
         initialDelay += delayBetween;
     }
 }
 
+
     public MineResetManager getMineManager() {
         return mineManager;
     }
+
+    private void teleportPlayersOutOfMine(String mineName) {
+    YamlConfiguration config = mineManager.getMinesConfig();
+
+    String basePath = "mines." + mineName;
+    String worldName = config.getString(basePath + ".region.world");
+    World world = Bukkit.getWorld(worldName);
+    if (world == null) return;
+
+    int x1 = config.getInt(basePath + ".region.x1");
+    int y1 = config.getInt(basePath + ".region.y1");
+    int z1 = config.getInt(basePath + ".region.z1");
+    int x2 = config.getInt(basePath + ".region.x2");
+    int y2 = config.getInt(basePath + ".region.y2");
+    int z2 = config.getInt(basePath + ".region.z2");
+
+    for (Player player : world.getPlayers()) {
+        int px = player.getLocation().getBlockX();
+        int py = player.getLocation().getBlockY();
+        int pz = player.getLocation().getBlockZ();
+
+        boolean inside = px >= Math.min(x1, x2) && px <= Math.max(x1, x2)
+                      && py >= Math.min(y1, y2) && py <= Math.max(y1, y2)
+                      && pz >= Math.min(z1, z2) && pz <= Math.max(z1, z2);
+
+        if (inside) {
+            int centerX = (x1 + x2) / 2;
+            int centerZ = (z1 + z2) / 2;
+            int safeY = world.getHighestBlockYAt(centerX, centerZ);
+            player.teleport(new Location(world, centerX + 0.5, safeY + 1, centerZ + 0.5));
+            player.sendMessage(ChatColor.RED + "You were teleported out of the mine for reset!");
+        }
+    }
+}
+
+    private void sendMineWarning(String mineName, int warnSeconds) {
+    YamlConfiguration config = mineManager.getMinesConfig();
+    String basePath = "mines." + mineName;
+    String worldName = config.getString(basePath + ".region.world");
+    World world = Bukkit.getWorld(worldName);
+    if (world == null) return;
+
+    int x1 = config.getInt(basePath + ".region.x1");
+    int y1 = config.getInt(basePath + ".region.y1");
+    int z1 = config.getInt(basePath + ".region.z1");
+    int x2 = config.getInt(basePath + ".region.x2");
+    int y2 = config.getInt(basePath + ".region.y2");
+    int z2 = config.getInt(basePath + ".region.z2");
+
+    for (Player player : world.getPlayers()) {
+        int px = player.getLocation().getBlockX();
+        int py = player.getLocation().getBlockY();
+        int pz = player.getLocation().getBlockZ();
+
+        boolean inside = px >= Math.min(x1, x2) && px <= Math.max(x1, x2)
+                    && py >= Math.min(y1, y2) && py <= Math.max(y1, y2)
+                    && pz >= Math.min(z1, z2) && pz <= Math.max(z1, z2);
+
+        if (inside) {
+            player.sendMessage(ChatColor.YELLOW + mineName + " resetting in " + warnSeconds + " seconds!");
+        }
+    }
+}
+
 
 }

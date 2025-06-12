@@ -30,9 +30,7 @@ public class GiveItem {
                 new ItemDropEntry(customItemUtil.createCustomItem("Prison Key"), 0.1),
                 new ItemDropEntry(customItemUtil.createCustomItem("Enchant Key"), 0.05),
                 new ItemDropEntry(customItemUtil.createCustomItem("Divine Key"), 0.03),
-                new ItemDropEntry(customItemUtil.createCustomItem("Durability Key"), 0.02),
-                new ItemDropEntry(customItemUtil.createCustomItem("Prestige Key"), 0.01),
-                new ItemDropEntry(customItemUtil.createCustomItem("Prestige+ Key"), 0.01)
+                new ItemDropEntry(customItemUtil.createCustomItem("Durability Key"), 0.02)
                 ));
     
 }

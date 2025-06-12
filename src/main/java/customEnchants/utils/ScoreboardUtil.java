@@ -13,18 +13,11 @@ import customEnchants.managers.RankManager;
 
 public class ScoreboardUtil {
 
-    private final RankManager rankManager;
-
-    public ScoreboardUtil(TestEnchants plugin) {
-        this.rankManager = new RankManager();
-    }
-
-
     public void updateScoreboard(Player player) {
         ScoreboardManager manager = Bukkit.getScoreboardManager();
         if (manager == null) return;
 
-        String rank = rankManager.getRank(player);  // fetches rank string, e.g. "Member" or "VIP"
+        String rank = RankManager.getRank(player);  
 
         StatTracker statTracker = TestEnchants.getInstance().getStatTracker();
         UUID uuid = player.getUniqueId();

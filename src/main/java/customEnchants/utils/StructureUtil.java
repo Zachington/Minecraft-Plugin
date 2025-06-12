@@ -70,7 +70,7 @@ public class StructureUtil {
                 if (distanceSq > radius * radius) continue;
 
                 Block block = world.getBlockAt(dx, dy, dz);
-                if (!block.getType().isAir() && block.getType() != Material.PACKED_ICE && block.getType() != Material.BEDROCK) {
+                if (!block.getType().isAir() && block.getType() != Material.PACKED_ICE && block.getType() != Material.BEDROCK && block.getType() != Material.POLISHED_TUFF) {
                     candidates.add(new BlockDistance(block, distanceSq));
                 }
             }

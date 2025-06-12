@@ -1,33 +1,30 @@
 package customEnchants.listeners;
 
-import java.util.Random;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.RankUtils;
 import customEnchants.utils.StatTracker;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import customEnchants.utils.HeldToolInfo;
+import customEnchants.utils.EnchantFunctionUtil;
 
 public class GeneralBlockBreakListener implements Listener {
     private final StatTracker stats;
     private final JavaPlugin plugin;
-    private final Random random = new Random();
+    
 
     public GeneralBlockBreakListener(StatTracker stats, JavaPlugin plugin) {
         this.stats = stats;
@@ -47,22 +44,28 @@ public class GeneralBlockBreakListener implements Listener {
         ItemStack item = player.getInventory().getItemInMainHand();
 
         HeldToolInfo tool = HeldToolInfo.fromItem(item);
-        for (String enchant : tool.customEnchants.keySet()) {
-            String rarity = EnchantmentData.getRarity(enchant);
-            if ("PRESTIGE".equalsIgnoreCase(rarity) && !RankUtils.isAtLeastP1a(player)) {
-                player.sendMessage(ChatColor.RED + "You must be Prestige I (p1a) to use tools with " + enchant + "!");
-                event.setCancelled(true);
-                return;
-            }
-            if ("PRESTIGE+".equalsIgnoreCase(rarity) && !RankUtils.isAtLeastP10a(player)) {
-                player.sendMessage(ChatColor.RED + "You must be Prestige X (p10a) to use tools with " + enchant + "!");
-                event.setCancelled(true);
-                return;
-            }
+            if (!RankUtils.canUseEnchants(tool, player)) {
+            event.setCancelled(true);
+            return;
         }
 
-        // ---- Delayed Dynamite Logic ----
-        if (handleDelayedDynamite(event, tool)) return;
+        
+        boolean handled = EnchantFunctionUtil.handleDelayedDynamite(event, tool, plugin);
+        if (handled) {      
+            return; 
+        }
+
+        EnchantFunctionUtil.handleRegenerate(event, tool, plugin);
+        EnchantFunctionUtil.handleConjure(event, tool, plugin);
+        EnchantFunctionUtil.handleXpSyphon(event, tool, plugin);
+        EnchantFunctionUtil.handleLightWeight(event, tool, plugin);
+        EnchantFunctionUtil.handleSpeedBreaker(event, tool, plugin);
+        EnchantFunctionUtil.handleSprinter(event, tool);
+        EnchantFunctionUtil.handleBounder(event, tool);
+        EnchantFunctionUtil.handleKeyMiner(event, tool);
+        EnchantFunctionUtil.handleGoldDigger(event, tool);
+        EnchantFunctionUtil.handleVeinMiner(event, tool);
+        
 
         // Normal block break stat tracking
         UUID uuid = player.getUniqueId();
@@ -81,63 +84,57 @@ public class GeneralBlockBreakListener implements Listener {
         }
     }
 
-    private boolean handleDelayedDynamite(BlockBreakEvent event, HeldToolInfo tool) {
-    Block block = event.getBlock();
-    PersistentDataContainer blockData = block.getChunk().getPersistentDataContainer();
+    @EventHandler
+    public void onItemHeld(PlayerItemHeldEvent event) {
+    Player player = event.getPlayer();
+    ItemStack item = player.getInventory().getItem(event.getNewSlot());
 
-    String keyStr = getBlockKey(block);
-    NamespacedKey hitsKey = new NamespacedKey(plugin, keyStr + "_hits");
-    NamespacedKey levelKey = new NamespacedKey(plugin, keyStr + "_level");
-
-    // Handle if it's already a coal block
-    if (block.getType() == Material.COAL_BLOCK) {
-        int hits = blockData.getOrDefault(hitsKey, PersistentDataType.INTEGER, 0);
-        int level = blockData.getOrDefault(levelKey, PersistentDataType.INTEGER, 1);
-
-        hits++;
-        if (hits >= 10) {
-            block.setType(Material.AIR);
-            float explosionPower = 4.0F + (level - 1);
-            block.getWorld().createExplosion(block.getLocation(), explosionPower, false, true); // no fire, no block damage
-            blockData.remove(hitsKey);
-            blockData.remove(levelKey);
-        } else {
-            blockData.set(hitsKey, PersistentDataType.INTEGER, hits);
-            block.setType(Material.COAL_BLOCK);  // Reset it back to coal after each hit
+    HeldToolInfo tool = HeldToolInfo.fromItem(item);
+    
+    // If no tool or doesn't have Speed Breaker, handle potion removal safely
+    if (tool == null || !tool.customEnchants.containsKey("Speed Breaker")) {
+        PotionEffect active = player.getPotionEffect(PotionEffectType.HASTE);
+        if (active != null && active.getDuration() >= 999999 - 100 && !active.isAmbient()) {
+            player.removePotionEffect(PotionEffectType.HASTE);
         }
-        event.setCancelled(true); // prevent dropping coal
-        return true;
+        return;
     }
 
-    // Handle normal block breaking
-    if (tool.customEnchants.containsKey("Delayed Dynamite")) {
-        EnchantmentData.EnchantmentInfo info = EnchantmentData.getEnchantmentInfoByName("Delayed Dynamite");
-        int level = tool.getLevel("Delayed Dynamite");
-        double procChance = info.procChance * level;
+    // --- Prestige check here ---
+    String rarity = EnchantmentData.getRarity("Speed Breaker");
+    String playerRank = RankUtils.getRank(player);
 
-        if (event.isCancelled()) {
-            return false;  // Don't do anything if another plugin (like WorldGuard) blocked this break
+    if ("PRESTIGE".equalsIgnoreCase(rarity)) {
+        if (RankUtils.compareRanks(playerRank, "p1a") < 0) {
+            player.sendMessage(ChatColor.RED + "You must be Prestige 1 to use Speed Breaker!");
+            PotionEffect active = player.getPotionEffect(PotionEffectType.HASTE);
+            if (active != null && active.getDuration() >= 999999 - 100 && !active.isAmbient()) {
+                player.removePotionEffect(PotionEffectType.HASTE);
+            }
+            return;
         }
+    } 
 
-        if (random.nextDouble() < procChance) {
-            // Delay placing coal block by 1 tick to allow block break to fully complete
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                Block newBlock = block.getLocation().getBlock();
-                if (newBlock.getType() == Material.AIR) { // ensure block is still broken
-                    newBlock.setType(Material.COAL_BLOCK);
-                    PersistentDataContainer delayedBlockData = newBlock.getChunk().getPersistentDataContainer();
-                    delayedBlockData.set(hitsKey, PersistentDataType.INTEGER, 0);
-                    delayedBlockData.set(levelKey, PersistentDataType.INTEGER, level);
-                }
-            }, 1L);
+    // Apply potion effect
+    int level = tool.getLevel("Speed Breaker");
+    if (level >= 3) {
+        int amplifier = level - 2; // Level 3 = Haste 1
+        player.addPotionEffect(new PotionEffect(
+            PotionEffectType.HASTE, 
+            999999, 
+            amplifier, 
+            false, false, false
+        ));
+    } else {
+        // Only remove our long-duration effect if present
+        PotionEffect active = player.getPotionEffect(PotionEffectType.HASTE);
+        if (active != null && active.getDuration() >= 999999 - 100 && !active.isAmbient()) {
+            player.removePotionEffect(PotionEffectType.HASTE);
         }
     }
-    return false;
 }
 
 
 
-    private String getBlockKey(Block block) {
-        return "coalblock_" + block.getX() + "_" + block.getY() + "_" + block.getZ();
-    }
+
 }
