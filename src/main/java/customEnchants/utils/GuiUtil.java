@@ -8,6 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import customEnchants.TestEnchants;
 import customEnchants.utils.crateTableUtil.LootEntry;
 
 import java.util.*;
@@ -240,29 +241,36 @@ public class GuiUtil {
             String name = ChatColor.stripColor(loot.item.getItemMeta().getDisplayName());
             ItemStack customItem = customItemUtil.createCustomItem(name);
 
-            if (customItem != null) {
-                ItemMeta meta = customItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    customItem.setItemMeta(meta);
-                }
-            gui.setItem(slotIndex++, customItem);
-            } else {
-                // Handle non-custom (vanilla) items
-                ItemStack vanillaItem = loot.item; // <-- however you're storing the item
-                if (vanillaItem != null) {
-                    ItemMeta meta = vanillaItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    vanillaItem.setItemMeta(meta);
-                    }
-            gui.setItem(slotIndex++, vanillaItem);
+            if (customItem != null) { 
+    ItemMeta meta = customItem.getItemMeta();
+    if (meta != null) {
+        List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+        String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+        if (!lore.contains(chanceLine)) {
+            lore.add(chanceLine);
+        }
+        meta.setLore(lore);
+        customItem.setItemMeta(meta);
+    }
+    gui.setItem(slotIndex++, customItem);
+} else {
+    // Handle non-custom (vanilla) items
+    ItemStack vanillaItem = loot.item; // <-- however you're storing the item
+    if (vanillaItem != null) {
+        ItemMeta meta = vanillaItem.getItemMeta();
+        if (meta != null) {
+            List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+            String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+            if (!lore.contains(chanceLine)) {
+                lore.add(chanceLine);
+            }
+            meta.setLore(lore);
+            vanillaItem.setItemMeta(meta);
+        }
+        gui.setItem(slotIndex++, vanillaItem);
     }
 }
+
         }
     }
 
@@ -287,29 +295,36 @@ public class GuiUtil {
             String name = ChatColor.stripColor(loot.item.getItemMeta().getDisplayName());
             ItemStack customItem = customItemUtil.createCustomItem(name);
 
-            if (customItem != null) {
-                ItemMeta meta = customItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    customItem.setItemMeta(meta);
-                }
-            gui.setItem(slotIndex++, customItem);
-            } else {
-                // Handle non-custom (vanilla) items
-                ItemStack vanillaItem = loot.item; // <-- however you're storing the item
-                if (vanillaItem != null) {
-                    ItemMeta meta = vanillaItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    vanillaItem.setItemMeta(meta);
-                    }
-            gui.setItem(slotIndex++, vanillaItem);
+            if (customItem != null) { 
+    ItemMeta meta = customItem.getItemMeta();
+    if (meta != null) {
+        List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+        String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+        if (!lore.contains(chanceLine)) {
+            lore.add(chanceLine);
+        }
+        meta.setLore(lore);
+        customItem.setItemMeta(meta);
+    }
+    gui.setItem(slotIndex++, customItem);
+} else {
+    // Handle non-custom (vanilla) items
+    ItemStack vanillaItem = loot.item; // <-- however you're storing the item
+    if (vanillaItem != null) {
+        ItemMeta meta = vanillaItem.getItemMeta();
+        if (meta != null) {
+            List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+            String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+            if (!lore.contains(chanceLine)) {
+                lore.add(chanceLine);
+            }
+            meta.setLore(lore);
+            vanillaItem.setItemMeta(meta);
+        }
+        gui.setItem(slotIndex++, vanillaItem);
     }
 }
+
         }
     }
 
@@ -334,29 +349,36 @@ public class GuiUtil {
             String name = ChatColor.stripColor(loot.item.getItemMeta().getDisplayName());
             ItemStack customItem = customItemUtil.createCustomItem(name);
 
-            if (customItem != null) {
-                ItemMeta meta = customItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    customItem.setItemMeta(meta);
-                }
-            gui.setItem(slotIndex++, customItem);
-            } else {
-                // Handle non-custom (vanilla) items
-                ItemStack vanillaItem = loot.item; // <-- however you're storing the item
-                if (vanillaItem != null) {
-                    ItemMeta meta = vanillaItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    vanillaItem.setItemMeta(meta);
-                    }
-            gui.setItem(slotIndex++, vanillaItem);
+            if (customItem != null) { 
+    ItemMeta meta = customItem.getItemMeta();
+    if (meta != null) {
+        List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+        String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+        if (!lore.contains(chanceLine)) {
+            lore.add(chanceLine);
+        }
+        meta.setLore(lore);
+        customItem.setItemMeta(meta);
+    }
+    gui.setItem(slotIndex++, customItem);
+} else {
+    // Handle non-custom (vanilla) items
+    ItemStack vanillaItem = loot.item; // <-- however you're storing the item
+    if (vanillaItem != null) {
+        ItemMeta meta = vanillaItem.getItemMeta();
+        if (meta != null) {
+            List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+            String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+            if (!lore.contains(chanceLine)) {
+                lore.add(chanceLine);
+            }
+            meta.setLore(lore);
+            vanillaItem.setItemMeta(meta);
+        }
+        gui.setItem(slotIndex++, vanillaItem);
     }
 }
+
         }
     }
 
@@ -381,29 +403,36 @@ public class GuiUtil {
             String name = ChatColor.stripColor(loot.item.getItemMeta().getDisplayName());
             ItemStack customItem = customItemUtil.createCustomItem(name);
 
-            if (customItem != null) {
-                ItemMeta meta = customItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    customItem.setItemMeta(meta);
-                }
-            gui.setItem(slotIndex++, customItem);
-            } else {
-                // Handle non-custom (vanilla) items
-                ItemStack vanillaItem = loot.item; // <-- however you're storing the item
-                if (vanillaItem != null) {
-                    ItemMeta meta = vanillaItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    vanillaItem.setItemMeta(meta);
-                    }
-            gui.setItem(slotIndex++, vanillaItem);
+            if (customItem != null) { 
+    ItemMeta meta = customItem.getItemMeta();
+    if (meta != null) {
+        List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+        String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+        if (!lore.contains(chanceLine)) {
+            lore.add(chanceLine);
+        }
+        meta.setLore(lore);
+        customItem.setItemMeta(meta);
+    }
+    gui.setItem(slotIndex++, customItem);
+} else {
+    // Handle non-custom (vanilla) items
+    ItemStack vanillaItem = loot.item; // <-- however you're storing the item
+    if (vanillaItem != null) {
+        ItemMeta meta = vanillaItem.getItemMeta();
+        if (meta != null) {
+            List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+            String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+            if (!lore.contains(chanceLine)) {
+                lore.add(chanceLine);
+            }
+            meta.setLore(lore);
+            vanillaItem.setItemMeta(meta);
+        }
+        gui.setItem(slotIndex++, vanillaItem);
     }
 }
+
         }
     }
 
@@ -428,29 +457,36 @@ public class GuiUtil {
             String name = ChatColor.stripColor(loot.item.getItemMeta().getDisplayName());
             ItemStack customItem = customItemUtil.createCustomItem(name);
 
-            if (customItem != null) {
-                ItemMeta meta = customItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    customItem.setItemMeta(meta);
-                }
-            gui.setItem(slotIndex++, customItem);
-            } else {
-                // Handle non-custom (vanilla) items
-                ItemStack vanillaItem = loot.item; // <-- however you're storing the item
-                if (vanillaItem != null) {
-                    ItemMeta meta = vanillaItem.getItemMeta();
-                if (meta != null) {
-                    List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                    lore.add(ChatColor.YELLOW + "Chance: " + loot.chance + "%");
-                    meta.setLore(lore);
-                    vanillaItem.setItemMeta(meta);
-                    }
-            gui.setItem(slotIndex++, vanillaItem);
+            if (customItem != null) { 
+    ItemMeta meta = customItem.getItemMeta();
+    if (meta != null) {
+        List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+        String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+        if (!lore.contains(chanceLine)) {
+            lore.add(chanceLine);
+        }
+        meta.setLore(lore);
+        customItem.setItemMeta(meta);
+    }
+    gui.setItem(slotIndex++, customItem);
+} else {
+    // Handle non-custom (vanilla) items
+    ItemStack vanillaItem = loot.item; // <-- however you're storing the item
+    if (vanillaItem != null) {
+        ItemMeta meta = vanillaItem.getItemMeta();
+        if (meta != null) {
+            List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+            String chanceLine = ChatColor.YELLOW + "Chance: " + loot.chance + "%";
+            if (!lore.contains(chanceLine)) {
+                lore.add(chanceLine);
+            }
+            meta.setLore(lore);
+            vanillaItem.setItemMeta(meta);
+        }
+        gui.setItem(slotIndex++, vanillaItem);
     }
 }
+
         }
     }
 
@@ -641,6 +677,146 @@ public class GuiUtil {
         case 8 -> 24;
         default -> 0;
     };
+}
+
+    public static void openQuestGUI(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 54, ChatColor.DARK_GREEN + "Active Quests");
+
+    // Add border
+    ItemStack border = createPane(Material.GRAY_STAINED_GLASS_PANE);
+    for (int i = 0; i < 54; i++) {
+        if (isBorderSlot(i)) gui.setItem(i, border);
+    }
+
+    // Get active quests
+    Set<String> activeQuests = TestEnchants.getInstance().getQuestManager().getActiveQuests(player);
+
+    List<ItemStack> questItems = new ArrayList<>();
+    for (String questKey : activeQuests) {
+        RankQuest quest = TestEnchants.getInstance().getQuestManager().get(questKey);
+        if (quest == null) continue;
+
+        ItemStack questItem = createQuestDisplayItem(player, questKey, quest);
+        questItems.add(questItem);
+    }
+
+    // Center slots (non-border)
+    int[] centerSlots = {
+        10, 11, 12, 13, 14, 15, 16,
+        19, 20, 21, 22, 23, 24, 25,
+        28, 29, 30, 31, 32, 33, 34,
+        37, 38, 39, 40, 41, 42, 43
+    };
+
+    for (int i = 0; i < questItems.size() && i < centerSlots.length; i++) {
+        gui.setItem(centerSlots[i], questItems.get(i));
+    }
+
+    player.openInventory(gui);
+}
+
+    private static boolean isBorderSlot(int slot) {
+    return slot < 9 || slot >= 45 || slot % 9 == 0 || slot % 9 == 8;
+}
+
+    public static ItemStack createQuestDisplayItem(Player player, String questKey, RankQuest quest) {
+    Material material;
+    String displayName;
+    String progressLine = "";
+    UUID uuid = player.getUniqueId();
+    StatTracker statTracker = TestEnchants.getInstance().statTracker;
+
+    // Default material fallback
+    material = Material.BARRIER;
+    displayName = ChatColor.RED + "Unknown Quest";
+
+    // Parse quest type
+    if (questKey.endsWith("quest1")) {
+        // Block break quest
+        material = Material.STONE;
+        displayName = ChatColor.AQUA + "Mine " + quest.blocksRequired + " blocks";
+        String baseRank = questKey.split("-quest")[0];
+        int current = statTracker.getPlayerStat(uuid, "blocks_broken", false);
+        int atStart = statTracker.getPlayerStat(uuid, "blocks_broken_at_rank_start." + baseRank, false);
+        int progress = current - atStart;
+        progressLine = ChatColor.GRAY + "Progress: " + Math.min(progress, quest.blocksRequired) + "/" + quest.blocksRequired;
+    } else if (quest.extraObjective != null) {
+        String[] parts = quest.extraObjective.split(":");
+        String type = parts[0];
+        String param = parts.length > 1 ? parts[1] : "";
+
+        switch (type) {
+            case "apply_enchant":
+                material = Material.ENCHANTED_BOOK;
+                displayName = ChatColor.LIGHT_PURPLE + "Apply " + param + " enchant";
+                int current = statTracker.getPlayerStat(uuid, "enchants_applied_" + param, false);
+                int atStart = statTracker.getPlayerStat(uuid, "enchants_applied_" + param + "_at_rank_start." + questKey.split("-quest")[0], false);
+                progressLine = ChatColor.GRAY + "Progress: " + (current - atStart) + "/1";
+                break;
+
+            case "equip_extractor":
+                material = Material.COAL_ORE;
+                displayName = ChatColor.DARK_AQUA + "Equip an Extractor";
+                progressLine = ChatColor.GRAY + "Progress: Equip to complete";
+                break;
+
+            case "sell_filler":
+                material = Material.EMERALD_BLOCK;
+                displayName = ChatColor.GREEN + "Sell " + param + " filler";
+                current = statTracker.getPlayerStat(uuid, "filler_sold", false);
+                atStart = statTracker.getPlayerStat(uuid, "filler_sold_at_rank_start." + questKey.split("-quest")[0], false);
+                progressLine = ChatColor.GRAY + "Progress: " + (current - atStart) + "/" + param;
+                break;
+
+            case "craft_shard":
+                material = Material.ECHO_SHARD;
+                displayName = ChatColor.AQUA + "Craft " + param + " Essence Shard";
+                progressLine = ChatColor.GRAY + "Progress: Not tracked";
+                break;
+
+            case "scrap_enchant":
+                material = Material.ANVIL;
+                displayName = ChatColor.GOLD + "Scrap an Enchant";
+                progressLine = ChatColor.GRAY + "Progress: Not tracked";
+                break;
+
+            case "open_crates":
+                material = Material.TRIAL_KEY;
+                displayName = ChatColor.YELLOW + "Open " + param + " Crates";
+                current = statTracker.getPlayerStat(uuid, "crate_total", false);
+                atStart = statTracker.getPlayerStat(uuid, "total_crates_at_rank_start." + questKey.split("-quest")[0], false);
+                progressLine = ChatColor.GRAY + "Progress: " + (current - atStart) + "/" + param;
+                break;
+
+            case "use_black_scroll":
+                material = Material.BLACK_CANDLE;
+                displayName = ChatColor.DARK_PURPLE + "Use a Black Scroll";
+                progressLine = ChatColor.GRAY + "Progress: Not tracked";
+                break;
+
+            case "rent_cell":
+                material = Material.IRON_BARS;
+                displayName = ChatColor.GRAY + "Rent a Cell";
+                progressLine = ChatColor.GRAY + "Progress: Not tracked";
+                break;
+
+            case "craft_extractor":
+                material = Material.CRAFTING_TABLE;
+                displayName = ChatColor.GOLD + "Craft an Extractor";
+                progressLine = ChatColor.GRAY + "Progress: Not tracked";
+                break;
+        }
+    }
+
+    ItemStack item = new ItemStack(material);
+    ItemMeta meta = item.getItemMeta();
+    if (meta != null) {
+        meta.setDisplayName(displayName);
+        meta.setLore(Collections.singletonList(progressLine));
+        item.setItemMeta(meta);
+    }
+
+    return item;
 }
 
 

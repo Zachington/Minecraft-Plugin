@@ -14,58 +14,45 @@ import customEnchants.managers.RankManager;
 public class ScoreboardUtil {
 
     public void updateScoreboard(Player player) {
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        if (manager == null) return;
+    ScoreboardManager manager = Bukkit.getScoreboardManager();
+    if (manager == null) return;
 
-        String rank = RankManager.getRank(player);  
+    String rank = RankManager.getRank(player);
+    StatTracker statTracker = TestEnchants.getInstance().getStatTracker();
+    UUID uuid = player.getUniqueId();
+    int totalBroken = statTracker.getPlayerStat(uuid, "blocks_broken", false);
+    int dailyBroken = statTracker.getPlayerStat(uuid, "blocks_broken", true);
+    double balance = VaultUtil.getEconomy().getBalance(player);
+    int online = Bukkit.getOnlinePlayers().size();
+    int max = Bukkit.getMaxPlayers();
 
-        StatTracker statTracker = TestEnchants.getInstance().getStatTracker();
-        UUID uuid = player.getUniqueId();
+    Scoreboard board = manager.getNewScoreboard();
+    Objective obj = board.registerNewObjective("info", "dummy", ChatColor.GOLD + " Minecraft Server ");
+    obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        int totalBroken = statTracker.getPlayerStat(uuid, "blocks_broken", false);
-        int dailyBroken = statTracker.getPlayerStat(uuid, "blocks_broken", true);
+    String[] lines = new String[]{
+        ChatColor.YELLOW + "Balance: " + ChatColor.WHITE + "$" + formatBalance(balance),
+        ChatColor.YELLOW + "Rank: " + ChatColor.WHITE + formatRankFancy(rank),
+        ChatColor.YELLOW + "Quests Complete:" + ChatColor.WHITE + " 0",
+        ChatColor.GRAY + "",
+        ChatColor.YELLOW + "DBM: " + ChatColor.WHITE + dailyBroken,
+        ChatColor.YELLOW + "Total Blocks: " + ChatColor.WHITE + totalBroken,
+        ChatColor.GRAY + " ",
+        ChatColor.YELLOW + "Players Online:",
+        ChatColor.WHITE + "" + online + " / " + max
+    };
 
-
-        Scoreboard board = manager.getNewScoreboard();
-        Objective obj = board.registerNewObjective("info", "dummy", ChatColor.GREEN + "Minecraft Server Name");
-        obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-        int line = 12;
-
-        obj.getScore("   ").setScore(line--);
-
-        // Vault Balance
-        double balance = VaultUtil.getEconomy().getBalance(player);
-        obj.getScore(ChatColor.YELLOW + "Balance: " + ChatColor.WHITE + "$" + formatBalance(balance)).setScore(line--);
-
-        obj.getScore("     ").setScore(line--);
-
-        
-        obj.getScore(ChatColor.YELLOW + "Rank: " + ChatColor.WHITE + formatRankFancy(rank)).setScore(line--);
-        
-        obj.getScore("    ").setScore(line--);
-
-        // Placeholder Quests
-        obj.getScore(ChatColor.YELLOW + "Quests Complete:" + ChatColor.WHITE + "0").setScore(line--);
-
-        // Space
-        obj.getScore("  ").setScore(line--);
-
-        //Blocks Broken
-        obj.getScore(ChatColor.YELLOW + "Total Blocks: " + ChatColor.WHITE + String.valueOf(totalBroken)).setScore(line--);
-        obj.getScore(ChatColor.YELLOW + "DBM: " + ChatColor.WHITE + String.valueOf(dailyBroken)).setScore(line--);
-
-        // Space
-        obj.getScore(" ").setScore(line--);
-
-        // Players Online
-        int online = Bukkit.getOnlinePlayers().size();
-        int max = Bukkit.getMaxPlayers();
-        obj.getScore(ChatColor.YELLOW + "Players Online:").setScore(line--);
-        obj.getScore(ChatColor.WHITE + "" + online + " / " + max).setScore(line--);
-
-        player.setScoreboard(board);
+    for (int i = 0; i < lines.length; i++) {
+        String entry = ChatColor.COLOR_CHAR + "" + (char) ('a' + i); // §a, §b, etc.
+        Team team = board.registerNewTeam("line" + i);
+        team.addEntry(entry);
+        team.setPrefix(lines[i]);
+        obj.getScore(entry).setScore(0); // all use score 0 to avoid visible numbers
     }
+
+    player.setScoreboard(board);
+}
+
 
     private static String formatBalance(double balance) {
     long rounded = (long) balance; // Remove cents

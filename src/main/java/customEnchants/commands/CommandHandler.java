@@ -3,16 +3,23 @@ package customEnchants.commands;
 import customEnchants.TestEnchants;
 import customEnchants.listeners.EssenceGenerationListener;
 import customEnchants.managers.RankManager;
+import customEnchants.managers.SellManager;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
+import customEnchants.utils.RankQuest;
 import customEnchants.utils.RankUtils;
 import customEnchants.utils.RankUtils.RankCost;
+import customEnchants.utils.StatTracker;
+import customEnchants.utils.VaultUtil;
 import customEnchants.utils.customItemUtil;
 import net.milkbowl.vault.economy.Economy;
 import customEnchants.utils.EssenceManager;
+import customEnchants.managers.VaultManager;
+import customEnchants.managers.QuestManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,6 +28,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +36,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
+import java.util.regex.*;
 
 
 
@@ -37,12 +47,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private final Economy economy;
     private final EssenceManager essenceManager;
     private final RankManager rankManager;
-    
+    private final VaultManager vaultManager;
+    StatTracker statTracker = TestEnchants.getInstance().statTracker;
+    QuestManager questManager = TestEnchants.getInstance().getQuestManager();
 
-    public CommandHandler(TestEnchants plugin, Economy economy, RankManager rankManager) {
+    public CommandHandler(TestEnchants plugin, Economy economy, RankManager rankManager, VaultManager vaultManager) {
         this.economy = economy;
         this.rankManager = rankManager;
         this.essenceManager = plugin.getEssenceManager();
+        this.vaultManager = plugin.getVaultManager();
     }
 
     @Override
@@ -212,11 +225,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             case "rankup" -> {
     String currentRank = RankUtils.getRank(player);
     String nextRank = RankUtils.getNextRank(currentRank);
+    UUID uuid = player.getUniqueId();
 
     if (nextRank == null) {
         player.sendMessage(ChatColor.RED + "You are already at the max rank!");
         return true;
     }
+
+    // Check quests
+    if (statTracker.getPlayerStat(uuid, "quests_completed", false) < 2) {
+    player.sendMessage(ChatColor.RED + "You must complete both quests before ranking up.");
+    return true;
+}
 
     RankCost cost = RankUtils.getRankCost(nextRank, currentRank);
     if (cost == null) {
@@ -224,14 +244,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    // Check essence with EssenceManager instance
     int playerEssence = essenceManager.getEssence(player, cost.essenceTier);
     if (playerEssence < cost.essence) {
         player.sendMessage(ChatColor.RED + "You need §e" + cost.essence + " Tier " + cost.essenceTier + " Essence§c to rank up.");
         return true;
     }
 
-    // Check money with Vault economy
     double balance = economy.getBalance(player);
     if (balance < cost.money) {
         player.sendMessage(ChatColor.RED + "You need §a$" + String.format("%,.2f", cost.money) + "§c to rank up.");
@@ -241,24 +259,40 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     // Remove essence and money
     essenceManager.removeEssence(player, cost.essenceTier, cost.essence);
     economy.withdrawPlayer(player, cost.money);
-    String oldRank = RankUtils.getRank(player);
-    // Update rank in your player data system
+
+    // Remove old quests & add new quests
+    statTracker.setPlayerStat(uuid, "quests_completed", 0, false);
+    questManager.addQuest(player, nextRank + "-quest1");
+    questManager.addQuest(player, nextRank + "-quest2");
+
+    // Update rank
     rankManager.setRank(player, nextRank);
-
-
 
     player.sendMessage(ChatColor.GREEN + "You ranked up to " + RankUtils.formatRankName(nextRank) + ChatColor.GREEN + "!");
 
-    
-    String newRank = nextRank;
+    // Save blocks broken at start of new rank
+    for (String rarity : new String[]{"common", "uncommon", "rare", "epic", "legendary"}) {
+    String statKey = "enchants_applied_" + rarity;
+    int current = statTracker.getPlayerStat(player.getUniqueId(), statKey, false);
+    statTracker.setPlayerStat(player.getUniqueId(), statKey + "_at_rank_start." + nextRank, current, false);
+    }
+    int currentBlocks = statTracker.getPlayerStat(uuid, "blocks_broken", false);
+    int currentEssence = statTracker.getPlayerStat(uuid, "earned_essence", false);
+    int currentCrates = statTracker.getPlayerStat(uuid, "crate_total", false);
+    int currentFiller = statTracker.getPlayerStat(uuid, "filler_sold", false); 
+    statTracker.setPlayerStat(uuid, "blocks_broken_at_rank_start." + nextRank, currentBlocks, false);
+    statTracker.setPlayerStat(uuid, "earned_essence_at_rank_start." + nextRank, currentEssence, false);
+    statTracker.setPlayerStat(uuid, "total_crates_at_rank_start." + nextRank, currentCrates, false);
+    statTracker.setPlayerStat(uuid, "filler_sold_at_rank_start." + nextRank, currentFiller, false);
 
-if (RankUtils.isAscendUpgrade(oldRank, newRank)) {
-    Bukkit.broadcastMessage("§6" + player.getName() + " §ehas §4Ascended §eto: " + ChatColor.DARK_RED + RankUtils.formatRankTierOnly(newRank) + "§e!");
-} else if (RankUtils.isPrestigeUpgrade(oldRank, newRank)) {
-    Bukkit.broadcastMessage("§6" + player.getName() + " §ehas §dPrestiged §eto: " + ChatColor.LIGHT_PURPLE + RankUtils.formatRankPrestigeOnly(newRank) + "§e!");
+    if (RankUtils.isAscendUpgrade(currentRank, nextRank)) {
+        Bukkit.broadcastMessage("§6" + player.getName() + " §ehas §4Ascended §eto: " + ChatColor.DARK_RED + RankUtils.formatRankTierOnly(nextRank) + "§e!");
+    } else if (RankUtils.isPrestigeUpgrade(currentRank, nextRank)) {
+        Bukkit.broadcastMessage("§6" + player.getName() + " §ehas §dPrestiged §eto: " + ChatColor.LIGHT_PURPLE + RankUtils.formatRankPrestigeOnly(nextRank) + "§e!");
+    }
+
+    return true;
 }
-
-    return true;}       
             case "setrank" -> {
     if (!sender.hasPermission("customenchants.setrank")) {
         sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
@@ -323,13 +357,186 @@ if (RankUtils.isAscendUpgrade(oldRank, newRank)) {
 
     return true;
 }
+            case "pv" -> {
+    int index;
 
+    if (args.length == 0) {
+        index = 1; // default to vault 1
+    } else if (args.length == 1) {
+        try {
+            index = Integer.parseInt(args[0]);
+        } catch (NumberFormatException e) {
+            player.sendMessage(ChatColor.RED + "Invalid vault number.");
+            return true;
+        }
+    } else {
+        player.sendMessage(ChatColor.RED + "Usage: /pv [1-5]");
+        return true;
+    }
 
+    if (index < 1 || index > 5) {
+        player.sendMessage(ChatColor.RED + "Vault must be between 1 and 5.");
+        return true;
+    }
 
+    if (player.getOpenInventory().getTitle().startsWith("Vault")) {
+        player.sendMessage(ChatColor.RED + "You already have a vault open!");
+        return true;
+    }
 
+    Inventory vault = vaultManager.getVault(player.getUniqueId(), index);
+    player.openInventory(vault);
+    return true;
+}
 
+            case "pvsee" -> {
+    if (!sender.hasPermission("customenchants.pvsee")) {
+        sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
+        return true;
+    }
+
+    if (args.length != 2) {
+        sender.sendMessage(ChatColor.RED + "Usage: /pvsee <player> <1-5>");
+        return true;
+    }
+
+    Player target = Bukkit.getPlayerExact(args[0]);
+    if (target == null) {
+        sender.sendMessage(ChatColor.RED + "Player not found.");
+        return true;
+    }
+
+    int index;
+    try {
+        index = Integer.parseInt(args[1]);
+    } catch (NumberFormatException e) {
+        sender.sendMessage(ChatColor.RED + "Invalid vault number.");
+        return true;
+    }
+
+    if (index < 1 || index > 5) {
+        sender.sendMessage(ChatColor.RED + "Vault must be between 1 and 5.");
+        return true;
+    }
+
+    Inventory vault = vaultManager.getVault(target.getUniqueId(), index);
+    player.openInventory(vault);
+    return true;
+}
+            case "sell" -> {
+    String mode = (args.length > 0 && args[0].equalsIgnoreCase("hand")) ? "hand" : "all";
+
+    SellManager sellManager = TestEnchants.getInstance().getSellManager();
+    double total = 0;
+    double fillerTotal = 0;  // Track filler sold value separately
+
+    if (mode.equals("hand")) {
+        ItemStack item = player.getInventory().getItemInMainHand();
+        if (item == null || item.getType() == Material.AIR || !sellManager.isSellable(item.getType())) {
+            player.sendMessage(ChatColor.RED + "You're not holding a sellable item.");
+            return true;
+        }
+        double price = sellManager.getPrice(item.getType()) * item.getAmount();
+        total += price;
+
+        if (sellManager.isFillerBlock(item.getType())) {
+            fillerTotal += price;
+        }
+
+        player.getInventory().setItemInMainHand(null);
+    } else {
+        for (int i = 0; i < player.getInventory().getSize(); i++) {
+            ItemStack item = player.getInventory().getItem(i);
+            if (item == null || item.getType() == Material.AIR) continue;
+
+            if (sellManager.isSellable(item.getType())) {
+                double price = sellManager.getPrice(item.getType()) * item.getAmount();
+                total += price;
+
+                if (sellManager.isFillerBlock(item.getType())) {
+                    fillerTotal += price;
+                }
+
+                player.getInventory().clear(i);
+            }
+        }
+    }
+
+    if (total > 0) {
+        // Calculate prestige bonus same as your code
+        String rank = RankUtils.getRank(player);
+        int prestigeBonus = 0;
+
+        Matcher matcher = Pattern.compile("p(\\d*)").matcher(rank.toLowerCase());
+        if (matcher.find()) {
+            String digits = matcher.group(1);
+            if (!digits.isEmpty()) {
+                if (rank.length() == matcher.start() + 1 + digits.length()) {
+                    try {
+                        int value = Integer.parseInt(digits);
+                        prestigeBonus = Math.min(value, 10);
+                    } catch (NumberFormatException ignored) {}
+                } else {
+                    prestigeBonus = 10;
+                }
+            } else {
+                prestigeBonus = 0;
+            }
+        } else {
+            prestigeBonus = 0;
+        }
+
+        double multiplier = 1.0 + (prestigeBonus * 0.01);
+        double finalAmount = total * multiplier;
+
+        VaultUtil.getEconomy().depositPlayer(player, finalAmount);
+        player.sendMessage(ChatColor.GREEN + "Sold items for $" + String.format("%.2f", finalAmount));
 
         
+        if (fillerTotal > 0) {
+    UUID uuid = player.getUniqueId();
+    TestEnchants.getInstance().statTracker.incrementPlayerStat(uuid, "filler_sold", (int) fillerTotal);
+
+    // Get active quests
+    QuestManager questManager = TestEnchants.getInstance().getQuestManager();
+    Set<String> activeQuests = questManager.getActiveQuests(player);
+    int currentFiller = TestEnchants.getInstance().statTracker.getPlayerStat(uuid, "filler_sold", false);
+
+    for (String questKey : activeQuests) {
+        RankQuest quest = questManager.get(questKey);
+        if (quest == null || quest.extraObjective == null || !quest.extraObjective.startsWith("sell_filler:")) continue;
+
+        String[] parts = quest.extraObjective.split(":");
+        int required = Integer.parseInt(parts[1]);
+        String baseRank = questKey.split("-quest")[0]; // e.g., "a-b" from "a-b-quest2"
+
+        int fillerAtStart = TestEnchants.getInstance().statTracker.getPlayerStat(uuid, "filler_sold_at_rank_start." + baseRank, false);
+        int fillerSinceStart = currentFiller - fillerAtStart;
+
+        if (fillerSinceStart >= required) {
+            questManager.completeQuest(player, questKey);
+            player.sendMessage("§aQuest complete: Sell filler worth $" + required);
+        }
+    }
+}
+    } else {
+        player.sendMessage(ChatColor.RED + "No sellable items found.");
+    }
+
+    return true;
+}
+    case "quest", "q" -> {
+    if (args.length != 0) {
+        player.sendMessage(ChatColor.RED + "Usage: /quest");
+        return true;
+    }
+    player.setMetadata("viewing_quests", new FixedMetadataValue(TestEnchants.getInstance(), true));
+    GuiUtil.openQuestGUI(player);
+    return true;
+}
+
+
+
 
 
 
@@ -471,10 +678,49 @@ if (RankUtils.isAscendUpgrade(oldRank, newRank)) {
     }
 }
 
+        if ("pvsee".equals(cmd)) {
+    if (args.length == 1) {
+        String partial = args[0].toLowerCase();
+        List<String> matchingPlayers = new ArrayList<>();
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getName().toLowerCase().startsWith(partial)) {
+                matchingPlayers.add(online.getName());
+            }
+        }
+        return matchingPlayers;
+    }
+
+    if (args.length == 2) {
+        String partial = args[1];
+        List<String> vaultNumbers = Arrays.asList("1", "2", "3", "4", "5");
+        List<String> completions = new ArrayList<>();
+        for (String num : vaultNumbers) {
+            if (num.startsWith(partial)) {
+                completions.add(num);
+            }
+        }
+        return completions;
+    }
+}
+
+        if ("sell".equals(cmd)) {
+    if (args.length == 1) {
+        String partial = args[0].toLowerCase();
+        List<String> options = Arrays.asList("hand", "all");
+        List<String> completions = new ArrayList<>();
+        for (String option : options) {
+            if (option.startsWith(partial)) {
+                completions.add(option);
+            }
+        }
+        return completions;
+    }
+}
+
         return Collections.emptyList();
     }
 
-
+    
 
 
 

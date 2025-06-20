@@ -1,0 +1,155 @@
+a-b:
+  quest1:
+    blocks: 2000
+  quest2:
+    objective: equip_extractor
+
+b-c:
+  quest1:
+    blocks: 3000
+  quest2:
+    objective: earn_essence:1000
+
+c-d:
+  quest1:
+    blocks: 4000
+  quest2:
+    objective: apply_enchant:common
+
+d-e:
+  quest1:
+    blocks: 5000
+  quest2:
+    objective: sell_filler:10000
+
+e-f:
+  quest1:
+    blocks: 6000
+  quest2:
+    objective: open_crates:5
+
+f-g:
+  quest1:
+    blocks: 7000
+  quest2:
+    objective: craft_shard:1
+
+g-h:
+  quest1:
+    blocks: 8000
+  quest2:
+    objective: scrap_enchant
+
+h-i:
+  quest1:
+    blocks: 9000
+  quest2:
+    objective: apply_enchant:uncommon
+
+i-j:
+  quest1:
+    blocks: 10000
+  quest2:
+    objective: rent_cell
+
+j-k:
+  quest1:
+    blocks: 12000
+  quest2:
+    objective: open_crates:15
+
+k-l:
+  quest1:
+    blocks: 14000
+  quest2:
+    objective: craft_shard:5
+
+l-m:
+  quest1:
+    blocks: 16000
+  quest2:
+    objective: sell_filler:50000
+
+m-n:
+  quest1:
+    blocks: 18000
+  quest2:
+    objective: apply_enchant:rare
+
+n-o:
+  quest1:
+    blocks: 20000
+  quest2:
+    objective: craft_extractor
+
+o-p:
+  quest1:
+    blocks: 24000
+  quest2:
+    objective: open_crates:25
+
+p-q:
+  quest1:
+    blocks: 28000
+  quest2:
+    objective: craft_shard:10
+
+q-r:
+  quest1:
+    blocks: 32000
+  quest2:
+    objective: sell_filler:75000
+
+r-s:
+  quest1:
+    blocks: 36000
+  quest2:
+    objective: apply_enchant:epic
+
+s-t:
+  quest1:
+    blocks: 40000
+  quest2:
+    objective: open_crates:35
+
+t-u:
+  quest1:
+    blocks: 45000
+  quest2:
+    objective: craft_shard:10
+
+u-v:
+  quest1:
+    blocks: 50000
+  quest2:
+    objective: sell_filler:100000
+
+v-w:
+  quest1:
+    blocks: 55000
+  quest2:
+    objective: use_black_scroll
+
+w-x:
+  quest1:
+    blocks: 60000
+  quest2:
+    objective: apply_enchant:legendary
+
+x-y:
+  quest1:
+    blocks: 70000
+  quest2:
+    objective: open_crates:50
+
+y-z:
+  quest1:
+    blocks: 85000
+  quest2:
+    objective: craft_shard:15
+
+z-p1a:
+  quest1:
+    blocks: 100000
+  quest2:
+    objective: sell_filler:250000

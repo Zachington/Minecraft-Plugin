@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
+
 import customEnchants.utils.EnchantmentData.EnchantmentInfo;
 import customEnchants.utils.GiveItem.EnchantmentDropData;
 import customEnchants.utils.GiveItem.ItemDropEntry;
@@ -285,22 +286,29 @@ public class EnchantFunctionUtil {
     }
 
     public static void handleGoldDigger(BlockBreakEvent event, HeldToolInfo tool) {
-        Player player = event.getPlayer();
-        int level = tool.getLevel("Gold Digger");
-        if (level <= 0) return;
+    Player player = event.getPlayer();
+    int level = tool.getLevel("Gold Digger");
+    if (level <= 0) return;
 
-        int enchantIndex = EnchantmentData.getEnchantmentIndex("Gold Digger");
-        if (enchantIndex < 0 || enchantIndex >= EnchantmentData.ENCHANT_PROC_CHANCE.length) return;
+    int enchantIndex = EnchantmentData.getEnchantmentIndex("Gold Digger");
+    if (enchantIndex < 0 || enchantIndex >= EnchantmentData.ENCHANT_PROC_CHANCE.length) return;
 
-        double baseChance = EnchantmentData.ENCHANT_PROC_CHANCE[enchantIndex];
-        double chance = Math.min(baseChance * level, 1.0);
+    double baseChance = EnchantmentData.ENCHANT_PROC_CHANCE[enchantIndex];
+    double chance = Math.min(baseChance * level, 1.0);
 
-        if (random.nextDouble() >= chance) return;
+    if (random.nextDouble() >= chance) return;
 
-        double money = 500 + Math.random() * 1000; // TODO: Add prestige scaling
-        VaultUtil.giveMoney(player, money);
-        player.sendMessage(ChatColor.GOLD + "You found $" + String.format("%.2f", money) + " from Gold Digger!");
-    }
+    String playerRank = RankUtils.getRank(player);
+    int prestige = RankUtils.getPrestigeFromRank(playerRank);
+    
+    double base = 500 + (1000 * prestige);
+    double variance = Math.random() * 1000;
+    double money = base + variance;
+
+    VaultUtil.giveMoney(player, money);
+    player.sendMessage(ChatColor.GOLD + "You found $" + String.format("%.2f", money) + " from Gold Digger!");
+}
+
 
     public static void handleVeinMiner(BlockBreakEvent event, HeldToolInfo tool) {
     Player player = event.getPlayer();

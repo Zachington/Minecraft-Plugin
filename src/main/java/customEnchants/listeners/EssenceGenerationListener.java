@@ -1,5 +1,6 @@
 package customEnchants.listeners;
 
+import customEnchants.TestEnchants;
 import customEnchants.utils.EssenceManager;
 import customEnchants.utils.customItemUtil;
 
@@ -148,6 +149,7 @@ public class EssenceGenerationListener implements Listener {
                 essenceManager.addEssence(player, config.tier, amount);
                 if (!isEssenceNotifDisabled(player)) {
                     player.sendMessage(ChatColor.GREEN + "You found Essence Tier " + config.tier + " x" + amount + "!");
+                    TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "earned_essence", amount);
                 }
             }
         }

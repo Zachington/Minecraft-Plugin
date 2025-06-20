@@ -87,6 +87,8 @@
                 <includes>
                     <include>plugin.yml</include>
                     <include>mines.yml</include>
+                    <include>sell-prices.yml</include>
+                    <include>rank-quests.yml</include>
                 </includes>
             </resource>
         </resources>

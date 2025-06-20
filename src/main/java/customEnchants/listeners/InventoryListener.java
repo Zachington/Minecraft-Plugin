@@ -10,9 +10,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-
+import customEnchants.TestEnchants;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.InventoryParser;
+import customEnchants.utils.RankQuest;
 import customEnchants.utils.RankUtils;
 
 
@@ -148,22 +149,56 @@ public class InventoryListener implements Listener {
 
         String rarity = EnchantmentData.getRarity(book.name);
 
-        if ("PRESTIGE".equalsIgnoreCase(rarity) && !RankUtils.isAtLeastP1a(player)) {
-            player.sendMessage(ChatColor.RED + "You must be at least Prestige 1 to use this enchantment.");
-            event.setCancelled(true);
-        return;
+        if ("PRESTIGE".equalsIgnoreCase(rarity)) {
+        String playerRank = RankUtils.getRank(player);
+            if (RankUtils.compareRanks(playerRank, "p1a") < 1) {
+                player.sendMessage(ChatColor.RED + "You must be at least Prestige 1 to use this enchantment.");
+                event.setCancelled(true);
+            return;
+            }
         }
 
-        if ("PRESTIGE+".equalsIgnoreCase(rarity) && !RankUtils.isAtLeastP10a(player)) {
-            player.sendMessage(ChatColor.RED + "You must be at least Prestige 10 to use this enchantment.");
-            event.setCancelled(true);
-        return;
-        }
+        if ("PRESTIGE+".equalsIgnoreCase(rarity)) {
+            String playerRank = RankUtils.getRank(player);
+            if (RankUtils.compareRanks(playerRank, "p10a") < 1) {
+                player.sendMessage(ChatColor.RED + "You must be at least Prestige 10 to use this enchantment.");
+                event.setCancelled(true);
+            return;
+            }
+        }       
+
 
         if (random.nextInt(100) < book.successRate) {
             applyEnchant(clicked, tool, book);
             player.sendMessage(ChatColor.GREEN + "Applied " + book.name + " " + book.level + "!");
             player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1f, 1.5f);
+            String statKey = "enchants_applied_" + rarity.toLowerCase();
+            TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), statKey);
+
+            // --- Begin quest check logic ---
+            UUID uuid = player.getUniqueId();
+            Set<String> activeQuests = TestEnchants.getInstance().getQuestManager().getActiveQuests(player);
+
+            for (String questKey : activeQuests) {
+                RankQuest quest = TestEnchants.getInstance().getQuestManager().get(questKey);
+                if (quest == null || quest.extraObjective == null) continue;
+
+            String[] parts = questKey.split("-quest");
+            if (parts.length == 0) continue;
+
+                if (quest.extraObjective.startsWith("apply_enchant:")) {
+                    String requiredRarity = quest.extraObjective.split(":")[1].toLowerCase();
+                    if (requiredRarity.equals(rarity.toLowerCase())) {
+                        // Check if player has at least one of this enchant applied
+                    int applied = TestEnchants.getInstance().statTracker.getPlayerStat(uuid, statKey, false);
+                        if (applied > 0) {
+                            TestEnchants.getInstance().getQuestManager().completeQuest(player, questKey);
+                            player.sendMessage("§aQuest complete: Apply a " + requiredRarity + " enchant!");
+                        }
+                    }
+                }
+            }
+
         } else {
             player.sendMessage(ChatColor.RED + "Failed to apply " + book.name + " (" + book.successRate + "%)");
             player.playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 1f, 0.8f);
@@ -306,7 +341,6 @@ public class InventoryListener implements Listener {
     return true;
 }
 
-
     private void applyEnchant(ItemStack tool, ToolEnchantInfo toolInfo, EnchantmentBookInfo book) {
     ItemMeta meta = tool.getItemMeta();
     if (meta == null) return;
@@ -340,7 +374,6 @@ public class InventoryListener implements Listener {
     meta.setLore(buildLore(tool, toolInfo));
     tool.setItemMeta(meta);
 }
-
 
     private List<String> buildLore(ItemStack tool, ToolEnchantInfo info) {
         List<String> lore = new ArrayList<>();

@@ -44,3 +44,16 @@ commands:
     description: Resets a mine
     usage: /resetmine <mine name>
     permission: customEnchants.resetmine
+  pv:
+    description: Open your player vault
+    usage: /pv <1-5>
+  pvsee:
+    description: Admin view of other players' vaults
+    usage: /pvsee <player> <1-5>
+    permission: customenchants.pvsee
+  sell:
+    description: Sell items
+    usage: /sell [hand|all]
+  quest:
+    description: Opens the quest GUI
+    aliases: [q]

@@ -41,13 +41,17 @@ public class StatTracker {
         resetDailyIfNeeded();
     }
 
-    public void incrementPlayerStat(UUID uuid, String stat) {
-        int total = playerConfig.getInt(uuid + "." + stat + ".total", 0) + 1;
-        int daily = playerConfig.getInt(uuid + "." + stat + ".daily", 0) + 1;
+    public void incrementPlayerStat(UUID uuid, String stat, int amount) {
+    int total = playerConfig.getInt(uuid + "." + stat + ".total", 0) + amount;
+    int daily = playerConfig.getInt(uuid + "." + stat + ".daily", 0) + amount;
 
-        playerConfig.set(uuid + "." + stat + ".total", total);
-        playerConfig.set(uuid + "." + stat + ".daily", daily);
-    }
+    playerConfig.set(uuid + "." + stat + ".total", total);
+    playerConfig.set(uuid + "." + stat + ".daily", daily);
+}
+
+    public void incrementPlayerStat(UUID uuid, String stat) {
+    incrementPlayerStat(uuid, stat, 1);
+}
 
     public void incrementServerStat(String stat) {
         int total = serverConfig.getInt(stat + ".total", 0) + 1;
@@ -107,5 +111,14 @@ public class StatTracker {
     public int getServerStat(String stat, boolean daily) {
         return serverConfig.getInt(stat + (daily ? ".daily.count" : ".total"), 0);
     }
+
+    public void setPlayerStat(UUID uuid, String stat, int value, boolean daily) {
+    String path = uuid + "." + stat + (daily ? ".daily" : ".total");
+    playerConfig.set(path, value);
+    save();
+}
+
+
+
 }
 

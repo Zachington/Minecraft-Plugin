@@ -106,7 +106,7 @@ public class EnchantmentData {
         "PRESTIGE",     //Speed breaker
         "COMMON",       //sprinter
         "COMMON",       //bounder
-        "LEGENDARY"     //vein miner
+        "PRESTIGE"     //vein miner
     };
     
     // ChatColor mappings for each rarity
@@ -157,26 +157,26 @@ public class EnchantmentData {
     
     // Proc chance percentages (0.0 to 1.0)
     public static final double[] ENCHANT_PROC_CHANCE = {
-        .1,    // Wall Breaker - 10% per level
-        .05,   // Blast - 5% per level
-        0.5,   // Gold Digger - Always active (passive)
-        1.0,   //Amplify never used
-        0.35,  // Ore Scavenger - 35% chance
-        1.0,   // Auto Smelt - Always active (passive)
-        1.0,   // Unbreakable - Always active (passive)
-        1.0,   // Magnet - Always active (passive)
-        0.1,    // Preservation 5%
-        0.01,    //Frost Touch 1%
-        0.05,   //Key miner
-        .05,    //delayed dynamite
-        1,       //regenerate
-        1,
-        1,
-        .3,
-        .3,
-        .1,
-        .1,
-        .1
+        .1,         // Wall Breaker - 10% per level
+        .05,        // Blast - 5% per level
+        0.002,      // Gold Digger 
+        1.0,        //Amplify never used
+        0.35,       // Ore Scavenger - 35% chance
+        1.0,        // Auto Smelt - Always active (passive)
+        1.0,        // Unbreakable - Always active (passive)
+        1.0,        // Magnet - Always active (passive)
+        0.1,        // Preservation 10%
+        0.01,       //Frost Touch 1%
+        0.00005,    //Key miner
+        0.05,       //delayed dynamite
+        0.05,       //regenerate
+        0.05,       //conjure     
+        1,          //xp syphon
+        0.1,        //light weight
+        0.2,        //speed breaker
+        0.1,        //sprinter
+        0.1,        //bounder
+        0.05        //vein miner
     };
     
     // Helper method to get rarity color by rarity name

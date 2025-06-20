@@ -52,13 +52,13 @@ public class RegionBlockBreakListener implements Listener {
         }
     }
 
-    private boolean hasRequiredRank(String playerRank, String requiredRank) {
-        int playerValue = rankToValue(playerRank);
-        int requiredValue = rankToValue(requiredRank);
-        return playerValue >= requiredValue;
-    }
+    public static boolean hasRequiredRank(String playerRank, String requiredRank) {
+    int playerValue = rankToValue(playerRank);
+    int requiredValue = rankToValue(requiredRank);
+    return playerValue >= requiredValue;
+}
 
-    private int rankToValue(String rank) {
+    public static int rankToValue(String rank) {
     Pattern pattern = Pattern.compile(
         "^(?:([a-z])|p(\\d{1,2})([a-z])|a(\\d)p(\\d{1,2})([a-z]))$",
         Pattern.CASE_INSENSITIVE

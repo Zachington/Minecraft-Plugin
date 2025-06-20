@@ -18,7 +18,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
 import customEnchants.managers.PluginManager;
+import customEnchants.managers.QuestManager;
 import customEnchants.managers.RankManager;
+import customEnchants.managers.SellManager;
+import customEnchants.managers.VaultManager;
 import customEnchants.managers.MineResetManager;
 import customEnchants.utils.ClaimStorage;
 import customEnchants.utils.EssenceManager;
@@ -41,8 +44,10 @@ import customEnchants.listeners.BlockBreakListener;
 import customEnchants.listeners.CrateListener;
 import customEnchants.listeners.GeneralBlockBreakListener;
 import customEnchants.listeners.PlayerQuitListener;
+import customEnchants.listeners.QuestListener;
 import customEnchants.listeners.RegionBlockBreakListener;
 import customEnchants.listeners.RngBlockBreak;
+import customEnchants.listeners.VaultListener;
 import customEnchants.listeners.ClaimMenuListener;
 
 import customEnchants.commands.CommandHandler;
@@ -53,17 +58,22 @@ public class TestEnchants extends JavaPlugin {
 
     private static TestEnchants instance;
     private EssenceManager essenceManager;
-    private StatTracker statTracker;
+    public StatTracker statTracker;
     private final Map<Integer, Double> essenceSellPrices = new HashMap<>();
     private RankManager rankManager;
     private Economy economy;
     private ScoreboardUtil scoreboardUtil;
     private MineResetManager mineManager;
+    private VaultManager vaultManager;
+    private QuestManager questManager;
+    public SellManager sellManager;
+    private QuestManager QuestManager;
 
     @Override
     public void onEnable() {
         instance = this;
         customItemUtil.setPlugin(this);
+        this.vaultManager = new VaultManager(this);
 
         saveResource("mines.yml", false); // Copies default from jar if it doesn't exist
         ClaimStorage.init(getDataFolder());
@@ -95,6 +105,8 @@ public class TestEnchants extends JavaPlugin {
         this.scoreboardUtil = new ScoreboardUtil();
         this.economy = VaultUtil.getEconomy();
         mineManager = new MineResetManager(this);
+        this.sellManager = new SellManager(getDataFolder());
+        this.questManager = new QuestManager(getDataFolder());
 
         // Initialize plugin manager
         PluginManager.getInstance().initialize();
@@ -103,7 +115,7 @@ public class TestEnchants extends JavaPlugin {
         registerListeners();
 
         // Register commands
-        CommandHandler handler = new CommandHandler(this, economy, rankManager);
+        CommandHandler handler = new CommandHandler(this, economy, rankManager, vaultManager);
         registerCommands(handler);
 
         // Schedule tasks
@@ -112,6 +124,7 @@ public class TestEnchants extends JavaPlugin {
         scheduleDailyReset();
         scheduleHourlyVoucherGiveaway();
         scheduleStaggeredMineResets();
+        scheduleVaultSaver();
 
         getLogger().info("CustomEnchant has been enabled!");
     }
@@ -129,25 +142,27 @@ public class TestEnchants extends JavaPlugin {
 
     private void registerListeners() {
         World world = Bukkit.getWorld("world"); // Adjust if needed
-        int xMin = 0, xMax = 16, yMin = -10, yMax = 5, zMin = 34, zMax = 50;
+        int xMin = -6, xMax = 24, yMin = -10, yMax = 5, zMin = 30, zMax = 60;
 
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new MagnetListener(), this);
         getServer().getPluginManager().registerEvents(new DurabilityEnchantListener(), this);
-        getServer().getPluginManager().registerEvents(new AnvilCombineListener(), this);
+        getServer().getPluginManager().registerEvents(new AnvilCombineListener(this), this);
         getServer().getPluginManager().registerEvents(new EnchantScrapListener(this), this);
         getServer().getPluginManager().registerEvents(new BlackScrollListener(this), this);
         getServer().getPluginManager().registerEvents(new CrateListener(world, xMin, xMax, yMin, yMax, zMin, zMax), this);
         getServer().getPluginManager().registerEvents(new VoucherListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerListener(essenceManager), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(essenceManager, questManager), this);
         getServer().getPluginManager().registerEvents(new ClaimMenuListener(), this);
         getServer().getPluginManager().registerEvents(new EssenceGenerationListener(this, essenceManager), this);
         getServer().getPluginManager().registerEvents(new GeneralBlockBreakListener(statTracker, this), this);
-        getServer().getPluginManager().registerEvents(new PlayerQuitListener(statTracker), this);
+        getServer().getPluginManager().registerEvents(new PlayerQuitListener(statTracker, vaultManager), this);
         getServer().getPluginManager().registerEvents(new EssenceMenuListener(this), this);
         getServer().getPluginManager().registerEvents(new RngBlockBreak(this, statTracker), this);
         getServer().getPluginManager().registerEvents(new RegionBlockBreakListener(), this);
+        getServer().getPluginManager().registerEvents(new VaultListener(vaultManager), this);
+        getServer().getPluginManager().registerEvents(new QuestListener(questManager, essenceManager), this);
 
     }
 
@@ -165,6 +180,10 @@ public class TestEnchants extends JavaPlugin {
         getCommand("setrank").setExecutor(handler);
         getCommand("essencenotif").setExecutor(handler);
         getCommand("resetmine").setExecutor(handler);
+        getCommand("pv").setExecutor(handler);
+        getCommand("pvsee").setExecutor(handler);
+        getCommand("sell").setExecutor(handler);
+        getCommand("quest").setExecutor(handler);
     }
 
     private void scheduleScoreboardUpdates() {
@@ -236,7 +255,6 @@ public class TestEnchants extends JavaPlugin {
     return essenceSellPrices;
 }
 
-    // Static getter for plugin instance
     public static TestEnchants getInstance() {
         return instance;
     }
@@ -247,6 +265,10 @@ public class TestEnchants extends JavaPlugin {
 
     public StatTracker getStatTracker() {
         return statTracker;
+    }
+
+    public SellManager getSellManager() {
+        return sellManager;
     }
 
     public ScoreboardUtil getScoreboardUtil() {
@@ -299,6 +321,9 @@ public class TestEnchants extends JavaPlugin {
     }
 }
 
+    public VaultManager getVaultManager() {
+    return vaultManager;
+}
 
     public MineResetManager getMineManager() {
         return mineManager;
@@ -367,5 +392,18 @@ public class TestEnchants extends JavaPlugin {
     }
 }
 
+    public QuestManager getQuestManager() {
+        return questManager;
+    }
+
+    private void scheduleVaultSaver() {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+        vaultManager.saveAll();
+        }, 20L * 60 * 5, 20L * 60 * 5);
+    }
+
+    public QuestManager getRankQuestManager() {
+    return questManager;
+}
 
 }

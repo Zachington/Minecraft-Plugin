@@ -271,8 +271,6 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     return cost != null ? cost.essenceTier : -1;
 }
 
-
-    // Get the cost of a rank
     public static RankCost getRankCost(String rank, String previousRank) {
     if (rank == null) return null;
 
@@ -325,8 +323,6 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     return null;
 }
 
-
-    // Get the next rank
     public static String getNextRank(String currentRank) {
     if (currentRank.matches("^[a-z]$")) {
         char next = (char)(currentRank.charAt(0) + 1);
@@ -366,15 +362,12 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     return null;
 }
 
-
-    // Check if rank is valid
     public static boolean isValidRank(String rank) {
         return rank.matches("^[a-z]$")
             || rank.matches("^p(\\d+)[a-z]$")
             || rank.matches("^c(\\d+)p(\\d+)[a-z]$");
     }
 
-    // Get correct essence tier
     public static int getEssenceTier(String rank) {
         if (rank.matches("^[a-z]$")) {
             char letter = rank.charAt(0);
@@ -553,14 +546,6 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
         return prestige;
     }
 
-    public static boolean isAtLeastP1a(Player player) {
-        return compareRanks(getRank(player), "p1a") >= 0;
-    }
-
-    public static boolean isAtLeastP10a(Player player) {
-        return compareRanks(getRank(player), "p10a") >= 0;
-    }
-
     public static int getMaxEnchantCount(Player player, Material type) {
     String rank = getRank(player); // e.g. "a", "p1a", "p5a"
 
@@ -615,5 +600,21 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     return true;
 }
 
+    public static int getPrestigeFromRank(String rank) {
+    if (rank == null || rank.isEmpty()) return 0;
+
+    if (rank.startsWith("p")) {
+        try {
+            int endIndex = rank.indexOf('a'); // assumes format like p1a, p10a, etc
+            if (endIndex > 1) {
+                String numStr = rank.substring(1, endIndex);
+                return Integer.parseInt(numStr);
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    return 0; // no prestige
+}
 
 }

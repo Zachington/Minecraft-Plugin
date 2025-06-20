@@ -29,30 +29,30 @@ public class customItemUtil {
     public static final String[] CUSTOM_ITEM = {
         "§8Black Scroll",
         "Transmutation Shard",
-        "Mining Key",
-        "Prison Key",
-        "Enchant Key",  //5
-        "Divine Key",
-        "Durability Key",
-        "Prestige Key",
-        "Prestige+ Key",
+        "§3Mining Key",
+        "§1Prison Key",
+        "§5Enchant Key",  //5
+        "§cDivine Key",
+        "§8Durability Key",
+        "§dPrestige Key",
+        "§4Prestige+ Key",
         "Transmutation Voucher",    //10
         "Decoration Voucher",
         "$1500 Voucher",
-        "Key All Voucher",
+        "§2Key All Voucher",
         "§fCommon Enchant",
         "§2Uncommon Enchant",   //15
         "§3Rare Enchant",
         "§5Epic Enchant",
         "§6Legendary Enchant",
-        "Coal Extractor",
-        "Copper Extractor",     //20
-        "Iron Extractor",
-        "Redstone Extractor",
-        "Lapis Extractor",
-        "Gold Extractor",
-        "Diamond Extractor",    //25
-        "Emerald Extractor",
+        "§8Coal Extractor",
+        "§6Copper Extractor",     //20
+        "§7Iron Extractor",
+        "§cRedstone Extractor",
+        "§9Lapis Extractor",
+        "§eGold Extractor",
+        "§9Diamond Extractor",    //25
+        "§aEmerald Extractor",
         "Deepslate Coal Extractor",
         "Deepslate Copper Extractor",
         "Deepslate Iron Extractor",
@@ -69,7 +69,7 @@ public class customItemUtil {
         "Durability Shard Tier 5",  //40
         "Durability Shard Tier 6",
         "Durability Shard Tier 7",
-        "Preservation Voucher"
+        "§6Preservation Voucher"
     };
 
     //Change these
@@ -193,22 +193,22 @@ public class customItemUtil {
     null,
     null,   //25
     null,
-    null,
-    null,
-    null,
-    null,   //30
-    null,
-    null,
-    null,
-    null,
-    null,   //35
-    null,
-    null,
-    null,
-    null,
-    null,   //40
-    null,
-    null,
+    "#646464",
+    "#FFC400",
+    "#FFFFFF",
+    "#DB0404",   //30
+    "#0070CA",
+    "#FFED00",
+    "#00E0FF",
+    "#00FF1C",
+    "#721C00",   //35
+    "#646464",
+    "#646464",
+    "#646464",
+    "#646464",
+    "#646464",   //40
+    "#646464",
+    "#646464",
     null
 };
 
@@ -240,22 +240,22 @@ public class customItemUtil {
         null,
         null,   //25
         null,
-        null,
-        null,
-        null,
-        null,   //30
-        null,
-        null,
-        null,
-        null,
-        null,   //35
-        null,
-        null,
-        null,
-        null,
-        null,   //40
-        null,
-        null,
+        "#646464",
+        "#816902",
+        "#484848",
+        "#390000",   //30
+        "#2200FF",
+        "#EAE26E",
+        "#0775B5",
+        "#016400",
+        "#8F8B00",   //35
+        "#39853E",
+        "#39853E",
+        "#39853E",
+        "#39853E",
+        "#39853E",   //40
+        "#39853E",
+        "#39853E",
         null
 };
 
@@ -308,7 +308,7 @@ public class customItemUtil {
 }
 
 // Helper method to identify if an item is an extractor by name
-    private static boolean isExtractor(String name) {
+    public static boolean isExtractor(String name) {
     String stripped = ChatColor.stripColor(name).toLowerCase();
     // Check if name contains "extractor" (case insensitive)
     return stripped.contains("extractor");

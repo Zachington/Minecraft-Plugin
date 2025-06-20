@@ -170,16 +170,23 @@ public void onInventoryClick(InventoryClickEvent event) {
         List<String> toolLore = toolMeta.getLore();
         for (String line : toolLore) {
             for (EnchantmentData.EnchantmentInfo info : EnchantmentData.ENCHANTMENTS) {
-                if (line.contains(info.name)) {
-                    int level = extractLevelFromLore(line);
-                    ItemStack book = EnchantmentData.createEnchantedBook(info, level, 100, false);
-                    if (bookIndex < bookSlots.length) {
-                        gui.setItem(bookSlots[bookIndex], book);
-                        bookIndex++;
-                    }
-                    break;
-                }
-            }
+    if (line.contains(info.name)) {
+
+        // Prevent Prestige and P+ rarity enchants
+        String rarity = info.rarity;
+        if (rarity.equalsIgnoreCase("PRESTIGE") || rarity.equalsIgnoreCase("P+")) {
+            continue; // Skip this enchant, don't add to black scroll GUI
+        }
+
+        int level = extractLevelFromLore(line);
+        ItemStack book = EnchantmentData.createEnchantedBook(info, level, 100, false);
+        if (bookIndex < bookSlots.length) {
+            gui.setItem(bookSlots[bookIndex], book);
+            bookIndex++;
+        }
+        break;
+    }
+}
         }
     }
 

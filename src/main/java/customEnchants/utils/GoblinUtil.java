@@ -107,16 +107,15 @@ static {
 
     // Utility: check if player meets min rank
     public static boolean canSpawn(Player player, LootGoblinType goblin) {
-        // Use your RankUtils to check rank
-        switch (goblin.minRank) {
-            case "p1a":
-                return RankUtils.isAtLeastP1a(player);
-            case "p10a":
-                return RankUtils.isAtLeastP10a(player);
-            default:
-                return true;
-        }
+    String playerRank = RankUtils.getRank(player);
+    String requiredRank = goblin.minRank;
+
+    if (requiredRank == null || requiredRank.isEmpty()) {
+        return true; // No rank requirement
     }
+
+    return RankUtils.compareRanks(playerRank, requiredRank) >= 1;
+}
 
     
 }

@@ -6,23 +6,33 @@ import customEnchants.utils.GuiUtil.EnchantParseResult;
 import customEnchants.utils.customItemUtil;
 import customEnchants.utils.RankUtils;
 
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 
 import java.util.*;
 import java.lang.reflect.Field;
 
 
 public class AnvilCombineListener implements Listener {
+
+    private final JavaPlugin plugin;
+
+    public AnvilCombineListener(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onAnvilCombine(PrepareAnvilEvent event) {
@@ -67,6 +77,19 @@ public class AnvilCombineListener implements Listener {
             handleToolCombine(event, first, second, inv);
         }
     }
+
+    @EventHandler
+    public void onAnvilClick(InventoryClickEvent event) {
+    if (!(event.getInventory() instanceof AnvilInventory)) return;
+
+    Location anvilLocation = event.getWhoClicked().getLocation().getBlock().getLocation(); 
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Block block = anvilLocation.getBlock();
+        if (block.getType().toString().contains("ANVIL")) {
+            block.setType(Material.ANVIL);
+        }
+    }, 1L);
+}
 
     private void handleBookCombine(PrepareAnvilEvent event, ItemStack first, ItemStack second, AnvilInventory inv) {
     EnchantParseResult result1 = GuiUtil.parseCustomEnchantBook(first);
@@ -192,9 +215,6 @@ public class AnvilCombineListener implements Listener {
         return;
     }
 }
-
-
-
 
     private int getRepairCost(ItemStack item) {
         if (item == null) return 0;

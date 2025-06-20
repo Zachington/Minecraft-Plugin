@@ -19,12 +19,14 @@ customEnchants\listeners\EnchantScrapListener.class
 customEnchants\listeners\AnvilCombineListener$ToolEnchantInfo.class
 customEnchants\listeners\CrateListener$2.class
 customEnchants\listeners\RngBlockBreak.class
+customEnchants\managers\QuestManager.class
 customEnchants\utils\GiveItem$EnchantmentDropData.class
 customEnchants\utils\BlockBreaker.class
 customEnchants\listeners\EssenceGenerationListener.class
 customEnchants\listeners\BlackScrollListener$1.class
 customEnchants\listeners\EssenceMenuListener.class
 customEnchants\utils\GuiUtil$EnchantParseResult.class
+customEnchants\utils\RankQuest.class
 customEnchants\managers\RankManager.class
 customEnchants\utils\GuiUtil$RarityInfo.class
 customEnchants\listeners\MagnetListener.class
@@ -32,6 +34,7 @@ customEnchants\managers\MineResetManager$1.class
 customEnchants\listeners\CrateListener$1.class
 customEnchants\listeners\CrateListener.class
 customEnchants\utils\RankUtils$RankCost.class
+customEnchants\utils\EnchantFunctionUtil.class
 customEnchants\utils\customItemUtil.class
 customEnchants\utils\GoblinUtil$LootGoblinType.class
 customEnchants\utils\ItemVoucherUtil.class
@@ -39,6 +42,7 @@ customEnchants\utils\ItemVoucherUtil$VoucherType.class
 customEnchants\utils\VaultUtil.class
 customEnchants\managers\MineResetManager.class
 customEnchants\listeners\PlayerQuitListener.class
+customEnchants\managers\VaultManager.class
 customEnchants\listeners\GeneralBlockBreakListener.class
 customEnchants\managers\ScoreboardManager.class
 customEnchants\utils\StructureUtil.class
@@ -52,6 +56,7 @@ customEnchants\utils\HeldToolInfo.class
 customEnchants\listeners\InventoryListener.class
 customEnchants\utils\EnchantFunctionUtil$1.class
 customEnchants\commands\CommandHandler.class
+customEnchants\managers\SellManager.class
 customEnchants\utils\GuiUtil.class
 customEnchants\utils\RankUtils.class
 customEnchants\commands\CommandHandler$Cost.class
@@ -59,7 +64,9 @@ customEnchants\listeners\InventoryListener$EnchantmentBookInfo.class
 customEnchants\utils\BlockBreaker$1.class
 customEnchants\utils\ClaimStorage.class
 customEnchants\listeners\VoucherListener.class
+customEnchants\listeners\VaultListener.class
 customEnchants\utils\crateTableUtil.class
+customEnchants\listeners\QuestListener.class
 customEnchants\utils\EnchantmentData$EnchantmentInfo.class
 customEnchants\utils\EssenceManager.class
 customEnchants\listeners\AnvilCombineListener.class

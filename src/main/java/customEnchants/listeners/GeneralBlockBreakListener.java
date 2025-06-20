@@ -15,6 +15,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.RankUtils;
 import customEnchants.utils.StatTracker;
@@ -46,6 +52,29 @@ public class GeneralBlockBreakListener implements Listener {
         HeldToolInfo tool = HeldToolInfo.fromItem(item);
             if (!RankUtils.canUseEnchants(tool, player)) {
             event.setCancelled(true);
+            return;
+        }
+
+        RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(block.getWorld()));
+        if (regions != null) {
+        ApplicableRegionSet regionSet = regions.getApplicableRegions(BukkitAdapter.asBlockVector(block.getLocation()));
+
+            for (ProtectedRegion region : regionSet) {
+                String regionId = region.getId();
+
+                if (regionId.startsWith("mine_")) {
+                    String requiredRank = regionId.substring(5);
+                    String playerRank = RankUtils.getRank(player);
+
+                    if (!RegionBlockBreakListener.hasRequiredRank(playerRank, requiredRank)) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (event.isCancelled()) {
             return;
         }
 

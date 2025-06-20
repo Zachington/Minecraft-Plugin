@@ -26,11 +26,11 @@ public class GiveItem {
         public static final Map<String, List<ItemDropEntry>> ENCHANT_DROP_MAP = new HashMap<>();
         static {
             ENCHANT_DROP_MAP.put("Key Miner", List.of(
-                new ItemDropEntry(customItemUtil.createCustomItem("Mining Key"), 0.1),
-                new ItemDropEntry(customItemUtil.createCustomItem("Prison Key"), 0.1),
-                new ItemDropEntry(customItemUtil.createCustomItem("Enchant Key"), 0.05),
-                new ItemDropEntry(customItemUtil.createCustomItem("Divine Key"), 0.03),
-                new ItemDropEntry(customItemUtil.createCustomItem("Durability Key"), 0.02)
+                new ItemDropEntry(customItemUtil.createCustomItem("Mining Key"), 0.2),
+                new ItemDropEntry(customItemUtil.createCustomItem("Prison Key"), 0.45),
+                new ItemDropEntry(customItemUtil.createCustomItem("Enchant Key"), 0.2),
+                new ItemDropEntry(customItemUtil.createCustomItem("Divine Key"), 0.1),
+                new ItemDropEntry(customItemUtil.createCustomItem("Durability Key"), 0.05)
                 ));
     
 }

@@ -2,7 +2,6 @@ package customEnchants.listeners;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-//import java.util.logging.LOGGER;
 
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -16,9 +15,12 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.bukkit.event.block.Action;
 
 import customEnchants.TestEnchants;
+import customEnchants.managers.QuestManager;
 import customEnchants.utils.GuiUtil;
+import customEnchants.utils.RankQuest;
 import customEnchants.utils.crateTableUtil;
 import customEnchants.utils.customItemUtil;
 import customEnchants.utils.crateTableUtil.LootEntry;
@@ -58,6 +60,9 @@ public class CrateListener implements Listener {
         Material clickedType = event.getClickedBlock().getType();
         boolean isSneaking = player.isSneaking();
 
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock().getType() == Material.ENCHANTING_TABLE) {
+            event.setCancelled(true);
+        }
         
         switch (event.getAction()) {
             case LEFT_CLICK_BLOCK:
@@ -78,6 +83,30 @@ public class CrateListener implements Listener {
             } else {
                 if (handleRightClick(player, clickedType, loc)) {
                     event.setCancelled(true);
+                    UUID uuid = player.getUniqueId();
+                    TestEnchants.getInstance().statTracker.incrementPlayerStat(uuid, "crate_total", 1);
+
+                    // Check for active crate quests
+                    QuestManager questManager = TestEnchants.getInstance().getQuestManager();
+                    Set<String> activeQuests = questManager.getActiveQuests(player);
+                    int currentCrates = TestEnchants.getInstance().statTracker.getPlayerStat(uuid, "crate_total", false);
+
+                    for (String questKey : activeQuests) {
+                        RankQuest quest = questManager.get(questKey);
+                        if (quest == null || quest.extraObjective == null || !quest.extraObjective.startsWith("open_crates:")) continue;
+
+                        String[] parts = quest.extraObjective.split(":");
+                        int required = Integer.parseInt(parts[1]);
+                        String baseRank = questKey.split("-quest")[0];
+
+                        int cratesAtStart = TestEnchants.getInstance().statTracker.getPlayerStat(uuid, "total_crates_at_rank_start." + baseRank, false);
+                        int cratesSinceStart = currentCrates - cratesAtStart;
+
+                    if (cratesSinceStart >= required) {
+                        questManager.completeQuest(player, questKey);
+                        player.sendMessage("§aQuest complete: Opened " + required + " crates!");
+                    }
+                    }
                 }
             }
                 break;
@@ -305,7 +334,7 @@ public class CrateListener implements Listener {
         player.openInventory(GuiUtil.enchantKeyInventory(player));
         guiOpenMethod.put(player, "LEFT_CLICK");
         return true;
-    } else if (clickedType == Material.DIAMOND_BLOCK) {
+    } else if (clickedType == Material.REDSTONE_BLOCK) {
         player.openInventory(GuiUtil.divineKeyInventory(player));
         guiOpenMethod.put(player, "LEFT_CLICK");
         return true;
@@ -342,6 +371,8 @@ public class CrateListener implements Listener {
                 Inventory gui = GuiUtil.enchantKeyInventory(player);
                 guiOpenMethod.put(player, "RIGHT_CLICK");
                 player.openInventory(gui);
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_enchant");
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
                 return true;
             } else {
                 player.sendMessage("You must hold an Enchant Key to open this.");
@@ -353,7 +384,7 @@ public class CrateListener implements Listener {
             pushPlayerBack(player, clickedBlockLoc);
             return false;
         }
-    } else if (clickedType == Material.DIAMOND_BLOCK) {
+    } else if (clickedType == Material.REDSTONE_BLOCK) {
         if (isValidCustomItem(handItem)) {
             String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
             if (plainName.equalsIgnoreCase("Divine Key")) {
@@ -367,6 +398,8 @@ public class CrateListener implements Listener {
                 Inventory gui = GuiUtil.divineKeyInventory(player);
                 guiOpenMethod.put(player, "RIGHT_CLICK");
                 player.openInventory(gui);
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_divine");
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
                 return true;
             } else {
                 player.sendMessage("You must hold a Divine Key to open this.");
@@ -392,6 +425,8 @@ public class CrateListener implements Listener {
                 Inventory gui = GuiUtil.durabilityKeyInventory(player);
                 guiOpenMethod.put(player, "RIGHT_CLICK");
                 player.openInventory(gui);
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_durability");
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
                 return true;
             } else {
                 player.sendMessage("You must hold a Durability Key to open this.");
@@ -417,6 +452,8 @@ public class CrateListener implements Listener {
                 Inventory gui = GuiUtil.miningKeyInventory(player);
                 guiOpenMethod.put(player, "RIGHT_CLICK");
                 player.openInventory(gui);
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_mining");
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
                 return true;
             } else {
                 player.sendMessage("You must hold a Mining Key to open this.");
@@ -442,6 +479,8 @@ public class CrateListener implements Listener {
                 Inventory gui = GuiUtil.prisonKeyInventory(player);
                 guiOpenMethod.put(player, "RIGHT_CLICK");
                 player.openInventory(gui);
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_prison");
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
                 return true;
             } else {
                 player.sendMessage("You must hold a Prison Key to open this.");
@@ -463,7 +502,7 @@ public class CrateListener implements Listener {
     ItemStack handItem = player.getInventory().getItemInMainHand();
 
     if (clickedType != Material.ENCHANTING_TABLE &&
-        clickedType != Material.DIAMOND_BLOCK &&
+        clickedType != Material.REDSTONE_BLOCK &&
         clickedType != Material.BEDROCK &&
         clickedType != Material.CREAKING_HEART &&
         clickedType != Material.CRYING_OBSIDIAN) {
@@ -481,7 +520,7 @@ public class CrateListener implements Listener {
 
     if (clickedType == Material.ENCHANTING_TABLE && plainName.equalsIgnoreCase("Enchant Key")) {
         crateType = "Enchant Key";
-    } else if (clickedType == Material.DIAMOND_BLOCK && plainName.equalsIgnoreCase("Divine Key")) {
+    } else if (clickedType == Material.REDSTONE_BLOCK && plainName.equalsIgnoreCase("Divine Key")) {
         crateType = "Divine Key";
     } else if (clickedType == Material.BEDROCK && plainName.equalsIgnoreCase("Durability Key")) {
         crateType = "Durability Key";
@@ -504,6 +543,20 @@ public class CrateListener implements Listener {
     } else {
         player.getInventory().setItemInMainHand(handItem);
     }
+
+    String statKey = null;
+    switch (crateType) {
+    case "Enchant Key": statKey = "crate_enchant"; break;
+    case "Divine Key": statKey = "crate_divine"; break;
+    case "Durability Key": statKey = "crate_durability"; break;
+    case "Mining Key": statKey = "crate_mining"; break;
+    case "Prison Key": statKey = "crate_prison"; break;
+}
+
+    if (statKey != null) {
+        TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), statKey, amount);
+        TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total", amount); // optional total counter
+}
 
     for (int i = 0; i < amount; i++) {
         ItemStack loot = getRandomLoot(crateType);
