@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 
 import customEnchants.TestEnchants;
 import customEnchants.managers.QuestManager;
@@ -23,19 +24,24 @@ public class PlayerListener implements Listener {
 
     private final EssenceManager essenceManager;
     private final QuestManager questManager;
+    private final TestEnchants testEnchants;
 
-    public PlayerListener(EssenceManager essenceManager, QuestManager questManager) {
+    public PlayerListener(EssenceManager essenceManager, QuestManager questManager, TestEnchants testEnchants) {
         this.essenceManager = essenceManager;
         this.questManager = questManager;
+        this.testEnchants = testEnchants;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false, false));
-
-        // Check if rank is already set in NBT
         PersistentDataContainer container = player.getPersistentDataContainer();
+        NamespacedKey nvkey = new NamespacedKey(testEnchants, "night_vision_enabled");
+
+        if (container.has(nvkey, PersistentDataType.INTEGER) && container.get(nvkey, PersistentDataType.INTEGER) == 1) {
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false, false));
+    }
+
     if (!container.has(RankUtils.rankKey, PersistentDataType.STRING)) {
         RankUtils.setRank(player, "a");  // Set initial rank to 'a' only if no rank is set
         System.out.println("[Join] Rank not found, setting to 'a' for " + player.getName());
@@ -47,17 +53,7 @@ public class PlayerListener implements Listener {
     if (!player.hasPlayedBefore()) {
         Location spawnA = new Location(Bukkit.getWorld("world"), -34, 0, -62);
         player.teleport(spawnA);
-    }
-
-        // Schedule scoreboard update
-        Bukkit.getScheduler().runTaskLater(TestEnchants.getInstance(), () -> {
-        TestEnchants.getInstance().getScoreboardUtil().updateScoreboard(player);
-        }, 20L);
-
-        // Preload extractor inventory into memory
-        essenceManager.preloadExtractorInventory(player);
-
-    if (questManager.getActiveQuests(player).isEmpty()) {
+        if (questManager.getActiveQuests(player).isEmpty()) {
     String baseRank = "a";
     String nextRank = "b"; // hardcoded for first rank-up
 
@@ -95,5 +91,16 @@ public class PlayerListener implements Listener {
 
     System.out.println("[Join] Assigned a-b quests to " + player.getName());
 }
+    }
+
+        // Schedule scoreboard update
+        Bukkit.getScheduler().runTaskLater(TestEnchants.getInstance(), () -> {
+        TestEnchants.getInstance().getScoreboardUtil().updateScoreboard(player);
+        }, 20L);
+
+        // Preload extractor inventory into memory
+        essenceManager.preloadExtractorInventory(player);
+
+    
     }
 }

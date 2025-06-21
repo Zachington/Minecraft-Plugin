@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 
 
 import org.bukkit.Bukkit;
@@ -12,16 +13,22 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Statistic;
 
 import customEnchants.managers.PluginManager;
 import customEnchants.managers.QuestManager;
 import customEnchants.managers.RankManager;
 import customEnchants.managers.SellManager;
 import customEnchants.managers.VaultManager;
+import customEnchants.managers.WarpManager;
 import customEnchants.managers.MineResetManager;
 import customEnchants.utils.ClaimStorage;
 import customEnchants.utils.EssenceManager;
@@ -30,6 +37,7 @@ import customEnchants.utils.StatTracker;
 import customEnchants.utils.VaultUtil;
 import customEnchants.utils.customItemUtil;
 import net.milkbowl.vault.economy.Economy;
+import customEnchants.listeners.AntiCheatListener;
 import customEnchants.listeners.AnvilCombineListener;
 import customEnchants.listeners.BlackScrollListener;
 import customEnchants.listeners.InventoryListener;
@@ -37,6 +45,7 @@ import customEnchants.listeners.DurabilityEnchantListener;
 import customEnchants.listeners.EnchantScrapListener;
 import customEnchants.listeners.EssenceGenerationListener;
 import customEnchants.listeners.EssenceMenuListener;
+import customEnchants.listeners.FurnaceListener;
 import customEnchants.listeners.MagnetListener;
 import customEnchants.listeners.PlayerListener;
 import customEnchants.listeners.VoucherListener;
@@ -47,6 +56,7 @@ import customEnchants.listeners.PlayerQuitListener;
 import customEnchants.listeners.QuestListener;
 import customEnchants.listeners.RegionBlockBreakListener;
 import customEnchants.listeners.RngBlockBreak;
+import customEnchants.listeners.TraderListener;
 import customEnchants.listeners.VaultListener;
 import customEnchants.listeners.ClaimMenuListener;
 
@@ -68,6 +78,7 @@ public class TestEnchants extends JavaPlugin {
     private QuestManager questManager;
     public SellManager sellManager;
     private QuestManager QuestManager;
+    private WarpManager warpManager;
 
     @Override
     public void onEnable() {
@@ -89,6 +100,27 @@ public class TestEnchants extends JavaPlugin {
             return;
         }
 
+        Iterator<Recipe> it = Bukkit.recipeIterator();
+    while (it.hasNext()) {
+        Recipe recipe = it.next();
+        if (recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe) {
+            ItemStack result = recipe.getResult();
+            Material type = result.getType();
+
+            if (
+                type.name().endsWith("_BOAT") || // All types of boats
+                type == Material.BLAST_FURNACE ||
+                type.name().endsWith("_SHULKER_BOX") || // All shulker box colors
+                type == Material.AMETHYST_BLOCK ||
+                type == Material.SPYGLASS ||
+                type == Material.RECOVERY_COMPASS ||
+                type == Material.LEGACY_BOOK_AND_QUILL
+            ) {
+                it.remove();
+            }
+        }
+    }
+
 
         essenceSellPrices.put(1, 10.0);
         essenceSellPrices.put(2, 15.0);
@@ -107,6 +139,7 @@ public class TestEnchants extends JavaPlugin {
         mineManager = new MineResetManager(this);
         this.sellManager = new SellManager(getDataFolder());
         this.questManager = new QuestManager(getDataFolder());
+        this.warpManager = new WarpManager(this);
 
         // Initialize plugin manager
         PluginManager.getInstance().initialize();
@@ -115,7 +148,7 @@ public class TestEnchants extends JavaPlugin {
         registerListeners();
 
         // Register commands
-        CommandHandler handler = new CommandHandler(this, economy, rankManager, vaultManager);
+        CommandHandler handler = new CommandHandler(this, economy, rankManager, vaultManager, this);
         registerCommands(handler);
 
         // Schedule tasks
@@ -137,6 +170,8 @@ public class TestEnchants extends JavaPlugin {
         }
         ClaimStorage.saveKeys();
         EssenceGenerationListener.savePreferences();
+        questManager.saveActiveQuests();
+        statTracker.save();
         getLogger().info("CustomEnchant has been disabled!");
     }
 
@@ -144,16 +179,16 @@ public class TestEnchants extends JavaPlugin {
         World world = Bukkit.getWorld("world"); // Adjust if needed
         int xMin = -6, xMax = 24, yMin = -10, yMax = 5, zMin = 30, zMax = 60;
 
-        getServer().getPluginManager().registerEvents(new InventoryListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryListener(statTracker), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new MagnetListener(), this);
         getServer().getPluginManager().registerEvents(new DurabilityEnchantListener(), this);
         getServer().getPluginManager().registerEvents(new AnvilCombineListener(this), this);
         getServer().getPluginManager().registerEvents(new EnchantScrapListener(this), this);
         getServer().getPluginManager().registerEvents(new BlackScrollListener(this), this);
-        getServer().getPluginManager().registerEvents(new CrateListener(world, xMin, xMax, yMin, yMax, zMin, zMax), this);
+        getServer().getPluginManager().registerEvents(new CrateListener(world, xMin, xMax, yMin, yMax, zMin, zMax, statTracker), this);
         getServer().getPluginManager().registerEvents(new VoucherListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerListener(essenceManager, questManager), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(essenceManager, questManager, this), this);
         getServer().getPluginManager().registerEvents(new ClaimMenuListener(), this);
         getServer().getPluginManager().registerEvents(new EssenceGenerationListener(this, essenceManager), this);
         getServer().getPluginManager().registerEvents(new GeneralBlockBreakListener(statTracker, this), this);
@@ -162,7 +197,10 @@ public class TestEnchants extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new RngBlockBreak(this, statTracker), this);
         getServer().getPluginManager().registerEvents(new RegionBlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new VaultListener(vaultManager), this);
-        getServer().getPluginManager().registerEvents(new QuestListener(questManager, essenceManager), this);
+        getServer().getPluginManager().registerEvents(new QuestListener(questManager, essenceManager, statTracker), this);
+        getServer().getPluginManager().registerEvents(new TraderListener(statTracker,questManager, economy), this);
+        getServer().getPluginManager().registerEvents(new AntiCheatListener(), this);
+        getServer().getPluginManager().registerEvents(new FurnaceListener(this), this); 
 
     }
 
@@ -175,7 +213,7 @@ public class TestEnchants extends JavaPlugin {
         getCommand("keyall").setExecutor(handler);
         getCommand("claim").setExecutor(handler);
         getCommand("extractor").setExecutor(handler);
-        this.getCommand("essence").setExecutor(handler);
+        getCommand("essence").setExecutor(handler);
         getCommand("rankup").setExecutor(handler);
         getCommand("setrank").setExecutor(handler);
         getCommand("essencenotif").setExecutor(handler);
@@ -184,6 +222,11 @@ public class TestEnchants extends JavaPlugin {
         getCommand("pvsee").setExecutor(handler);
         getCommand("sell").setExecutor(handler);
         getCommand("quest").setExecutor(handler);
+        getCommand("completequest").setExecutor(handler);
+        getCommand("nightvision").setExecutor(handler);
+        getCommand("spawntrader").setExecutor(handler);
+        getCommand("savewarp").setExecutor(handler);
+        getCommand("removewarp").setExecutor(handler);
     }
 
     private void scheduleScoreboardUpdates() {
@@ -329,7 +372,7 @@ public class TestEnchants extends JavaPlugin {
         return mineManager;
     }
 
-    private void teleportPlayersOutOfMine(String mineName) {
+    public void teleportPlayersOutOfMine(String mineName) {
     YamlConfiguration config = mineManager.getMinesConfig();
 
     String basePath = "mines." + mineName;
@@ -344,20 +387,20 @@ public class TestEnchants extends JavaPlugin {
     int y2 = config.getInt(basePath + ".region.y2");
     int z2 = config.getInt(basePath + ".region.z2");
 
+    Location warp = warpManager.getWarp(mineName);
+    if (warp == null) return;
+
     for (Player player : world.getPlayers()) {
         int px = player.getLocation().getBlockX();
         int py = player.getLocation().getBlockY();
         int pz = player.getLocation().getBlockZ();
 
         boolean inside = px >= Math.min(x1, x2) && px <= Math.max(x1, x2)
-                      && py >= Math.min(y1, y2) && py <= Math.max(y1, y2)
-                      && pz >= Math.min(z1, z2) && pz <= Math.max(z1, z2);
+                    && py >= Math.min(y1, y2) && py <= Math.max(y1, y2)
+                    && pz >= Math.min(z1, z2) && pz <= Math.max(z1, z2);
 
         if (inside) {
-            int centerX = (x1 + x2) / 2;
-            int centerZ = (z1 + z2) / 2;
-            int safeY = world.getHighestBlockYAt(centerX, centerZ);
-            player.teleport(new Location(world, centerX + 0.5, safeY + 1, centerZ + 0.5));
+            player.teleport(warp);
             player.sendMessage(ChatColor.RED + "You were teleported out of the mine for reset!");
         }
     }
@@ -377,17 +420,19 @@ public class TestEnchants extends JavaPlugin {
     int y2 = config.getInt(basePath + ".region.y2");
     int z2 = config.getInt(basePath + ".region.z2");
 
+    String formattedName = formatMineName(mineName);
+
     for (Player player : world.getPlayers()) {
         int px = player.getLocation().getBlockX();
         int py = player.getLocation().getBlockY();
         int pz = player.getLocation().getBlockZ();
 
         boolean inside = px >= Math.min(x1, x2) && px <= Math.max(x1, x2)
-                    && py >= Math.min(y1, y2) && py <= Math.max(y1, y2)
-                    && pz >= Math.min(z1, z2) && pz <= Math.max(z1, z2);
+                && py >= Math.min(y1, y2) && py <= Math.max(y1, y2)
+                && pz >= Math.min(z1, z2) && pz <= Math.max(z1, z2);
 
         if (inside) {
-            player.sendMessage(ChatColor.YELLOW + mineName + " resetting in " + warnSeconds + " seconds!");
+            player.sendMessage(ChatColor.YELLOW + formattedName + " resetting in " + warnSeconds + " seconds!");
         }
     }
 }
@@ -404,6 +449,26 @@ public class TestEnchants extends JavaPlugin {
 
     public QuestManager getRankQuestManager() {
     return questManager;
+}
+
+    private String formatMineName(String raw) {
+    if (raw == null || raw.isEmpty()) return "Unknown Mine";
+
+    StringBuilder result = new StringBuilder("Mine ");
+    for (int i = 4; i < raw.length(); i++) { // skip "mine"
+        char c = raw.charAt(i);
+        if (i == 4) {
+            result.append(Character.toUpperCase(c));
+        } else {
+            result.append(' ').append(Character.toUpperCase(c));
+        }
+    }
+    return result.toString();
+}
+
+    public long getPlayTimeSeconds(Player player) {
+        int ticks = player.getStatistic(Statistic.PLAY_ONE_MINUTE);
+        return ticks / 20L; // Convert to seconds
 }
 
 }

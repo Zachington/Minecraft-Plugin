@@ -757,7 +757,15 @@ public class GuiUtil {
             case "equip_extractor":
                 material = Material.COAL_ORE;
                 displayName = ChatColor.DARK_AQUA + "Equip an Extractor";
-                progressLine = ChatColor.GRAY + "Progress: Equip to complete";
+                progressLine = ChatColor.GRAY + "Progress: Equip an Extractor to complete";
+                break;
+
+            case "earn_essence":
+                material = Material.EMERALD;
+                displayName = ChatColor.DARK_GREEN + "Earn Essence";
+                current = statTracker.getPlayerStat(uuid, "earned_essence", false);
+                atStart = statTracker.getPlayerStat(uuid, "earned_essence_at_rank_start." + questKey.split("-quest")[0], false);
+                progressLine = ChatColor.GRAY + "Progress: " + (current - atStart) + "/" + param;
                 break;
 
             case "sell_filler":
@@ -818,6 +826,348 @@ public class GuiUtil {
 
     return item;
 }
+
+    public static void openEssenceShardGUI(Player player) {
+        Inventory inv = Bukkit.createInventory(null, 36, "Essence Shards");
+
+        // Define each shard with material, name, lore
+        inv.setItem(10, createShard(Material.COAL, "Coal Essence Shard", 
+                Arrays.asList(
+                    ChatColor.GRAY + "Crafting Recipe:",
+                    ChatColor.GRAY + "576 Coal"
+                )));
+        inv.setItem(11, createShard(Material.COPPER_INGOT, "Copper Essence Shard",
+                Arrays.asList(
+                    ChatColor.GRAY + "Crafting Recipe:",
+                    ChatColor.GRAY + "576 Copper"
+                )));
+        inv.setItem(19, createShard(Material.IRON_INGOT, "Iron Essence Shard",
+                Arrays.asList(
+                    ChatColor.GRAY + "Crafting Recipe:",
+                    ChatColor.GRAY + "576 Iron"
+                )));
+        inv.setItem(20, createShard(Material.REDSTONE, "Redstone Essence Shard",
+                Arrays.asList(
+                    ChatColor.GRAY + "Crafting Recipe:",
+                    ChatColor.GRAY + "288 Coal",
+                    ChatColor.GRAY + "288 Copper"
+                )));
+
+        inv.setItem(15, createShard(Material.LAPIS_LAZULI, "Lapis Essence Shard",
+                Arrays.asList(
+                    ChatColor.GRAY + "Crafting Recipe:",
+                    ChatColor.GRAY + "1 Redstone Essence Shard",
+                    ChatColor.GRAY + "288 Iron"
+                )));
+        inv.setItem(16, createShard(Material.GOLD_INGOT, "Gold Essence Shard",
+                Arrays.asList(
+                    ChatColor.GRAY + "Crafting Recipe:",
+                    ChatColor.GRAY + "576 Gold"
+                )));
+        inv.setItem(24, createShard(Material.DIAMOND, "Diamond Essence Shard",
+                Arrays.asList(
+                    ChatColor.GRAY + "Crafting Recipe:",
+                    ChatColor.GRAY + "1 Lapis Essence Shard",
+                    ChatColor.GRAY + "288 Emerald"
+                )));
+        inv.setItem(25, createShard(Material.EMERALD, "Emerald Essence Shard",
+                Arrays.asList(
+                    ChatColor.GRAY + "Crafting Recipe:",
+                    ChatColor.GRAY + "576 Emerald"
+                )));
+            fillEmptySlotsWithGrayPane(inv);
+
+        player.openInventory(inv);
+    }
+
+    public static void openDeepEssenceShardGUI(Player player) {
+        Inventory inv = Bukkit.createInventory(null, 36, "Deep Essence Shards");
+
+        inv.setItem(10, createDeepShard(Material.COAL_BLOCK, "Coal", "Coal Essence Shard"));
+        inv.setItem(11, createDeepShard(Material.COPPER_BLOCK, "Copper", "Copper Essence Shard"));
+        inv.setItem(19, createDeepShard(Material.IRON_BLOCK, "Iron", "Iron Essence Shard"));
+        inv.setItem(20, createDeepShard(Material.REDSTONE_BLOCK, "Redstone", "Redstone Essence Shard"));
+        inv.setItem(13, createAmethystShard());
+
+        inv.setItem(15, createDeepShard(Material.LAPIS_BLOCK, "Lapis", "Lapis Essence Shard"));
+        inv.setItem(16, createDeepShard(Material.GOLD_BLOCK, "Gold", "Gold Essence Shard"));
+        inv.setItem(24, createDeepShard(Material.DIAMOND_BLOCK, "Diamond", "Diamond Essence Shard"));
+        inv.setItem(25, createDeepShard(Material.EMERALD_BLOCK, "Emerald", "Emerald Essence Shard"));
+        fillEmptySlotsWithGrayPane(inv);
+
+        player.openInventory(inv);
+    }
+
+    private static ItemStack createDeepShard(Material blockMaterial, String materialName, String correspondingShardName) {
+        ItemStack item = new ItemStack(blockMaterial);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.DARK_PURPLE + "Deep " + materialName + " Essence Shard");
+
+            meta.setLore(Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "10 " + correspondingShardName,
+                ChatColor.GRAY + "128 Amethyst Blocks"
+            ));
+
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private static ItemStack createShard(Material material, String name, java.util.List<String> lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.AQUA + name);
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private static ItemStack createAmethystShard() {
+    ItemStack item = new ItemStack(Material.AMETHYST_SHARD);
+    ItemMeta meta = item.getItemMeta();
+    if (meta != null) {
+        meta.setDisplayName(ChatColor.DARK_PURPLE + "Amethyst Essence Shard");
+        meta.setLore(Arrays.asList(
+            ChatColor.GRAY + "Crafting Recipe:",
+            ChatColor.GRAY + "16 Deep Emerald Essence Shard",
+            ChatColor.GRAY + "1024 Amethyst Blocks"
+        ));
+        item.setItemMeta(meta);
+    }
+    return item;
+}
+
+    public static void fillEmptySlotsWithGrayPane(Inventory inv) {
+    ItemStack grayPane = createPane(Material.GRAY_STAINED_GLASS_PANE);
+    for (int slot = 0; slot < inv.getSize(); slot++) {
+        ItemStack current = inv.getItem(slot);
+        if (current == null || current.getType() == Material.AIR) {
+            inv.setItem(slot, grayPane);
+        }
+    }
+}
+
+    public static void openExtractorCraftingGUI(Player player) {
+    Inventory inv = Bukkit.createInventory(null, 36, "Extractor Crafting");
+
+    inv.setItem(10, createExtractor(Material.COAL_ORE, "Coal Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "1 Coal Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    inv.setItem(11, createExtractor(Material.COPPER_ORE, "Copper Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "2 Copper Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    inv.setItem(20, createExtractor(Material.REDSTONE_ORE, "Redstone Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "10 Redstone Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    inv.setItem(15, createExtractor(Material.LAPIS_ORE, "Lapis Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "15 Lapis Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    inv.setItem(19, createExtractor(Material.IRON_ORE, "Iron Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "5 Iron Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    inv.setItem(16, createExtractor(Material.GOLD_ORE, "Gold Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "20 Gold Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    inv.setItem(24, createExtractor(Material.DIAMOND_ORE, "Diamond Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "15 Diamond Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    inv.setItem(25, createExtractor(Material.EMERALD_ORE, "Emerald Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "54 Emerald Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    fillEmptySlotsWithGrayPane(inv);
+    player.openInventory(inv);
+}
+
+    public static void openDeepExtractorCraftingGUI(Player player) {
+    Inventory inv = Bukkit.createInventory(null, 36, "Deep Extractor Crafting");
+
+    inv.setItem(10, createExtractor(Material.DEEPSLATE_COAL_ORE, "Deep Coal Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "6 Deep Coal Essence Shard",
+                ChatColor.GRAY + "1 Extractor Core"
+            )));
+
+    inv.setItem(11, createExtractor(Material.DEEPSLATE_COPPER_ORE, "Deep Copper Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "18 Deep Copper Essence Shard",
+                ChatColor.GRAY + "2 Extractor Core"
+            )));
+
+    inv.setItem(20, createExtractor(Material.DEEPSLATE_REDSTONE_ORE, "Deep Redstone Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "54 Deep Redstone Essence Shard",
+                ChatColor.GRAY + "10 Extractor Core"
+            )));
+
+    inv.setItem(15, createExtractor(Material.DEEPSLATE_LAPIS_ORE, "Deep Lapis Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "36 Deep Lapis Essence Shard",
+                ChatColor.GRAY + "15 Extractor Core"
+            )));
+
+    inv.setItem(19, createExtractor(Material.DEEPSLATE_IRON_ORE, "Deep Iron Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "30 Deep Iron Essence Shard",
+                ChatColor.GRAY + "5 Extractor Core"
+            )));
+
+    inv.setItem(16, createExtractor(Material.DEEPSLATE_GOLD_ORE, "Deep Gold Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "90 Deep Gold Essence Shard",
+                ChatColor.GRAY + "20 Extractor Core"
+            )));
+
+    inv.setItem(24, createExtractor(Material.DEEPSLATE_DIAMOND_ORE, "Deep Diamond Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "48 Deep Diamond Essence Shard",
+                ChatColor.GRAY + "25 Extractor Core"
+            )));
+
+    inv.setItem(25, createExtractor(Material.DEEPSLATE_EMERALD_ORE, "Deep Emerald Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "90 Deep Emerald Essence Shard",
+                ChatColor.GRAY + "30 Extractor Core"
+            )));
+
+    inv.setItem(13, createExtractor(Material.NETHER_GOLD_ORE, "Nether Gold Extractor",
+            Arrays.asList(
+                ChatColor.GRAY + "Crafting Recipe:",
+                ChatColor.GRAY + "10 Amethyst Shards",
+                ChatColor.GRAY + "50 Extractor Core"
+            )));
+
+    fillEmptySlotsWithGrayPane(inv);
+    player.openInventory(inv);
+}
+
+    private static ItemStack createExtractor(Material material, String name, List<String> lore) {
+    ItemStack item = new ItemStack(material);
+    ItemMeta meta = item.getItemMeta();
+    if (meta != null) {
+        meta.setDisplayName(ChatColor.AQUA + name);
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+    }
+    return item;
+}
+
+    public static Inventory getFurnaceUpgradeGUI(Player player) {
+    Inventory gui = Bukkit.createInventory(null, 27, ChatColor.GRAY + "Furnace Upgrades");
+
+    // Fill top and bottom rows with mats
+    ItemStack[] mats = {
+        new ItemStack(Material.COAL),
+        new ItemStack(Material.COPPER_INGOT),
+        new ItemStack(Material.IRON_INGOT),
+        new ItemStack(Material.GOLD_INGOT),
+        new ItemStack(Material.DIAMOND),
+        new ItemStack(Material.EMERALD),
+        new ItemStack(Material.AMETHYST_SHARD),
+    };
+    for (int i = 0; i < 7; i++) {
+    gui.setItem(i + 1, mats[i]);  // slots 1 to 7 get mats[0] to mats[6]
+    }
+    for (int i = 0; i < 7; i++) {
+    gui.setItem(i + 19, mats[i]);  // slots 19 to 24 get mats[1] to mats[6]
+    }   
+
+    for (int tier = 1; tier <= 7; tier++) {
+        Material furnaceMat = (tier == 7) ? Material.BLAST_FURNACE : Material.FURNACE;
+        ItemStack furnace = new ItemStack(furnaceMat);
+        ItemMeta meta = furnace.getItemMeta();
+
+        String name = (tier == 7) ? "Blast Furnace" : "Tier " + tier + " Furnace";
+        int smeltBonus = switch (tier) {
+            case 1 -> 10;
+            case 2 -> 20;
+            case 3 -> 30;
+            case 4 -> 45;
+            case 5 -> 60;
+            case 6 -> 80;
+            default -> 100;
+        };
+
+        // Calculate cost
+        double[] tierCosts = {
+            50_000,     // Tier 1
+            100_000,    // Tier 2
+            150_000,    // Tier 3
+            250_000,    // Tier 4
+            300_000,    // Tier 5
+            650_000,    // Tier 6
+            1_000_000   // Tier 7 (Blast Furnace)
+        };
+
+        double moneyCost = tierCosts[tier - 1];
+
+        // Set lore
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY + "Double Smelt Chance: " + smeltBonus + "%");
+        lore.add(ChatColor.YELLOW + "Crafting Cost:");
+        if (tier == 1) {
+            lore.add(ChatColor.GRAY + "- Furnace");
+        } else {
+            String prev = (tier == 7) ? "Tier 6 Furnace" : "Tier " + (tier - 1) + " Furnace";
+            lore.add(ChatColor.GRAY + "- " + prev);
+        }
+        lore.add(ChatColor.GRAY + "- $" + String.format("%,d", (int) moneyCost));
+
+        meta.setDisplayName(ChatColor.GREEN + name);
+        meta.setLore(lore);
+        furnace.setItemMeta(meta);
+        gui.setItem(9 + tier, furnace);
+    }
+
+    fillEmptySlotsWithGrayPane(gui);
+    return gui;
+}
+
+
+
 
 
 }

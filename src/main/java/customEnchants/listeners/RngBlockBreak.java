@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
@@ -25,6 +26,7 @@ import org.bukkit.entity.Zombie;
 
 import customEnchants.utils.GoblinUtil;
 import customEnchants.utils.StatTracker;
+import customEnchants.utils.customItemUtil;
 
 public class RngBlockBreak implements Listener {
 
@@ -48,6 +50,18 @@ public class RngBlockBreak implements Listener {
 
         UUID uuid = player.getUniqueId();
 
+        if (random.nextInt(50000) == 0) {
+        ItemStack extractorCore = customItemUtil.createCustomItem("Extractor Core");
+        Map<Integer, ItemStack> leftover = player.getInventory().addItem(extractorCore);
+        if (!leftover.isEmpty()) {
+            // Drop leftover on the ground near player if inventory full
+            for (ItemStack drop : leftover.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), drop);
+            }
+        }
+        player.sendMessage(ChatColor.GREEN + "You found an Extractor Core!");
+    }
+
         int blocksBroken = stats.getPlayerStat(uuid, "blocks_broken", false); // total count
         int lastSpawn = getLastGoblinSpawnBlocks(uuid);
         int blocksSinceLastSpawn = blocksBroken - lastSpawn;
@@ -60,6 +74,7 @@ public class RngBlockBreak implements Listener {
 
             if (guaranteedSpawn || rngSpawn) {
                 spawnGoblin(event.getBlock().getLocation(), player, goblin);
+                player.sendTitle(ChatColor.GOLD + goblin.name + " has Spawned!","",10, 70, 20);
                 setLastGoblinSpawnBlocks(uuid, blocksBroken);  // Reset counter
                 break;  // Spawn only one per break
             }
@@ -68,7 +83,7 @@ public class RngBlockBreak implements Listener {
 
     @SuppressWarnings("unchecked")
     @EventHandler
-public void onGoblinDeath(EntityDeathEvent event) {
+    public void onGoblinDeath(EntityDeathEvent event) {
     if (!(event.getEntity() instanceof Zombie zombie) || !zombie.isBaby()) return;
 
     // Custom drops
@@ -98,9 +113,8 @@ public void onGoblinDeath(EntityDeathEvent event) {
     }
 }
 
-
     @EventHandler
-public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
     if (!(event.getEntity() instanceof Zombie zombie) || !zombie.isBaby()) return;
     if (!zombie.hasMetadata("goblinHits")) return;
 
@@ -116,8 +130,6 @@ public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         zombie.setMetadata("goblinHits", new FixedMetadataValue(plugin, hits));
     }
 }
-
-
 
     private void spawnGoblin(Location loc, Player player, GoblinUtil.LootGoblinType goblin) {
     World world = loc.getWorld();
@@ -143,8 +155,6 @@ public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 
 
 }
-
-
 
     private int getLastGoblinSpawnBlocks(UUID uuid) {
         return lastGoblinSpawnMap.getOrDefault(uuid, 0);

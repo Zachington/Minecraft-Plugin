@@ -26,14 +26,17 @@ public class ScoreboardUtil {
     int online = Bukkit.getOnlinePlayers().size();
     int max = Bukkit.getMaxPlayers();
 
+    // Fetch dynamic quest count, assuming your StatTracker has this key
+    int questsCompleted = statTracker.getPlayerStat(uuid, "quests_completed", false);
+
     Scoreboard board = manager.getNewScoreboard();
-    Objective obj = board.registerNewObjective("info", "dummy", ChatColor.GOLD + " Minecraft Server ");
+    Objective obj = board.registerNewObjective("info", "dummy", ChatColor.GOLD + " Wardens Quarry ");
     obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
     String[] lines = new String[]{
         ChatColor.YELLOW + "Balance: " + ChatColor.WHITE + "$" + formatBalance(balance),
         ChatColor.YELLOW + "Rank: " + ChatColor.WHITE + formatRankFancy(rank),
-        ChatColor.YELLOW + "Quests Complete:" + ChatColor.WHITE + " 0",
+        ChatColor.YELLOW + "Quests Complete: " + ChatColor.WHITE + questsCompleted,
         ChatColor.GRAY + "",
         ChatColor.YELLOW + "DBM: " + ChatColor.WHITE + dailyBroken,
         ChatColor.YELLOW + "Total Blocks: " + ChatColor.WHITE + totalBroken,
@@ -42,16 +45,20 @@ public class ScoreboardUtil {
         ChatColor.WHITE + "" + online + " / " + max
     };
 
+    // Assign descending scores to keep order and hide red numbers
+    int scoreValue = lines.length;
+
     for (int i = 0; i < lines.length; i++) {
-        String entry = ChatColor.COLOR_CHAR + "" + (char) ('a' + i); // §a, §b, etc.
+        String entry = ChatColor.COLOR_CHAR + "" + (char) ('a' + i); // §a, §b, ...
         Team team = board.registerNewTeam("line" + i);
         team.addEntry(entry);
         team.setPrefix(lines[i]);
-        obj.getScore(entry).setScore(0); // all use score 0 to avoid visible numbers
+        obj.getScore(entry).setScore(scoreValue--);
     }
 
     player.setScoreboard(board);
 }
+
 
 
     private static String formatBalance(double balance) {

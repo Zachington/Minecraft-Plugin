@@ -4,11 +4,11 @@ import customEnchants.TestEnchants;
 import customEnchants.managers.QuestManager;
 import customEnchants.utils.EssenceManager;
 import customEnchants.utils.RankQuest;
+import customEnchants.utils.StatTracker;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -23,12 +23,13 @@ public class QuestListener implements Listener {
 
     private final QuestManager questManager;
     private final EssenceManager essenceManager;
-    
+    private final StatTracker statTracker;
     
 
-    public QuestListener(QuestManager questManager, EssenceManager essenceManager) {
+    public QuestListener(QuestManager questManager, EssenceManager essenceManager, StatTracker statTracker) {
         this.questManager = questManager;
         this.essenceManager = essenceManager;
+        this.statTracker = statTracker;
     }
 
     @EventHandler
@@ -92,26 +93,27 @@ public class QuestListener implements Listener {
 
         if (hasAnyItem) {
             questManager.completeQuest(player, "a-b-quest2");
-            player.sendMessage("§aQuest complete: Equip Extractor!");
+            player.sendMessage("§aQuest complete: Equip Extractor!"); 
         }
     }
 }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-    Player player = (Player) event.getWhoClicked();
-    Inventory clickedInv = event.getClickedInventory();
+    if (!(event.getWhoClicked() instanceof Player player)) return;
 
-    if (clickedInv == null || !event.getView().getTitle().equals("§8Quest Progress")) return;
+    // Check GUI title exactly (including color codes)
+    if (!event.getView().getTitle().equals("§2Active Quests")) return;
 
+    // Check if player is viewing quests (make sure this metadata is set when GUI opens)
     if (!player.hasMetadata("viewing_quests")) return;
 
-    // Prevent interaction with the quest GUI (but not with player's inventory)
+    // Cancel any interaction in the top inventory (the quest GUI)
     if (event.getRawSlot() < event.getView().getTopInventory().getSize()) {
         event.setCancelled(true);
     }
 
-    // Optional: allow shift-clicking out, or block that too
+    // Optionally cancel shift-clicks anywhere (to prevent item moving into GUI)
     if (event.isShiftClick()) {
         event.setCancelled(true);
     }

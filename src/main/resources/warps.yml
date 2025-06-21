@@ -1,0 +1,15 @@
+warps:
+  a:
+    world: world
+    x: 100.5
+    y: 64
+    z: 200.5
+    yaw: 0
+    pitch: 0
+  b:
+    world: world
+    x: 150.5
+    y: 70
+    z: 250.5
+    yaw: 90
+    pitch: 10

@@ -13,14 +13,14 @@ commands:
     description: Opens the scrap GUI
   giveenchant:
     description: Gives a custom enchanted book
-    permission: customEnchants.giveenchant
+    permission: customEnchants.admin
   giveCustomItem:
     description: Gives a custom utility item
     permission: customEnchants.giveCustomItem
   keyall:
     description: Give Key All Voucher to all players
     usage: /keyall
-    permission: customEnchants.keyall
+    permission: customEnchants.admin
   claim:
     description: Opens Claim menu
     usage: /claim
@@ -36,24 +36,44 @@ commands:
   setrank:
     description: Set a player's rank.
     usage: /setrank <player> <rank>
-    permission: customEnchants.setrank
+    permission: customEnchants.admin
   essencenotif:
     description: Enables or disables essence notifications
     usage: /essencenotif
   resetmine:
     description: Resets a mine
     usage: /resetmine <mine name>
-    permission: customEnchants.resetmine
+    permission: customEnchants.admin
   pv:
     description: Open your player vault
     usage: /pv <1-5>
   pvsee:
     description: Admin view of other players' vaults
     usage: /pvsee <player> <1-5>
-    permission: customenchants.pvsee
+    permission: customenchants.admin
   sell:
     description: Sell items
     usage: /sell [hand|all]
   quest:
     description: Opens the quest GUI
     aliases: [q]
+  completequest:
+    usage: /completequest <1|2> <player>
+    description: Force complete a player's quest
+    permission: customenchants.admin
+  nightvision:
+    usage: /nightvision
+    description: gives nightvision
+    aliases: [nv]
+  spawntrader: 
+    usage: /spawntrader [deep|essence]
+    description: spawns a trading villager
+    permission: customenchants.admin
+  savewarp:
+    usage: /savewarp [warp name]
+    description: saves a warp for mine Resets
+    permission: customenchants.admin
+  removewarp:
+    usage: /removewarp [warp name]
+    description: removes a warp for mine Resets
+    permission: customenchants.admin

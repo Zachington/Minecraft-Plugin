@@ -15,24 +15,35 @@ import customEnchants.utils.customItemUtil;
 import net.milkbowl.vault.economy.Economy;
 import customEnchants.utils.EssenceManager;
 import customEnchants.managers.VaultManager;
+import customEnchants.managers.WarpManager;
 import customEnchants.managers.QuestManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -48,14 +59,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private final EssenceManager essenceManager;
     private final RankManager rankManager;
     private final VaultManager vaultManager;
+    private final TestEnchants testEnchants;
     StatTracker statTracker = TestEnchants.getInstance().statTracker;
     QuestManager questManager = TestEnchants.getInstance().getQuestManager();
 
-    public CommandHandler(TestEnchants plugin, Economy economy, RankManager rankManager, VaultManager vaultManager) {
+    public CommandHandler(TestEnchants plugin, Economy economy, RankManager rankManager, VaultManager vaultManager, TestEnchants testEnchants) {
         this.economy = economy;
         this.rankManager = rankManager;
         this.essenceManager = plugin.getEssenceManager();
         this.vaultManager = plugin.getVaultManager();
+        this.testEnchants = testEnchants;
     }
 
     @Override
@@ -260,13 +273,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     essenceManager.removeEssence(player, cost.essenceTier, cost.essence);
     economy.withdrawPlayer(player, cost.money);
 
-    // Remove old quests & add new quests
-    statTracker.setPlayerStat(uuid, "quests_completed", 0, false);
-    questManager.addQuest(player, nextRank + "-quest1");
-    questManager.addQuest(player, nextRank + "-quest2");
 
     // Update rank
     rankManager.setRank(player, nextRank);
+
+    statTracker.setPlayerStat(uuid, "quests_completed", 0, false);
+    String newQuestPrefix = nextRank + "-" + RankUtils.getNextRank(nextRank); // e.g. b-c
+    questManager.addQuest(player, newQuestPrefix + "-quest1");
+    questManager.addQuest(player, newQuestPrefix + "-quest2");
 
     player.sendMessage(ChatColor.GREEN + "You ranked up to " + RankUtils.formatRankName(nextRank) + ChatColor.GREEN + "!");
 
@@ -280,10 +294,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     int currentEssence = statTracker.getPlayerStat(uuid, "earned_essence", false);
     int currentCrates = statTracker.getPlayerStat(uuid, "crate_total", false);
     int currentFiller = statTracker.getPlayerStat(uuid, "filler_sold", false); 
-    statTracker.setPlayerStat(uuid, "blocks_broken_at_rank_start." + nextRank, currentBlocks, false);
-    statTracker.setPlayerStat(uuid, "earned_essence_at_rank_start." + nextRank, currentEssence, false);
-    statTracker.setPlayerStat(uuid, "total_crates_at_rank_start." + nextRank, currentCrates, false);
-    statTracker.setPlayerStat(uuid, "filler_sold_at_rank_start." + nextRank, currentFiller, false);
+    int currentShards = statTracker.getPlayerStat(uuid, "crafted_essence", false);
+    int currentExtractor = statTracker.getPlayerStat(uuid, "crafted_extractors", false); 
+    statTracker.setPlayerStat(uuid, "blocks_broken_at_rank_start." + newQuestPrefix, currentBlocks, false);
+    statTracker.setPlayerStat(uuid, "earned_essence_at_rank_start." + newQuestPrefix, currentEssence, false);
+    statTracker.setPlayerStat(uuid, "total_crates_at_rank_start." + newQuestPrefix, currentCrates, false);
+    statTracker.setPlayerStat(uuid, "filler_sold_at_rank_start." + newQuestPrefix, currentFiller, false);
+    statTracker.setPlayerStat(uuid, "crafted_essence_at_rank_start." + newQuestPrefix, currentShards, false);
+    statTracker.setPlayerStat(uuid,"crafted_extractor_at_rank_start." + newQuestPrefix, currentExtractor, false);
 
     if (RankUtils.isAscendUpgrade(currentRank, nextRank)) {
         Bukkit.broadcastMessage("§6" + player.getName() + " §ehas §4Ascended §eto: " + ChatColor.DARK_RED + RankUtils.formatRankTierOnly(nextRank) + "§e!");
@@ -311,18 +329,64 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     String newRank = args[1].toLowerCase();
+    UUID uuid = target.getUniqueId();
 
+    // Set the player's rank
     rankManager.setRank(target, newRank);
+
+    StatTracker statTracker = TestEnchants.getInstance().getStatTracker();
+    QuestManager questManager = TestEnchants.getInstance().getQuestManager();
+
+    // Remove any existing quests for the player
+    Set<String> currentQuests = new HashSet<>(questManager.getActiveQuests(target));
+    for (String questKey : currentQuests) {
+        questManager.removeQuest(target, questKey);
+    }
+
+    // Reset quest completed stat
+    statTracker.setPlayerStat(uuid, "quests_completed", 0, false);
+
+    // Get next rank for quest prefix
+    String nextRank = RankUtils.getNextRank(newRank);
+    if (nextRank != null) {
+        String questPrefix = newRank + "-" + nextRank;
+
+        // Add new quests for the rank
+        questManager.addQuest(target, questPrefix + "-quest1");
+        questManager.addQuest(target, questPrefix + "-quest2");
+
+        // Set "at rank start" stats with the correct quest prefix (no double nextRank)
+        int currentBlocks = statTracker.getPlayerStat(uuid, "blocks_broken", false);
+        int currentEssence = statTracker.getPlayerStat(uuid, "earned_essence", false);
+        int currentCrates = statTracker.getPlayerStat(uuid, "crate_total", false);
+        int currentFiller = statTracker.getPlayerStat(uuid, "filler_sold", false);
+        int currentShards = statTracker.getPlayerStat(uuid, "crafted_essence", false);
+        int currentExtractor = statTracker.getPlayerStat(uuid, "crafted_extractors", false); 
+
+        statTracker.setPlayerStat(uuid, "blocks_broken_at_rank_start." + questPrefix, currentBlocks, false);
+        statTracker.setPlayerStat(uuid, "earned_essence_at_rank_start." + questPrefix, currentEssence, false);
+        statTracker.setPlayerStat(uuid, "total_crates_at_rank_start." + questPrefix, currentCrates, false);
+        statTracker.setPlayerStat(uuid, "filler_sold_at_rank_start." + questPrefix, currentFiller, false);
+        statTracker.setPlayerStat(uuid, "crafted_essence_at_rank_start." + questPrefix, currentShards, false);
+        statTracker.setPlayerStat(uuid,"crafted_extractor_at_rank_start." + questPrefix, currentExtractor, false);
+
+        // Set enchants_applied stats at rank start with nextRank suffix
+        for (String rarity : new String[]{"common", "uncommon", "rare", "epic", "legendary"}) {
+            String statKey = "enchants_applied_" + rarity;
+            int current = statTracker.getPlayerStat(uuid, statKey, false);
+            statTracker.setPlayerStat(uuid, statKey + "_at_rank_start." + nextRank, current, false);
+        }
+    }
 
     sender.sendMessage(ChatColor.GREEN + "Set " + target.getName() + "'s rank to " + newRank.toUpperCase() + ".");
     if (target.isOnline()) {
         target.sendMessage(ChatColor.GREEN + "Your rank has been set to " + newRank.toUpperCase() + ".");
-        // Optionally update scoreboard immediately
         TestEnchants.getInstance().getScoreboardUtil().updateScoreboard(target);
     }
 
     return true;
 }
+
             case "essencenotif" -> {
     if (EssenceGenerationListener.essenceNotifDisabled.contains(player.getUniqueId())) {
         EssenceGenerationListener.essenceNotifDisabled.remove(player.getUniqueId());
@@ -345,6 +409,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     String mineName = args[0].toLowerCase();
+
+    TestEnchants.getInstance().teleportPlayersOutOfMine(mineName);
     
     // Call your mine reset logic here
     boolean success = TestEnchants.getInstance().getMineManager().resetMine(mineName, TestEnchants.getInstance());
@@ -525,7 +591,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     return true;
 }
-    case "quest", "q" -> {
+            case "quest", "q" -> {
     if (args.length != 0) {
         player.sendMessage(ChatColor.RED + "Usage: /quest");
         return true;
@@ -535,7 +601,141 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     return true;
 }
 
+            case "completequest" -> {
+    if (!player.hasPermission("customenchants.admin")) {
+        player.sendMessage(ChatColor.RED + "You don't have permission to use this command.");
+        return true;
+    }
 
+    if (args.length != 2) {
+        player.sendMessage(ChatColor.RED + "Usage: /completequest <1|2> <player>");
+        return true;
+    }
+
+    int questNumber;
+    try {
+        questNumber = Integer.parseInt(args[0]);
+        if (questNumber != 1 && questNumber != 2) throw new NumberFormatException();
+    } catch (NumberFormatException e) {
+        player.sendMessage(ChatColor.RED + "Quest number must be 1 or 2.");
+        return true;
+    }
+
+    Player target = Bukkit.getPlayer(args[1]);
+    if (target == null || !target.isOnline()) {
+        player.sendMessage(ChatColor.RED + "That player is not online.");
+        return true;
+    }
+
+    Set<String> active = questManager.getActiveQuests(target);
+    List<String> sorted = new ArrayList<>(active).stream().sorted().toList();
+
+    if (questNumber > sorted.size()) {
+        player.sendMessage(ChatColor.RED + "That player doesn't have that many active quests.");
+        return true;
+    }
+
+    String questKey = sorted.get(questNumber - 1);
+    questManager.completeQuest(target, questKey);
+    target.sendMessage(ChatColor.GREEN + "Quest completed by admin: " + ChatColor.YELLOW + questKey);
+    player.sendMessage(ChatColor.GREEN + "You completed " + target.getName() + "'s quest: " + ChatColor.YELLOW + questKey);
+    return true;
+}
+            case "nightvision", "nv" -> {
+    PersistentDataContainer container = player.getPersistentDataContainer();
+    NamespacedKey nvkey = new NamespacedKey(testEnchants, "night_vision_enabled");
+
+    boolean enabled = container.has(nvkey, PersistentDataType.INTEGER) && container.get(nvkey, PersistentDataType.INTEGER) == 1;
+
+    if (enabled) {
+        // Disable night vision
+        player.removePotionEffect(PotionEffectType.NIGHT_VISION);
+        container.remove(nvkey);
+        player.sendMessage(ChatColor.RED + "Night vision disabled.");
+    } else {
+        // Enable night vision indefinitely
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false, false));
+        container.set(nvkey, PersistentDataType.INTEGER, 1);
+        player.sendMessage(ChatColor.GREEN + "Night vision enabled.");
+    }
+
+    return true;
+}
+            case "spawntrader" -> {
+    if (!player.hasPermission("customenchants.admin")) {
+        player.sendMessage(ChatColor.RED + "You don't have permission to use this command.");
+        return true;
+    }
+
+    if (args.length != 1) {
+        player.sendMessage(ChatColor.RED + "Usage: /customenchants spawntrader <essence|deep>");
+        return true;
+    }
+
+    Location loc = player.getLocation();
+
+    switch (args[0].toLowerCase()) {
+        case "essence" -> {
+            VillagerSpawner.spawnCustomVillager(loc, "Essence Trader", Villager.Profession.LIBRARIAN);
+            player.sendMessage(ChatColor.GREEN + "Spawned Essence Trader.");
+        }
+        case "deep" -> {
+            VillagerSpawner.spawnCustomVillager(loc, "Deep Essence Trader", Villager.Profession.CLERIC);
+            player.sendMessage(ChatColor.GREEN + "Spawned Deep Essence Trader.");
+        }
+        case "tinkerer" -> {
+            VillagerSpawner.spawnCustomVillager(loc, "Tinkerer", Villager.Profession.TOOLSMITH);
+            player.sendMessage(ChatColor.GREEN + "Spawned Tinkerer.");
+        }
+        case "extractor" -> {
+            VillagerSpawner.spawnCustomVillager(loc, "Extractor Trader", Villager.Profession.TOOLSMITH);
+            player.sendMessage(ChatColor.GREEN + "Spawned Extractor Trader.");
+        }
+        case "deepextractor" -> {
+            VillagerSpawner.spawnCustomVillager(loc, "Deep Extractor Trader", Villager.Profession.TOOLSMITH);
+            player.sendMessage(ChatColor.GREEN + "Spawned Deep Extractor Trader.");
+        }
+        case "furnace" -> {
+            VillagerSpawner.spawnCustomVillager(loc, "Furnace Upgrader", Villager.Profession.TOOLSMITH);
+            player.sendMessage(ChatColor.GREEN + "Spawned Furnace Upgrader");
+        }
+        default -> player.sendMessage(ChatColor.RED + "Unknown trader type: " + args[0]);
+    }
+
+    return true;
+}
+            case "savewarp" -> {
+    if (args.length != 1) {
+        player.sendMessage(ChatColor.RED + "Usage: /savewarp <mineName>");
+        return true;
+    }
+
+    String mineName = args[0].toLowerCase();
+    Location loc = player.getLocation();
+
+    WarpManager warpManager = new WarpManager(TestEnchants.getInstance()); // use your plugin instance
+    warpManager.saveWarp(mineName, loc);
+
+    player.sendMessage(ChatColor.GREEN + "Saved warp location for '" + mineName + "' at your position.");
+    return true;
+}
+            case "removewarp" -> {
+    if (args.length != 1) {
+        player.sendMessage(ChatColor.RED + "Usage: /removewarp <mineName>");
+        return true;
+    }
+
+    String mineName = args[0].toLowerCase();
+    WarpManager warpManager = new WarpManager(TestEnchants.getInstance());
+
+    if (!warpManager.removeWarp(mineName)) {
+        player.sendMessage(ChatColor.RED + "No saved warp found for '" + mineName + "'.");
+        return true;
+    }
+
+    player.sendMessage(ChatColor.YELLOW + "Removed warp location for '" + mineName + "'.");
+    return true;
+}
 
 
 
@@ -568,6 +768,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
         return String.join(", ", enchants);
     }
+
+    public class VillagerSpawner {
+    public static void spawnCustomVillager(Location location, String name, Villager.Profession profession) {
+        Villager villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
+        villager.setCustomName(ChatColor.GOLD + name);
+        villager.setCustomNameVisible(true);
+        villager.setProfession(profession);
+        villager.setAI(false);
+        villager.setInvulnerable(true);
+        villager.setCollidable(false);
+        villager.setSilent(true);
+        villager.setCanPickupItems(false);
+    }
+}
 
     public class Cost {
     public int tier;
@@ -707,6 +921,45 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     if (args.length == 1) {
         String partial = args[0].toLowerCase();
         List<String> options = Arrays.asList("hand", "all");
+        List<String> completions = new ArrayList<>();
+        for (String option : options) {
+            if (option.startsWith(partial)) {
+                completions.add(option);
+            }
+        }
+        return completions;
+    }
+}
+
+        if ("completequest".equals(cmd)) {
+    if (args.length == 1) {
+        List<String> options = Arrays.asList("1", "2");
+        String partial = args[0];
+        List<String> completions = new ArrayList<>();
+        for (String option : options) {
+            if (option.startsWith(partial)) {
+                completions.add(option);
+            }
+        }
+        return completions;
+    }
+
+    if (args.length == 2) {
+        String partial = args[1].toLowerCase();
+        List<String> matchingPlayers = new ArrayList<>();
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getName().toLowerCase().startsWith(partial)) {
+                matchingPlayers.add(online.getName());
+            }
+        }
+        return matchingPlayers;
+    }
+}
+
+        if ("spawntrader".equalsIgnoreCase(cmd)) {
+    if (args.length == 1) {
+        String partial = args[0].toLowerCase();
+        List<String> options = Arrays.asList("essence", "deep", "tinkerer", "extractor", "deepextractor","furnace");
         List<String> completions = new ArrayList<>();
         for (String option : options) {
             if (option.startsWith(partial)) {

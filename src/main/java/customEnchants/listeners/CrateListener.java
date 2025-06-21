@@ -21,6 +21,7 @@ import customEnchants.TestEnchants;
 import customEnchants.managers.QuestManager;
 import customEnchants.utils.GuiUtil;
 import customEnchants.utils.RankQuest;
+import customEnchants.utils.StatTracker;
 import customEnchants.utils.crateTableUtil;
 import customEnchants.utils.customItemUtil;
 import customEnchants.utils.crateTableUtil.LootEntry;
@@ -33,8 +34,9 @@ public class CrateListener implements Listener {
     private final Map<Player, String> guiOpenMethod = new ConcurrentHashMap<>();
     private final Random random = new Random();
     private final Map<Player, Long> shiftRightCooldown = new HashMap<>();
+    private final StatTracker statTracker;
 
-    public CrateListener(World world, int xMin, int xMax, int yMin, int yMax, int zMin, int zMax) {
+    public CrateListener(World world, int xMin, int xMax, int yMin, int yMax, int zMin, int zMax, StatTracker statTracker) {
         this.world = world;
         this.xMin = xMin;
         this.xMax = xMax;
@@ -42,6 +44,7 @@ public class CrateListener implements Listener {
         this.yMax = yMax;
         this.zMin = zMin;
         this.zMax = zMax;
+        this.statTracker = statTracker;
     }
 
     @EventHandler
@@ -243,12 +246,26 @@ public class CrateListener implements Listener {
             break;
         }
     } else {
-        // Fallback to matching by Material and amount
-        if (item.getType() == chosenItem.getType() && item.getAmount() == chosenItem.getAmount()) {
-            foundSlot = i;
-            break;
+    // Fallback to matching by Material and amount
+    if (item.getType() == chosenItem.getType() && item.getAmount() == chosenItem.getAmount()) {
+        // Strip lore line containing "Chance:" or "Success Rate:" from the chosenItem before placing
+        if (chosenItem.hasItemMeta()) {
+            ItemMeta meta = chosenItem.getItemMeta();
+            if (meta.hasLore()) {
+                List<String> lore = new ArrayList<>(meta.getLore());
+                lore.removeIf(line -> {
+                    String stripped = ChatColor.stripColor(line).toLowerCase();
+                    return stripped.contains("chance:") || stripped.contains("success rate:");
+                });
+                meta.setLore(lore);
+                chosenItem.setItemMeta(meta);
+            }
         }
+
+        foundSlot = i;
+        break;
     }
+}
 }
 
 
@@ -357,150 +374,26 @@ public class CrateListener implements Listener {
     private boolean handleRightClick(Player player, Material clickedType, Location clickedBlockLoc) {
     ItemStack handItem = player.getInventory().getItemInMainHand();
 
-    if (clickedType == Material.ENCHANTING_TABLE) {
-        if (isValidCustomItem(handItem)) {
-            String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
-            if (plainName.equalsIgnoreCase("Enchant Key")) {
-                if (handItem.getAmount() <= 1) {
-                    player.getInventory().setItemInMainHand(null);
-                } else {
-                    handItem.setAmount(handItem.getAmount() - 1);
-                    player.getInventory().setItemInMainHand(handItem);
-                }
-
-                Inventory gui = GuiUtil.enchantKeyInventory(player);
-                guiOpenMethod.put(player, "RIGHT_CLICK");
-                player.openInventory(gui);
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_enchant");
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
-                return true;
-            } else {
-                player.sendMessage("You must hold an Enchant Key to open this.");
-                pushPlayerBack(player, clickedBlockLoc);
-                return false;
-            }
-        } else {
-            player.sendMessage("You must hold an Enchant Key to open this.");
-            pushPlayerBack(player, clickedBlockLoc);
+    switch (clickedType) {
+        case ENCHANTING_TABLE:
+            return processKey(player, handItem, "Enchant Key", "crate_enchant", GuiUtil.enchantKeyInventory(player), clickedBlockLoc);
+        case REDSTONE_BLOCK:
+            return processKey(player, handItem, "Divine Key", "crate_divine", GuiUtil.divineKeyInventory(player), clickedBlockLoc);
+        case BEDROCK:
+            return processKey(player, handItem, "Durability Key", "crate_durability", GuiUtil.durabilityKeyInventory(player), clickedBlockLoc);
+        case CREAKING_HEART:  
+            return processKey(player, handItem, "Mining Key", "crate_mining", GuiUtil.miningKeyInventory(player), clickedBlockLoc);
+        case CRYING_OBSIDIAN:
+            return processKey(player, handItem, "Prison Key", "crate_prison", GuiUtil.prisonKeyInventory(player), clickedBlockLoc);
+        default:
             return false;
-        }
-    } else if (clickedType == Material.REDSTONE_BLOCK) {
-        if (isValidCustomItem(handItem)) {
-            String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
-            if (plainName.equalsIgnoreCase("Divine Key")) {
-                if (handItem.getAmount() <= 1) {
-                    player.getInventory().setItemInMainHand(null);
-                } else {
-                    handItem.setAmount(handItem.getAmount() - 1);
-                    player.getInventory().setItemInMainHand(handItem);
-                }
-
-                Inventory gui = GuiUtil.divineKeyInventory(player);
-                guiOpenMethod.put(player, "RIGHT_CLICK");
-                player.openInventory(gui);
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_divine");
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
-                return true;
-            } else {
-                player.sendMessage("You must hold a Divine Key to open this.");
-                pushPlayerBack(player, clickedBlockLoc);
-                return false;
-            }
-        } else {
-            player.sendMessage("You must hold a Divine Key to open this.");
-            pushPlayerBack(player, clickedBlockLoc);
-            return false;
-        }
-    } else if (clickedType == Material.BEDROCK) {
-        if (isValidCustomItem(handItem)) {
-            String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
-            if (plainName.equalsIgnoreCase("Durability Key")) {
-                if (handItem.getAmount() <= 1) {
-                    player.getInventory().setItemInMainHand(null);
-                } else {
-                    handItem.setAmount(handItem.getAmount() - 1);
-                    player.getInventory().setItemInMainHand(handItem);
-                }
-
-                Inventory gui = GuiUtil.durabilityKeyInventory(player);
-                guiOpenMethod.put(player, "RIGHT_CLICK");
-                player.openInventory(gui);
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_durability");
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
-                return true;
-            } else {
-                player.sendMessage("You must hold a Durability Key to open this.");
-                pushPlayerBack(player, clickedBlockLoc);
-                return false;
-            }
-        } else {
-            player.sendMessage("You must hold a Durability Key to open this.");
-            pushPlayerBack(player, clickedBlockLoc);
-            return false;
-        }
-    } else if (clickedType == Material.CREAKING_HEART) {
-        if (isValidCustomItem(handItem)) {
-            String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
-            if (plainName.equalsIgnoreCase("Mining Key")) {
-                if (handItem.getAmount() <= 1) {
-                    player.getInventory().setItemInMainHand(null);
-                } else {
-                    handItem.setAmount(handItem.getAmount() - 1);
-                    player.getInventory().setItemInMainHand(handItem);
-                }
-
-                Inventory gui = GuiUtil.miningKeyInventory(player);
-                guiOpenMethod.put(player, "RIGHT_CLICK");
-                player.openInventory(gui);
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_mining");
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
-                return true;
-            } else {
-                player.sendMessage("You must hold a Mining Key to open this.");
-                pushPlayerBack(player, clickedBlockLoc);
-                return false;
-            }
-        } else {
-            player.sendMessage("You must hold a Mining Key to open this.");
-            pushPlayerBack(player, clickedBlockLoc);
-            return false;
-        }
-    } else if (clickedType == Material.CRYING_OBSIDIAN) {
-        if (isValidCustomItem(handItem)) {
-            String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
-            if (plainName.equalsIgnoreCase("Prison Key")) {
-                if (handItem.getAmount() <= 1) {
-                    player.getInventory().setItemInMainHand(null);
-                } else {
-                    handItem.setAmount(handItem.getAmount() - 1);
-                    player.getInventory().setItemInMainHand(handItem);
-                }
-
-                Inventory gui = GuiUtil.prisonKeyInventory(player);
-                guiOpenMethod.put(player, "RIGHT_CLICK");
-                player.openInventory(gui);
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_prison");
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total");
-                return true;
-            } else {
-                player.sendMessage("You must hold a Prison Key to open this.");
-                pushPlayerBack(player, clickedBlockLoc);
-                return false;
-            }
-        } else {
-            player.sendMessage("You must hold a Prison Key to open this.");
-            pushPlayerBack(player, clickedBlockLoc);
-            return false;
-        }
     }
-
-    // If no matching material, return false
-    return false;
 }
 
     private boolean handleShiftRightClick(Player player, Material clickedType, Location clickedBlockLoc) {
     ItemStack handItem = player.getInventory().getItemInMainHand();
 
+    // Allowed crate types
     if (clickedType != Material.ENCHANTING_TABLE &&
         clickedType != Material.REDSTONE_BLOCK &&
         clickedType != Material.BEDROCK &&
@@ -536,61 +429,8 @@ public class CrateListener implements Listener {
         return false;
     }
 
-    int amount = Math.min(handItem.getAmount(), 32);
-    handItem.setAmount(handItem.getAmount() - amount);
-    if (handItem.getAmount() <= 0) {
-        player.getInventory().setItemInMainHand(null);
-    } else {
-        player.getInventory().setItemInMainHand(handItem);
-    }
-
-    String statKey = null;
-    switch (crateType) {
-    case "Enchant Key": statKey = "crate_enchant"; break;
-    case "Divine Key": statKey = "crate_divine"; break;
-    case "Durability Key": statKey = "crate_durability"; break;
-    case "Mining Key": statKey = "crate_mining"; break;
-    case "Prison Key": statKey = "crate_prison"; break;
-}
-
-    if (statKey != null) {
-        TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), statKey, amount);
-        TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "crate_total", amount); // optional total counter
-}
-
-    for (int i = 0; i < amount; i++) {
-        ItemStack loot = getRandomLoot(crateType);
-        if (loot == null) {
-            player.sendMessage("No loot available.");
-            break;
-        }
-
-        if (loot.hasItemMeta()) {
-            ItemMeta meta = loot.getItemMeta();
-            if (meta.hasLore()) {
-                List<String> lore = new ArrayList<>(meta.getLore());
-                int randomChance = 1 + random.nextInt(100);
-                for (int j = 0; j < lore.size(); j++) {
-                    String line = ChatColor.stripColor(lore.get(j));
-                    if (line.startsWith("Success Rate:")) {
-                        lore.set(j, ChatColor.GREEN + "Success Rate: " + randomChance + "%");
-                        break;
-                    }
-                }
-                meta.setLore(lore);
-                loot.setItemMeta(meta);
-            }
-        }
-
-        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(loot);
-        if (!leftover.isEmpty()) {
-            player.getWorld().dropItemNaturally(player.getLocation(), loot);
-        }
-    }
-
-    player.sendMessage("You received " + amount + " item" + (amount > 1 ? "s" : "") + " from the " + crateType + " crate.");
-    guiOpenMethod.remove(player);
-    return true;
+    // Process the key usage, increment stats, and check quest progress
+    return processShiftRightClickCrate(player, handItem, crateType, clickedBlockLoc);
 }
 
     private void pushPlayerBack(Player player, Location blockLocation) {
@@ -621,4 +461,152 @@ public class CrateListener implements Listener {
         }
         return false;
     }
+
+    private boolean processKey(Player player, ItemStack handItem, String keyName, String statKey, Inventory gui, Location clickedBlockLoc) {
+    if (!isValidCustomItem(handItem)) {
+        player.sendMessage("You must hold a " + keyName + " to open this.");
+        pushPlayerBack(player, clickedBlockLoc);
+        return false;
+    }
+
+    String plainName = stripColorCodes(handItem.getItemMeta().getDisplayName());
+    if (!plainName.equalsIgnoreCase(keyName)) {
+        player.sendMessage("You must hold a " + keyName + " to open this.");
+        pushPlayerBack(player, clickedBlockLoc);
+        return false;
+    }
+
+    // Decrement the key item count
+    if (handItem.getAmount() <= 1) {
+        player.getInventory().setItemInMainHand(null);
+    } else {
+        handItem.setAmount(handItem.getAmount() - 1);
+        player.getInventory().setItemInMainHand(handItem);
+    }
+
+    // Open the GUI
+    guiOpenMethod.put(player, "RIGHT_CLICK");
+    player.openInventory(gui);
+
+    UUID uuid = player.getUniqueId();
+    StatTracker statTracker = TestEnchants.getInstance().getStatTracker();
+
+    // Increment stats
+    statTracker.incrementPlayerStat(uuid, statKey);
+    statTracker.incrementPlayerStat(uuid, "crate_total");
+
+    // Now immediately check crate quests progress
+    QuestManager questManager = TestEnchants.getInstance().getQuestManager();
+    Set<String> activeQuests = new HashSet<>(questManager.getActiveQuests(player));
+    int currentCrates = statTracker.getPlayerStat(uuid, "crate_total", false);
+
+    for (String questKey : activeQuests) {
+        RankQuest quest = questManager.get(questKey);
+        if (quest == null || quest.extraObjective == null || !quest.extraObjective.startsWith("open_crates:"))
+            continue;
+
+        String[] parts = quest.extraObjective.split(":");
+        int required = Integer.parseInt(parts[1]);
+        String baseRank = questKey.split("-quest")[0];
+
+        int cratesAtStart = statTracker.getPlayerStat(uuid, "total_crates_at_rank_start." + baseRank, false);
+        int cratesSinceStart = currentCrates - cratesAtStart;
+
+        if (cratesSinceStart >= required) {
+            questManager.completeQuest(player, questKey);
+            player.sendMessage("§aQuest complete: Opened " + required + " crates!");
+        }
+    }
+
+    return true;
+}
+
+    private boolean processShiftRightClickCrate(Player player, ItemStack handItem, String crateType, Location clickedBlockLoc) {
+    int amount = Math.min(handItem.getAmount(), 32);
+    // Decrement key amount
+    handItem.setAmount(handItem.getAmount() - amount);
+    if (handItem.getAmount() <= 0) {
+        player.getInventory().setItemInMainHand(null);
+    } else {
+        player.getInventory().setItemInMainHand(handItem);
+    }
+
+    String statKey = switch (crateType) {
+        case "Enchant Key" -> "crate_enchant";
+        case "Divine Key" -> "crate_divine";
+        case "Durability Key" -> "crate_durability";
+        case "Mining Key" -> "crate_mining";
+        case "Prison Key" -> "crate_prison";
+        default -> null;
+    };
+
+    StatTracker statTracker = TestEnchants.getInstance().getStatTracker();
+    UUID uuid = player.getUniqueId();
+
+    if (statKey != null) {
+        statTracker.incrementPlayerStat(uuid, statKey, amount);
+        statTracker.incrementPlayerStat(uuid, "crate_total", amount); // optional total counter
+    }
+
+    Random random = new Random();
+
+    // Give loot for each key opened
+    for (int i = 0; i < amount; i++) {
+        ItemStack loot = getRandomLoot(crateType);
+        if (loot == null) {
+            player.sendMessage("No loot available.");
+            break;
+        }
+
+        if (loot.hasItemMeta()) {
+            ItemMeta meta = loot.getItemMeta();
+            if (meta.hasLore()) {
+                List<String> lore = new ArrayList<>(meta.getLore());
+                int randomChance = 1 + random.nextInt(100);
+                for (int j = 0; j < lore.size(); j++) {
+                    String line = ChatColor.stripColor(lore.get(j));
+                    if (line.startsWith("Success Rate:")) {
+                        lore.set(j, ChatColor.GREEN + "Success Rate: " + randomChance + "%");
+                        break;
+                    }
+                }
+                meta.setLore(lore);
+                loot.setItemMeta(meta);
+            }
+        }
+
+        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(loot);
+        if (!leftover.isEmpty()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), loot);
+        }
+    }
+
+    // Now immediately check crate quests progress
+    QuestManager questManager = TestEnchants.getInstance().getQuestManager();
+    Set<String> activeQuests = questManager.getActiveQuests(player);
+    int currentCrates = statTracker.getPlayerStat(uuid, "crate_total", false);
+
+    for (String questKey : activeQuests) {
+        RankQuest quest = questManager.get(questKey);
+        if (quest == null || quest.extraObjective == null || !quest.extraObjective.startsWith("open_crates:"))
+            continue;
+
+        String[] parts = quest.extraObjective.split(":");
+        int required = Integer.parseInt(parts[1]);
+        String baseRank = questKey.split("-quest")[0];
+
+        int cratesAtStart = statTracker.getPlayerStat(uuid, "total_crates_at_rank_start." + baseRank, false);
+        int cratesSinceStart = currentCrates - cratesAtStart;
+
+        if (cratesSinceStart >= required) {
+            questManager.completeQuest(player, questKey);
+            player.sendMessage("§aQuest complete: Opened " + required + " crates!");
+        }
+    }
+
+    player.sendMessage("You received " + amount + " item" + (amount > 1 ? "s" : "") + " from the " + crateType + " crate.");
+    guiOpenMethod.remove(player);
+    return true;
+}
+
 }

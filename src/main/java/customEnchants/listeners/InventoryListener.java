@@ -15,7 +15,7 @@ import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.InventoryParser;
 import customEnchants.utils.RankQuest;
 import customEnchants.utils.RankUtils;
-
+import customEnchants.utils.StatTracker;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -25,6 +25,11 @@ public class InventoryListener implements Listener {
 
     private static final Random random = new Random();
     private static final Pattern SUCCESS_PATTERN = Pattern.compile("Success Rate: (\\d+)%");
+    private final StatTracker statTracker;
+
+    public InventoryListener (StatTracker statTracker) {
+        this.statTracker = statTracker; 
+    };
     
 
 

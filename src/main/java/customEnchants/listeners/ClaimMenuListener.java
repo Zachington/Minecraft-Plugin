@@ -7,6 +7,7 @@ import customEnchants.utils.GuiUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,7 +22,7 @@ import java.util.HashMap;
 public class ClaimMenuListener implements Listener {
 
     @EventHandler
-public void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) {
     if (!(event.getWhoClicked() instanceof Player player)) return;
 
     InventoryView view = event.getView();
@@ -37,8 +38,7 @@ public void onInventoryClick(InventoryClickEvent event) {
         if (clickedInv.equals(view.getTopInventory())) {
             event.setCancelled(true);
 
-            // Only handle left/right click inside GUI with non-shift
-            if (event.isShiftClick() || event.getClick().isKeyboardClick()) return;
+            if (event.getClick().isKeyboardClick()) return;
 
             ItemStack clicked = event.getCurrentItem();
             if (clicked == null || !clicked.hasItemMeta() || !clicked.getItemMeta().hasDisplayName()) return;
@@ -61,8 +61,9 @@ public void onInventoryClick(InventoryClickEvent event) {
 
                 int currentAmount = ClaimStorage.getKeyCount(player, keyName);
                 if (currentAmount <= 0) {
+                    if (clicked.getType() != Material.TRIAL_KEY) return;
                     player.sendMessage(ChatColor.RED + "You don't have any " + keyName + "s!");
-                    return;
+                return;
                 }
 
                 int amountToGive = event.isShiftClick() ? Math.min(64, currentAmount) : 1;
@@ -81,14 +82,11 @@ public void onInventoryClick(InventoryClickEvent event) {
                 }
 
                 Bukkit.getScheduler().runTaskLater(TestEnchants.getPlugin(TestEnchants.class), () ->
-                        player.openInventory(GuiUtil.guiKeyClaim(player)), 1L);
+                    player.openInventory(GuiUtil.guiKeyClaim(player)), 1L);
             }
         }
         else if (clickedInv.equals(view.getBottomInventory())) {
-            // If shift-clicking from player inventory into GUI (top), cancel
             if (event.isShiftClick()) {
-                // Check if top inventory has any empty slot to receive the item
-                // Just cancel shift-clicks anyway to be safe
                 event.setCancelled(true);
             }
         }
@@ -98,7 +96,7 @@ public void onInventoryClick(InventoryClickEvent event) {
 
 
     @EventHandler
-public void onInventoryDrag(InventoryDragEvent event) {
+    public void onInventoryDrag(InventoryDragEvent event) {
     InventoryView view = event.getView();
     String title = ChatColor.stripColor(view.getTitle());
 

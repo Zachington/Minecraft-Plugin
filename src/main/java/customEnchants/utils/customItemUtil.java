@@ -69,7 +69,32 @@ public class customItemUtil {
         "Durability Shard Tier 5",  //40
         "Durability Shard Tier 6",
         "Durability Shard Tier 7",
-        "§6Preservation Voucher"
+        "§6Preservation Voucher",
+        "Coal Essence Shard",
+        "Copper Essence Shard",     //45
+        "Iron Essence Shard",
+        "Redstone Essence Shard",
+        "Lapis Essence Shard",
+        "Gold Essence Shard",
+        "Diamond Essence Shard",    //50
+        "Emerald Essence Shard",
+        "Deep Coal Essence Shard",
+        "Deep Copper Essence Shard",
+        "Deep Iron Essence Shard",
+        "Deep Redstone Essence Shard",  //55
+        "Deep Lapis Essence Shard",
+        "Deep Gold Essence Shard",
+        "Deep Diamond Essence Shard",
+        "Deep Emerald Essence Shard",
+        "Amethyst Essence Shard",       //60
+        "Extractor Core",
+        "Tier 1 Furnace",
+        "Tier 2 Furnace",
+        "Tier 3 Furnace",
+        "Tier 4 Furnace",   //65
+        "Tier 5 Furnace",
+        "Tier 6 Furnace",
+        "Blast Furnace"
     };
 
     //Change these
@@ -116,7 +141,33 @@ public class customItemUtil {
         "Drag and drop onto equipment to repair 150 Durability",//40
         "Drag and drop onto equipment to repair 200 Durability",
         "Drag and drop onto equipment to repair 250 Durability",
-        "Right Click to get a Preservation book of a random level"
+        "Right Click to get a Preservation book of a random level",
+        "Used to craft Extractors",
+        "Used to craft Extractors", //45
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors", //50
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors", //55
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors",
+        "Used to craft Extractors", //60
+        "Used to craft Extractors",
+        "10% Double Smelt Chance",
+        "20% Double Smelt Chance", 
+        "30% Double Smelt Chance", 
+        "45% Double Smelt Chance",  //65
+        "60% Double Smelt Chance", 
+        "80% Double Smelt Chance", 
+        "100% Double Smelt Chance"
+
     };
 
     public static final Material[] CUSTOM_ITEM_MATERIAL = {
@@ -162,7 +213,32 @@ public class customItemUtil {
         Material.PRISMARINE_SHARD,  //40
         Material.PRISMARINE_SHARD,
         Material.PRISMARINE_SHARD,
-        Material.CREEPER_BANNER_PATTERN
+        Material.CREEPER_BANNER_PATTERN,
+        Material.COAL,
+        Material.COPPER_INGOT,    //45
+        Material.IRON_INGOT,
+        Material.REDSTONE,
+        Material.LAPIS_LAZULI,
+        Material.GOLD_INGOT,
+        Material.DIAMOND,    //50
+        Material.EMERALD,
+        Material.COAL_BLOCK,
+        Material.COPPER_BLOCK,
+        Material.IRON_BLOCK,
+        Material.REDSTONE_BLOCK,    //55
+        Material.LAPIS_BLOCK,
+        Material.GOLD_BLOCK,
+        Material.DIAMOND_BLOCK,
+        Material.EMERALD_BLOCK,
+        Material.AMETHYST_SHARD,    //60
+        Material.HEAVY_CORE,
+        Material.FURNACE,  
+        Material.FURNACE,
+        Material.FURNACE,
+        Material.FURNACE,   //65
+        Material.FURNACE,
+        Material.FURNACE,
+        Material.BLAST_FURNACE   
     };
 
     //Change these
@@ -209,6 +285,31 @@ public class customItemUtil {
     "#646464",   //40
     "#646464",
     "#646464",
+    null,
+    null,   
+    null,   //45
+    null,
+    null,
+    null,
+    null,   
+    null,   //50
+    null,
+    null,
+    null,
+    null,   
+    null,   //55
+    null,
+    null,
+    null,
+    null,
+    null,    //60
+    null,
+    null,
+    null,
+    null,
+    null,   //65
+    null,
+    null,
     null
 };
 
@@ -256,8 +357,33 @@ public class customItemUtil {
         "#39853E",   //40
         "#39853E",
         "#39853E",
-        null
-};
+        null,
+        null,   
+        null,   //45
+        null,
+        null,
+        null,
+        null,   
+        null,   //50
+        null,
+        null,
+        null,
+        null,   
+        null,   //55
+        null,
+        null,
+        null,
+        null,
+        null,    //60
+        null,
+        null,
+        null,
+        null,
+        null,   //65
+        null,
+        null,
+        null,
+    };
 
 
 
@@ -387,6 +513,36 @@ public class customItemUtil {
     return -1;
 }
 
+    public static boolean isCustomItem(ItemStack item) {
+    if (item == null) return false;
+    if (!item.hasItemMeta()) return false;
+
+    ItemMeta meta = item.getItemMeta();
+    if (!meta.hasDisplayName() || !meta.hasLore()) return false;
+
+    String displayName = ChatColor.stripColor(meta.getDisplayName());
+    List<String> lore = meta.getLore();
+
+    for (int i = 0; i < CUSTOM_ITEM.length; i++) {
+        String expectedName = ChatColor.stripColor(CUSTOM_ITEM[i]);
+        String expectedLore = ChatColor.stripColor(CUSTOM_ITEM_LORE[i]);
+
+        if (expectedName.equalsIgnoreCase(displayName)) {
+            // Check material
+            if (item.getType() != CUSTOM_ITEM_MATERIAL[i]) continue;
+
+            // Check lore - make sure lore list contains the expected lore line somewhere
+            boolean loreMatches = lore.stream()
+                .map(ChatColor::stripColor)
+                .anyMatch(line -> line.equalsIgnoreCase(expectedLore));
+
+            if (loreMatches) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 }
 

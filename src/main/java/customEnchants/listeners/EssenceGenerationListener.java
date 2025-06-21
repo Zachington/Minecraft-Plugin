@@ -147,9 +147,9 @@ public class EssenceGenerationListener implements Listener {
             if (random.nextInt(100) < 50) {  // change 100 to 20 for normal use
                 int amount = config.minAmount + random.nextInt(config.maxAmount - config.minAmount + 1);
                 essenceManager.addEssence(player, config.tier, amount);
+                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "earned_essence", amount);
                 if (!isEssenceNotifDisabled(player)) {
                     player.sendMessage(ChatColor.GREEN + "You found Essence Tier " + config.tier + " x" + amount + "!");
-                    TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "earned_essence", amount);
                 }
             }
         }
