@@ -548,7 +548,6 @@ public class CrateListener implements Listener {
         statTracker.incrementPlayerStat(uuid, "crate_total", amount); // optional total counter
     }
 
-    Random random = new Random();
 
     // Give loot for each key opened
     for (int i = 0; i < amount; i++) {
@@ -559,21 +558,20 @@ public class CrateListener implements Listener {
         }
 
         if (loot.hasItemMeta()) {
-            ItemMeta meta = loot.getItemMeta();
-            if (meta.hasLore()) {
-                List<String> lore = new ArrayList<>(meta.getLore());
-                int randomChance = 1 + random.nextInt(100);
-                for (int j = 0; j < lore.size(); j++) {
-                    String line = ChatColor.stripColor(lore.get(j));
-                    if (line.startsWith("Success Rate:")) {
-                        lore.set(j, ChatColor.GREEN + "Success Rate: " + randomChance + "%");
-                        break;
-                    }
-                }
-                meta.setLore(lore);
-                loot.setItemMeta(meta);
-            }
-        }
+    ItemMeta meta = loot.getItemMeta();
+    if (meta.hasLore()) {
+        List<String> lore = new ArrayList<>(meta.getLore());
+
+        // Remove any old "Chance:" or "Success Rate:" lines
+        lore.removeIf(line -> {
+            String stripped = ChatColor.stripColor(line).toLowerCase();
+            return stripped.contains("chance:") || stripped.contains("success rate:");
+        });
+
+        meta.setLore(lore);
+        loot.setItemMeta(meta);
+    }
+}
 
         HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(loot);
         if (!leftover.isEmpty()) {

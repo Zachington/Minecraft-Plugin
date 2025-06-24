@@ -3,10 +3,12 @@ package customEnchants.listeners;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -78,23 +80,50 @@ public class GeneralBlockBreakListener implements Listener {
             return;
         }
 
+
+    if (!RankUtils.canUseEnchants(tool, player)) {
+        event.setCancelled(true);
+        return;
+    }
+
         
         boolean handled = EnchantFunctionUtil.handleDelayedDynamite(event, tool, plugin);
         if (handled) {      
             return; 
         }
 
+        
+
         EnchantFunctionUtil.handleRegenerate(event, tool, plugin);
         EnchantFunctionUtil.handleConjure(event, tool, plugin);
         EnchantFunctionUtil.handleXpSyphon(event, tool, plugin);
-        EnchantFunctionUtil.handleLightWeight(event, tool, plugin);
-        EnchantFunctionUtil.handleSpeedBreaker(event, tool, plugin);
+        EnchantFunctionUtil.handleLightWeight(event, tool);
+        EnchantFunctionUtil.handleSpeedBreaker(event, tool);
         EnchantFunctionUtil.handleSprinter(event, tool);
         EnchantFunctionUtil.handleBounder(event, tool);
-        EnchantFunctionUtil.handleKeyMiner(event, tool);
+        EnchantFunctionUtil.handleKeyMiner(event, tool, plugin);
         EnchantFunctionUtil.handleGoldDigger(event, tool);
         EnchantFunctionUtil.handleVeinMiner(event, tool);
-        
+        EnchantFunctionUtil.handleBlast(event, tool);
+        EnchantFunctionUtil.handleWallBreaker(event, tool);
+        EnchantFunctionUtil.handleFrostTouch(event, tool);
+        EnchantFunctionUtil.handleOreScavenger(event, tool);
+        EnchantFunctionUtil.handleTreasureHunter(event, tool);
+        EnchantFunctionUtil.handleResistance(event, tool);
+        EnchantFunctionUtil.handleJackpot(event, tool);
+        EnchantFunctionUtil.handleClumsy(event, tool, plugin);
+        EnchantFunctionUtil.handleDustCollector(event, tool);
+        EnchantFunctionUtil.handleEfficientGrip(event, tool);
+        EnchantFunctionUtil.handleTunneler(event, tool);
+        EnchantFunctionUtil.handleGemPolish(event, tool);
+        EnchantFunctionUtil.handleVeinFlicker(event, tool);
+        EnchantFunctionUtil.handleAutoSell(event, tool);
+        EnchantFunctionUtil.handleFortuneLink(event, tool);
+        EnchantFunctionUtil.handleWealthPulse(event, tool);
+        EnchantFunctionUtil.handleResistance(event, tool);
+        EnchantFunctionUtil.handleOmniMiner(event, tool);
+        EnchantFunctionUtil.handlePureGreed(player, tool, event);
+
 
         // Normal block break stat tracking
         UUID uuid = player.getUniqueId();
@@ -163,7 +192,15 @@ public class GeneralBlockBreakListener implements Listener {
     }
 }
 
+    @EventHandler
+    public void onItemDamage(PlayerItemDamageEvent event) {
+        Player player = event.getPlayer();
+        World world = player.getWorld();
 
+        if (world != null && "cell_world".equals(world.getName())) {
+            event.setCancelled(true);
+        }
+    }
 
 
 }

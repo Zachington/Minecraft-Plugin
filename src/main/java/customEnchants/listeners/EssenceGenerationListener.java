@@ -1,14 +1,18 @@
 package customEnchants.listeners;
 
 import customEnchants.TestEnchants;
+import customEnchants.utils.EnchantFunctionUtil;
 import customEnchants.utils.EssenceManager;
+import customEnchants.utils.HeldToolInfo;
 import customEnchants.utils.customItemUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -114,46 +118,72 @@ public class EssenceGenerationListener implements Listener {
     }
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
-        Player player = event.getPlayer();
+public void onBlockBreak(BlockBreakEvent event) {
+    Player player = event.getPlayer();
 
-        ItemStack[] storedContents = essenceManager.getStoredExtractorContents(player);
-        if (storedContents == null || storedContents.length != 9) {
-            return;
+    ItemStack[] storedContents = essenceManager.getStoredExtractorContents(player);
+    if (storedContents == null || storedContents.length != 9) {
+        return;
+    }
+
+    HeldToolInfo tool = HeldToolInfo.fromItem(player.getInventory().getItemInMainHand());
+
+    double essenceLinkMultiplier = EnchantFunctionUtil.getEssenceLinkMultiplier(tool);
+    double essenceHoarderMultiplier = EnchantFunctionUtil.getEssenceHoarderMultiplier(tool);
+
+    // If both enchants active, combine multipliers multiplicatively
+    double essenceMultiplier = essenceLinkMultiplier * essenceHoarderMultiplier;
+
+    // Check if Essence Hoarder is active to skip XP gain later in your XP handling logic
+    boolean skipXpGain = tool != null && tool.customEnchants.containsKey("Essence Hoarder");
+
+    for (int slot = 0; slot < storedContents.length; slot++) {
+        ItemStack item = storedContents[slot];
+        if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) {
+            continue;
         }
 
+        String strippedName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
 
-        for (int slot = 0; slot < storedContents.length; slot++) {
-            ItemStack item = storedContents[slot];
-            if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) {
-                continue;
-            }
+        int extractorIndex = customItemUtil.getCustomItemIndexByStrippedName(strippedName);
+        if (extractorIndex == -1) {
+            continue;
+        }
+        if (!strippedName.toLowerCase().contains("extractor")) {
+            continue;
+        }
 
-            String strippedName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+        TierAmountRange config = extractorConfig.get(extractorIndex);
+        if (config == null) {
+            continue;
+        }
 
-            int extractorIndex = customItemUtil.getCustomItemIndexByStrippedName(strippedName);
-            if (extractorIndex == -1) {
-                continue;
-            }
-            if (!strippedName.toLowerCase().contains("extractor")) {
-                continue;
-            }
+        if (random.nextInt(100) < 50) {  // change 100 to 20 for normal use
+            int baseAmount = config.minAmount + random.nextInt(config.maxAmount - config.minAmount + 1);
 
-            TierAmountRange config = extractorConfig.get(extractorIndex);
-            if (config == null) {
-                continue;
-            }
+            int finalAmount = (int) Math.ceil(baseAmount * essenceMultiplier);
+            essenceManager.addEssence(player, config.tier, finalAmount);
+            EnchantFunctionUtil.handleAuraOfWealth(event, tool, finalAmount);
 
-            if (random.nextInt(100) < 50) {  // change 100 to 20 for normal use
-                int amount = config.minAmount + random.nextInt(config.maxAmount - config.minAmount + 1);
-                essenceManager.addEssence(player, config.tier, amount);
-                TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "earned_essence", amount);
-                if (!isEssenceNotifDisabled(player)) {
-                    player.sendMessage(ChatColor.GREEN + "You found Essence Tier " + config.tier + " x" + amount + "!");
-                }
+            TestEnchants.getInstance().statTracker.incrementPlayerStat(player.getUniqueId(), "earned_essence", finalAmount);
+
+            if (!isEssenceNotifDisabled(player)) {
+                player.sendMessage(ChatColor.GREEN + "You found Essence Tier " + config.tier + " x" + finalAmount + "!");
             }
         }
     }
+
+    if (skipXpGain) {
+    event.setExpToDrop(0); 
+    Location playerLoc = player.getLocation();
+
+    player.getWorld().getEntities().stream()
+        .filter(entity -> entity instanceof ExperienceOrb)
+        .map(entity -> (ExperienceOrb) entity)
+        .filter(orb -> orb.getLocation().distanceSquared(playerLoc) <= 4)
+        .forEach(ExperienceOrb::remove);
+}
+}
 
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {

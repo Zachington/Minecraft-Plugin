@@ -4,6 +4,7 @@ import customEnchants.TestEnchants;
 import customEnchants.listeners.EssenceGenerationListener;
 import customEnchants.managers.RankManager;
 import customEnchants.managers.SellManager;
+import customEnchants.utils.CellUtil;
 import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
 import customEnchants.utils.RankQuest;
@@ -16,6 +17,7 @@ import net.milkbowl.vault.economy.Economy;
 import customEnchants.utils.EssenceManager;
 import customEnchants.managers.VaultManager;
 import customEnchants.managers.WarpManager;
+import customEnchants.managers.CellManager;
 import customEnchants.managers.QuestManager;
 
 import org.bukkit.Bukkit;
@@ -23,6 +25,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -39,18 +42,22 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.*;
-
-
 
 public class CommandHandler implements CommandExecutor, TabCompleter {
 
@@ -62,6 +69,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private final TestEnchants testEnchants;
     StatTracker statTracker = TestEnchants.getInstance().statTracker;
     QuestManager questManager = TestEnchants.getInstance().getQuestManager();
+    private static final Map<UUID, UUID> pendingInvites = new HashMap<>();
 
     public CommandHandler(TestEnchants plugin, Economy economy, RankManager rankManager, VaultManager vaultManager, TestEnchants testEnchants) {
         this.economy = economy;
@@ -244,12 +252,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         player.sendMessage(ChatColor.RED + "You are already at the max rank!");
         return true;
     }
+    if (nextRank == "a1p1a") {
+        player.sendMessage(ChatColor.RED + "You are already at the max rank!");
+        return true;
+    }
 
-    // Check quests
-    if (statTracker.getPlayerStat(uuid, "quests_completed", false) < 2) {
-    player.sendMessage(ChatColor.RED + "You must complete both quests before ranking up.");
-    return true;
-}
+    boolean isPrestige = RankUtils.compareRanks(currentRank, "p1a") >= 0;
+    boolean isStartOfPrestige = currentRank.endsWith("a");
+
+    // Quest check
+    int requiredQuests = isPrestige ? (isStartOfPrestige ? 1 : 0) : 2;
+    if (statTracker.getPlayerStat(uuid, "quests_completed", false) < requiredQuests) {
+        player.sendMessage(ChatColor.RED + "You must complete " + requiredQuests + " quest" + (requiredQuests == 1 ? "" : "s") + " before ranking up.");
+        return true;
+    }
 
     RankCost cost = RankUtils.getRankCost(nextRank, currentRank);
     if (cost == null) {
@@ -257,52 +273,66 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    int playerEssence = essenceManager.getEssence(player, cost.essenceTier);
-    if (playerEssence < cost.essence) {
+    if (essenceManager.getEssence(player, cost.essenceTier) < cost.essence) {
         player.sendMessage(ChatColor.RED + "You need §e" + cost.essence + " Tier " + cost.essenceTier + " Essence§c to rank up.");
         return true;
     }
 
-    double balance = economy.getBalance(player);
-    if (balance < cost.money) {
+    if (economy.getBalance(player) < cost.money) {
         player.sendMessage(ChatColor.RED + "You need §a$" + String.format("%,.2f", cost.money) + "§c to rank up.");
         return true;
     }
 
-    // Remove essence and money
+    // Deduct cost
     essenceManager.removeEssence(player, cost.essenceTier, cost.essence);
     economy.withdrawPlayer(player, cost.money);
 
-
-    // Update rank
+    // Set new rank
     rankManager.setRank(player, nextRank);
-
-    statTracker.setPlayerStat(uuid, "quests_completed", 0, false);
-    String newQuestPrefix = nextRank + "-" + RankUtils.getNextRank(nextRank); // e.g. b-c
-    questManager.addQuest(player, newQuestPrefix + "-quest1");
-    questManager.addQuest(player, newQuestPrefix + "-quest2");
-
     player.sendMessage(ChatColor.GREEN + "You ranked up to " + RankUtils.formatRankName(nextRank) + ChatColor.GREEN + "!");
 
-    // Save blocks broken at start of new rank
-    for (String rarity : new String[]{"common", "uncommon", "rare", "epic", "legendary"}) {
-    String statKey = "enchants_applied_" + rarity;
-    int current = statTracker.getPlayerStat(player.getUniqueId(), statKey, false);
-    statTracker.setPlayerStat(player.getUniqueId(), statKey + "_at_rank_start." + nextRank, current, false);
+    // Reset quests if needed
+    if (!isPrestige) {
+    statTracker.setPlayerStat(uuid, "quests_completed", 0, false);
     }
-    int currentBlocks = statTracker.getPlayerStat(uuid, "blocks_broken", false);
-    int currentEssence = statTracker.getPlayerStat(uuid, "earned_essence", false);
-    int currentCrates = statTracker.getPlayerStat(uuid, "crate_total", false);
-    int currentFiller = statTracker.getPlayerStat(uuid, "filler_sold", false); 
-    int currentShards = statTracker.getPlayerStat(uuid, "crafted_essence", false);
-    int currentExtractor = statTracker.getPlayerStat(uuid, "crafted_extractors", false); 
-    statTracker.setPlayerStat(uuid, "blocks_broken_at_rank_start." + newQuestPrefix, currentBlocks, false);
-    statTracker.setPlayerStat(uuid, "earned_essence_at_rank_start." + newQuestPrefix, currentEssence, false);
-    statTracker.setPlayerStat(uuid, "total_crates_at_rank_start." + newQuestPrefix, currentCrates, false);
-    statTracker.setPlayerStat(uuid, "filler_sold_at_rank_start." + newQuestPrefix, currentFiller, false);
-    statTracker.setPlayerStat(uuid, "crafted_essence_at_rank_start." + newQuestPrefix, currentShards, false);
-    statTracker.setPlayerStat(uuid,"crafted_extractor_at_rank_start." + newQuestPrefix, currentExtractor, false);
 
+    // Stat tracking
+    if (isPrestige && nextRank.endsWith("a")) {
+        // Snapshot stats once per prestige
+        String prestigePrefix = nextRank.substring(0, nextRank.length() - 1); // "p1", "p2", etc.
+        for (String rarity : new String[]{"common", "uncommon", "rare", "epic", "legendary"}) {
+            int current = statTracker.getPlayerStat(uuid, "enchants_applied_" + rarity, false);
+            statTracker.setPlayerStat(uuid, "enchants_applied_" + rarity + "_at_rank_start." + prestigePrefix, current, false);
+        }
+        statTracker.setPlayerStat(uuid, "blocks_broken_at_rank_start." + prestigePrefix, statTracker.getPlayerStat(uuid, "blocks_broken", false), false);
+        statTracker.setPlayerStat(uuid, "earned_essence_at_rank_start." + prestigePrefix, statTracker.getPlayerStat(uuid, "earned_essence", false), false);
+        statTracker.setPlayerStat(uuid, "total_crates_at_rank_start." + prestigePrefix, statTracker.getPlayerStat(uuid, "crate_total", false), false);
+        statTracker.setPlayerStat(uuid, "filler_sold_at_rank_start." + prestigePrefix, statTracker.getPlayerStat(uuid, "filler_sold", false), false);
+        statTracker.setPlayerStat(uuid, "crafted_essence_at_rank_start." + prestigePrefix, statTracker.getPlayerStat(uuid, "crafted_essence", false), false);
+        statTracker.setPlayerStat(uuid, "crafted_extractors_at_rank_start." + prestigePrefix, statTracker.getPlayerStat(uuid, "crafted_extractors", false), false);
+    } else if (!isPrestige) {
+        // Snapshot per-rank stats pre-prestige
+        String questPrefix = currentRank + "-" + nextRank;
+        for (String rarity : new String[]{"common", "uncommon", "rare", "epic", "legendary"}) {
+            int current = statTracker.getPlayerStat(uuid, "enchants_applied_" + rarity, false);
+            statTracker.setPlayerStat(uuid, "enchants_applied_" + rarity + "_at_rank_start." + questPrefix, current, false);
+        }
+        statTracker.setPlayerStat(uuid, "blocks_broken_at_rank_start." + questPrefix, statTracker.getPlayerStat(uuid, "blocks_broken", false), false);
+        statTracker.setPlayerStat(uuid, "earned_essence_at_rank_start." + questPrefix, statTracker.getPlayerStat(uuid, "earned_essence", false), false);
+        statTracker.setPlayerStat(uuid, "total_crates_at_rank_start." + questPrefix, statTracker.getPlayerStat(uuid, "crate_total", false), false);
+        statTracker.setPlayerStat(uuid, "filler_sold_at_rank_start." + questPrefix, statTracker.getPlayerStat(uuid, "filler_sold", false), false);
+        statTracker.setPlayerStat(uuid, "crafted_essence_at_rank_start." + questPrefix, statTracker.getPlayerStat(uuid, "crafted_essence", false), false);
+        statTracker.setPlayerStat(uuid, "crafted_extractors_at_rank_start." + questPrefix, statTracker.getPlayerStat(uuid, "crafted_extractors", false), false);
+    }
+
+    // Quests only if not prestige or ranking into a new prestige
+    if (!isPrestige || nextRank.endsWith("a")) {
+        String newQuestPrefix = nextRank + "-" + RankUtils.getNextRank(nextRank);
+        questManager.addQuest(player, newQuestPrefix + "-quest1");
+        questManager.addQuest(player, newQuestPrefix + "-quest2");
+    }
+
+    // Broadcast
     if (RankUtils.isAscendUpgrade(currentRank, nextRank)) {
         Bukkit.broadcastMessage("§6" + player.getName() + " §ehas §4Ascended §eto: " + ChatColor.DARK_RED + RankUtils.formatRankTierOnly(nextRank) + "§e!");
     } else if (RankUtils.isPrestigeUpgrade(currentRank, nextRank)) {
@@ -502,7 +532,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             player.sendMessage(ChatColor.RED + "You're not holding a sellable item.");
             return true;
         }
-        double price = sellManager.getPrice(item.getType()) * item.getAmount();
+        double price = SellManager.getPrice(item.getType()) * item.getAmount();
         total += price;
 
         if (sellManager.isFillerBlock(item.getType())) {
@@ -516,7 +546,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (item == null || item.getType() == Material.AIR) continue;
 
             if (sellManager.isSellable(item.getType())) {
-                double price = sellManager.getPrice(item.getType()) * item.getAmount();
+                double price = SellManager.getPrice(item.getType()) * item.getAmount();
                 total += price;
 
                 if (sellManager.isFillerBlock(item.getType())) {
@@ -529,34 +559,25 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     if (total > 0) {
-        // Calculate prestige bonus same as your code
-        String rank = RankUtils.getRank(player);
-        int prestigeBonus = 0;
+    String rank = RankUtils.getRank(player);
+    int prestigeLevel = 0;
 
-        Matcher matcher = Pattern.compile("p(\\d*)").matcher(rank.toLowerCase());
-        if (matcher.find()) {
-            String digits = matcher.group(1);
-            if (!digits.isEmpty()) {
-                if (rank.length() == matcher.start() + 1 + digits.length()) {
-                    try {
-                        int value = Integer.parseInt(digits);
-                        prestigeBonus = Math.min(value, 10);
-                    } catch (NumberFormatException ignored) {}
-                } else {
-                    prestigeBonus = 10;
-                }
-            } else {
-                prestigeBonus = 0;
-            }
+    // Check how many prestige levels the player has (up to 10)
+    for (int i = 1; i <= 10; i++) {
+        if (RankUtils.compareRanks(rank, "p" + i + "a") >= 0) {
+            prestigeLevel = i;
         } else {
-            prestigeBonus = 0;
+            break;
         }
+    }
 
-        double multiplier = 1.0 + (prestigeBonus * 0.01);
-        double finalAmount = total * multiplier;
+    double multiplier = 1.0 + (prestigeLevel * 0.01);
+    double finalAmount = total * multiplier;
 
-        VaultUtil.getEconomy().depositPlayer(player, finalAmount);
-        player.sendMessage(ChatColor.GREEN + "Sold items for $" + String.format("%.2f", finalAmount));
+    VaultUtil.getEconomy().depositPlayer(player, finalAmount);
+    player.sendMessage(ChatColor.GREEN + "Sold items for $" + String.format("%.2f", finalAmount));
+
+
 
         
         if (fillerTotal > 0) {
@@ -736,7 +757,414 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     player.sendMessage(ChatColor.YELLOW + "Removed warp location for '" + mineName + "'.");
     return true;
 }
+            case "cell" -> {
+    if (args.length == 0) {
+    if (!(sender instanceof Player)) {
+        sender.sendMessage(ChatColor.RED + "Only players can use this command.");
+        return true;
+    }
 
+    if (!CellManager.hasCell(player.getUniqueId())) {
+        player.sendMessage(ChatColor.RED + "You do not own a cell.");
+        return true;
+    }
+
+    Location loc = CellManager.getCellTeleportLocation(player.getUniqueId());
+    if (loc == null) {
+        player.sendMessage(ChatColor.RED + "Failed to find your cell.");
+        return true;
+    }
+
+    player.teleport(loc);
+    player.sendMessage(ChatColor.GREEN + "Teleported to your cell.");
+    return true;
+}
+
+String subCommand = args[0].toLowerCase();
+if (sender instanceof Player) {
+    player = (Player) sender;
+}
+
+    switch (subCommand) {
+        case "create" -> {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(ChatColor.RED + "Only players can use this command.");
+                return true;
+            }
+
+            // Check rank
+            String rank = RankUtils.getRank(player);
+            if (RankUtils.compareRanks(rank, "p1a") < 0) {
+                player.sendMessage(ChatColor.RED + "You must be at least rank P1A to create a cell.");
+                return true;
+            }
+
+            // Check if they already have a cell
+            if (CellManager.hasCell(player.getUniqueId())) {
+                player.sendMessage(ChatColor.RED + "You already own a cell.");
+                return true;
+            }
+
+            // Check money
+            double cost = 500_000;
+            Economy economy = VaultUtil.getEconomy();
+
+            if (economy == null) {
+                player.sendMessage(ChatColor.RED + "Economy system is not available.");
+                return true;
+            }
+
+            if (!economy.has(player, cost)) {
+                player.sendMessage(ChatColor.RED + "You need $" + String.format("%,.0f", cost) + " to create a cell.");
+                return true;
+            }
+
+            economy.withdrawPlayer(player, cost);
+
+            boolean success = CellManager.createPlayerCell(player);
+
+            if (success) {
+                player.sendMessage(ChatColor.GREEN + "Your prestige cell has been created!");
+            } else {
+                player.sendMessage(ChatColor.RED + "Failed to create your cell. Please contact staff.");
+            }
+
+            return true;
+        }
+        case "invite" -> {
+    if (args.length < 2) {
+        player.sendMessage(ChatColor.RED + "Usage: /cell invite <player>");
+        return true;
+    }
+
+    UUID inviterId = player.getUniqueId();
+    if (!CellManager.hasCell(inviterId)) {
+        player.sendMessage(ChatColor.RED + "You don't own a cell.");
+        return true;
+    }
+
+    CellUtil.PlayerCellData data = CellUtil.getPlayerCellData(inviterId);
+    if (data == null) {
+        player.sendMessage(ChatColor.RED + "Error: Your cell data could not be found.");
+        return true;
+    }
+
+    if (data.getMembers().size() >= CellUtil.getMaxMembersForLevel(data.getMemberCapacityLevel())) {
+        player.sendMessage(ChatColor.RED + "You have reached the maximum member limit for your cell.");
+        return true;
+    }
+
+    Player target = Bukkit.getPlayer(args[1]);
+    if (target == null || !target.isOnline()) {
+        player.sendMessage(ChatColor.RED + "That player is not online.");
+        return true;
+    }
+
+    if (target.getUniqueId().equals(inviterId)) {
+        player.sendMessage(ChatColor.RED + "You cannot invite yourself to your cell.");
+        return true;
+    }
+
+    pendingInvites.put(target.getUniqueId(), inviterId);
+    player.sendMessage(ChatColor.GREEN + "Invite sent to " + target.getName());
+    target.sendMessage(ChatColor.AQUA + player.getName() + " has invited you to their cell. Use /cell accept to join.");
+    return true;
+}
+        case "upgrade" -> {
+            if (args.length != 1) {
+                player.sendMessage(ChatColor.RED + "Usage: /cell upgrade");
+                return true;
+            }
+            GuiUtil.openCellUpgradeGUI(player);
+            return true;
+        }
+        case "delete" -> {
+
+    if (!sender.hasPermission("cells.delete")) {
+        sender.sendMessage(ChatColor.RED + "You don't have permission to delete cells.");
+        return true;
+    }
+
+    if (!(sender instanceof Player) && args.length != 1) {
+        sender.sendMessage(ChatColor.RED + "Usage: /cell delete <player>");
+        return true;
+    }
+
+    String targetName;
+    if (args.length == 1) {
+        targetName = args[0];
+    } else if (sender instanceof Player) {
+        targetName = ((Player) sender).getName();
+    } else {
+        sender.sendMessage(ChatColor.RED + "Usage: /cell delete <player>");
+        return true;
+    }
+
+    Player target = Bukkit.getPlayerExact(targetName);
+    if (target == null) {
+        sender.sendMessage(ChatColor.RED + "Player not found or not online.");
+        return true;
+    }
+
+    UUID targetId = target.getUniqueId();
+
+    boolean hasCell = CellManager.hasCell(targetId);
+    World world = Bukkit.getWorld("cell_world");
+
+    boolean hasRegion = false;
+    if (world != null) {
+        RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
+        if (regionManager != null) {
+            String regionId = "cell_" + targetId.toString().replace("-", "");
+            hasRegion = regionManager.hasRegion(regionId);
+        }
+    }
+
+    if (!hasCell && !hasRegion) {
+        sender.sendMessage(ChatColor.RED + targetName + " does not own a cell.");
+        return true;
+    }
+    boolean removed = CellManager.deletePlayerCell(targetId); // You need to implement this method
+
+    if (removed) {
+        sender.sendMessage(ChatColor.GREEN + "Deleted cell for " + targetName + ".");
+        target.sendMessage(ChatColor.RED + "Your cell was deleted by a developer.");
+    } else {
+        sender.sendMessage(ChatColor.RED + "Failed to delete cell for " + targetName + ".");
+    }
+    return true;
+}
+        case "accept" -> {
+    UUID inviteeId = player.getUniqueId();
+    if (!pendingInvites.containsKey(inviteeId)) {
+        player.sendMessage(ChatColor.RED + "You don't have any pending cell invites.");
+        return true;
+    }
+
+    UUID ownerId = pendingInvites.remove(inviteeId);
+    CellManager.CellData data = CellManager.getCellData(ownerId);
+    if (data == null) {
+        player.sendMessage(ChatColor.RED + "That cell no longer exists.");
+        return true;
+    }
+
+    World world = Bukkit.getWorld("cell_world");
+    RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+    RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
+    if (regionManager == null) {
+        player.sendMessage(ChatColor.RED + "Region manager error.");
+        return true;
+    }
+
+    ProtectedCuboidRegion region = (ProtectedCuboidRegion) regionManager.getRegion(data.regionId);
+    if (region == null) {
+        player.sendMessage(ChatColor.RED + "Cell region not found.");
+        return true;
+    }
+
+    region.getMembers().addPlayer(inviteeId);
+    player.sendMessage(ChatColor.GREEN + "You've joined the cell!");
+    return true;
+}
+        case "kick" -> {
+    if (args.length < 2) {
+        player.sendMessage(ChatColor.RED + "Usage: /cell kick <player>");
+        return true;
+    }
+
+    UUID ownerId = player.getUniqueId();
+    if (!CellManager.hasCell(ownerId)) {
+        player.sendMessage(ChatColor.RED + "You don't own a cell.");
+        return true;
+    }
+
+    Player target = Bukkit.getPlayer(args[1]);
+    if (target == null || !target.isOnline()) {
+        player.sendMessage(ChatColor.RED + "That player is not online.");
+        return true;
+    }
+
+    UUID targetId = target.getUniqueId();
+    if (targetId.equals(ownerId)) {
+        player.sendMessage(ChatColor.RED + "You cannot kick yourself.");
+        return true;
+    }
+
+    CellManager.CellData data = CellManager.getCellData(ownerId);
+    if (data == null) {
+        player.sendMessage(ChatColor.RED + "Cell data not found.");
+        return true;
+    }
+
+    World world = Bukkit.getWorld("cell_world");
+    RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
+    if (regionManager == null) {
+        player.sendMessage(ChatColor.RED + "Region manager error.");
+        return true;
+    }
+
+    ProtectedCuboidRegion region = (ProtectedCuboidRegion) regionManager.getRegion(data.regionId);
+    if (region == null) {
+        player.sendMessage(ChatColor.RED + "Region not found.");
+        return true;
+    }
+
+    if (!region.getMembers().contains(targetId)) {
+        player.sendMessage(ChatColor.RED + target.getName() + " is not a member of your cell.");
+        return true;
+    }
+
+    region.getMembers().removePlayer(targetId);
+    player.sendMessage(ChatColor.YELLOW + "You kicked " + target.getName() + " from your cell.");
+    target.sendMessage(ChatColor.RED + "You were kicked from " + player.getName() + "'s cell.");
+    return true;
+}
+        default -> {
+        // Invalid argument, send usage message or error
+        if (sender instanceof Player) {
+            player.sendMessage(ChatColor.RED + "Unknown subcommand. Usage: /cell <create|invite|upgrade|delete>");
+        } else {
+            sender.sendMessage(ChatColor.RED + "Unknown subcommand.");
+        }
+        return true;
+    }
+        
+}
+}
+            case "rankupmax" -> {
+    UUID uuid = player.getUniqueId();
+    String currentRank = RankUtils.getRank(player);
+
+    if (RankUtils.compareRanks(currentRank, "p1a") < 0) {
+        player.sendMessage(ChatColor.RED + "You must be at least rank p1a to use this command.");
+        return true;
+    }
+
+    if (currentRank.length() < 2 || !Character.isLetter(currentRank.charAt(currentRank.length() - 1))) {
+    player.sendMessage(ChatColor.RED + "Invalid rank format: " + currentRank);
+    return true;
+}
+
+    String prestigePrefix = currentRank.substring(0, currentRank.length() - 1); // e.g., "p1"
+    String prestigeCap = prestigePrefix + "z";
+
+    double balance = economy.getBalance(player);
+
+    // Cache original essence counts for all tiers
+    Map<Integer, Integer> essenceInventory = new HashMap<>();
+    Map<Integer, Integer> essenceOriginal = new HashMap<>();
+    for (int i = 1; i <= 8; i++) {
+        int amount = essenceManager.getEssence(player, i);
+        essenceInventory.put(i, amount);
+        essenceOriginal.put(i, amount);
+    }
+
+    int rankups = 0;
+    String lastTrackedPrefix = null;
+
+    while (true) {
+        String nextRank = RankUtils.getNextRank(currentRank);
+        if (nextRank == null || RankUtils.compareRanks(nextRank, prestigeCap) > 0) break;
+
+        RankCost cost = RankUtils.getRankCost(nextRank, currentRank);
+        if (cost == null) break;
+
+        // Check if player can afford money and essence cost
+        if (balance < cost.money) {
+            player.sendMessage(ChatColor.RED + "Insufficient money to rank up to " + nextRank);
+            break;
+        }
+
+        int currentEssence = essenceInventory.getOrDefault(cost.essenceTier, 0);
+        if (currentEssence < cost.essence) {
+            player.sendMessage(ChatColor.RED + "Insufficient essence tier " + cost.essenceTier + " to rank up to " + nextRank);
+            break;
+        }
+
+        // Deduct cost from cached values
+        balance -= cost.money;
+        essenceInventory.put(cost.essenceTier, currentEssence - cost.essence);
+
+        // Update rank
+        currentRank = nextRank;
+        rankManager.setRank(player, currentRank);
+        rankups++;
+
+        // Add quests at start of prestige tier only (if ends with 'a')
+        if (currentRank.endsWith("a")) {
+            String questKey = currentRank + "-" + RankUtils.getNextRank(currentRank);
+            questManager.addQuest(player, questKey + "-quest1");
+            questManager.addQuest(player, questKey + "-quest2");
+        }
+
+        // Track stats once per prestige block (e.g., p1)
+        String currentPrefix = currentRank.substring(0, currentRank.length() - 1); // e.g., "p1"
+        if (!currentPrefix.equals(lastTrackedPrefix)) {
+            lastTrackedPrefix = currentPrefix;
+
+            for (String rarity : new String[]{"common", "uncommon", "rare", "epic", "legendary"}) {
+                String statKey = "enchants_applied_" + rarity;
+                int current = statTracker.getPlayerStat(uuid, statKey, false);
+                statTracker.setPlayerStat(uuid, statKey + "_at_rank_start." + currentPrefix, current, false);
+            }
+
+            int blocks = statTracker.getPlayerStat(uuid, "blocks_broken", false);
+            int essence = statTracker.getPlayerStat(uuid, "earned_essence", false);
+            int crates = statTracker.getPlayerStat(uuid, "crate_total", false);
+            int filler = statTracker.getPlayerStat(uuid, "filler_sold", false);
+            int shards = statTracker.getPlayerStat(uuid, "crafted_essence", false);
+            int extractors = statTracker.getPlayerStat(uuid, "crafted_extractors", false);
+
+            statTracker.setPlayerStat(uuid, "blocks_broken_at_rank_start." + currentPrefix, blocks, false);
+            statTracker.setPlayerStat(uuid, "earned_essence_at_rank_start." + currentPrefix, essence, false);
+            statTracker.setPlayerStat(uuid, "total_crates_at_rank_start." + currentPrefix, crates, false);
+            statTracker.setPlayerStat(uuid, "filler_sold_at_rank_start." + currentPrefix, filler, false);
+            statTracker.setPlayerStat(uuid, "crafted_essence_at_rank_start." + currentPrefix, shards, false);
+            statTracker.setPlayerStat(uuid, "crafted_extractors_at_rank_start." + currentPrefix, extractors, false);
+        }
+    }
+
+    if (rankups > 0) {
+        player.sendMessage(ChatColor.GREEN + "You ranked up " + rankups + " time" + (rankups == 1 ? "" : "s") + " to " + RankUtils.formatRankName(currentRank) + "!");
+
+        // Withdraw money spent
+        economy.withdrawPlayer(player, economy.getBalance(player) - balance);
+
+        // Remove the used essence based on difference between original and remaining cached essence
+        for (Map.Entry<Integer, Integer> entry : essenceInventory.entrySet()) {
+            int tier = entry.getKey();
+            int remaining = entry.getValue();
+            int original = essenceOriginal.getOrDefault(tier, 0);
+
+            int used = original - remaining;
+            if (used > 0) {
+                essenceManager.removeEssence(player, tier, used);
+            }
+        }
+    } else {
+        player.sendMessage(ChatColor.RED + "You can't afford to rank up any further.");
+    }
+
+    return true;
+}
+
+
+            case "enchants" -> {
+        int page = 1;
+        if (args.length > 1) {
+            try {
+                page = Integer.parseInt(args[1]);
+                if (page < 1) page = 1; // minimum page is 1
+            } catch (NumberFormatException e) {
+                player.sendMessage(ChatColor.RED + "Invalid page number, defaulting to page 1.");
+                page = 1;
+            }
+        }
+        
+        Inventory gui = GuiUtil.getEnchantInfoGUI(page);
+        player.openInventory(gui);
+        return true;
+    }
 
 
 
@@ -967,6 +1395,34 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
         }
         return completions;
+    }
+}
+
+        if ("cell".equalsIgnoreCase(cmd)) {
+    if (args.length == 1) {
+        List<String> options = Arrays.asList("create", "invite", "upgrade", "delete", "kick", "accept");
+        String partial = args[0].toLowerCase();
+        List<String> completions = new ArrayList<>();
+        for (String option : options) {
+            if (option.startsWith(partial)) {
+                completions.add(option);
+            }
+        }
+        return completions;
+    }
+
+    if (args.length == 2) {
+        String sub = args[0].toLowerCase();
+        if (sub.equals("invite") || sub.equals("kick") || sub.equals("delete")) {
+            String partial = args[1].toLowerCase();
+            List<String> matchingPlayers = new ArrayList<>();
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                if (online.getName().toLowerCase().startsWith(partial)) {
+                    matchingPlayers.add(online.getName());
+                }
+            }
+            return matchingPlayers;
+        }
     }
 }
 

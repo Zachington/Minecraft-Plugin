@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import customEnchants.TestEnchants;
+import customEnchants.listeners.CellUpgradeListener;
 import customEnchants.utils.crateTableUtil.LootEntry;
 
 import java.util.*;
@@ -1166,8 +1167,284 @@ public class GuiUtil {
     return gui;
 }
 
+    public static void openCellUpgradeGUI(Player player) {
+        Inventory inv = Bukkit.createInventory(null, 27, "Cell Upgrade Menu");
 
+        // Get player data
+        CellUtil.PlayerCellData data = CellUtil.getPlayerCellData(player.getUniqueId());
 
+        inv.setItem(10, createUpgradeItem(
+            Material.VILLAGER_SPAWN_EGG,
+            "Member Capacity",
+            getMemberCapacityLore(data.getMemberCapacityLevel())
+        ));
+
+        inv.setItem(12, createUpgradeItem(
+            Material.IRON_BARS,
+            "Cell Size",
+            getCellSizeLore(data.getCellSizeLevel())
+        ));
+
+        inv.setItem(14, createUpgradeItem(
+            Material.HOPPER,
+            "Hopper Limit",
+            getHopperLimitLore(data.getHopperLimitLevel())
+        ));
+
+        inv.setItem(16, createUpgradeItem(
+            Material.WHEAT,
+            "Farm Upgrade",
+            getFarmUpgradeLore(data.getFarmUpgradeLevel())
+        ));
+
+        fillEmptySlotsWithGrayPane(inv);
+
+        player.openInventory(inv);
+    }
+
+    private static ItemStack createUpgradeItem(Material material, String name, java.util.List<String> lore) {
+        // Your method to create an ItemStack with display name and lore
+        // This is a stub; replace with your actual implementation
+        ItemStack item = new ItemStack(material);
+        var meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(name);
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private static final int MEMBER_CAPACITY_MAX_LEVEL = 3;
+
+    private static java.util.List<String> getMemberCapacityLore(int level) {
+    if (level >= MEMBER_CAPACITY_MAX_LEVEL) {
+        int maxMembers = CellUtil.getMaxMembersForLevel(level);
+        return java.util.Arrays.asList(
+            "Current level: Max (" + maxMembers + " members)",
+            "Upgrade cost: MAX"
+        );
+    }
+
+    double cost = switch (level + 1) {
+        case 1 -> 1_000_000;
+        case 2 -> 5_000_000;
+        case 3 -> 10_000_000;
+        default -> 999_999_999;  // fallback, ideally never hit
+    };
+    int maxMembers = CellUtil.getMaxMembersForLevel(level);
+    return java.util.Arrays.asList(
+        "Current level: " + level + " (" + maxMembers + " members)",
+        "Upgrade cost: $" + String.format("%,.0f", cost)
+    );
+}
+
+    private static final int CELL_SIZE_MAX_LEVEL = 5; // example max level
+
+    private static java.util.List<String> getCellSizeLore(int level) {
+    if (level >= CELL_SIZE_MAX_LEVEL) {
+        return java.util.Arrays.asList(
+            "Current level: Max",
+            "Upgrade cost: MAX"
+        );
+    }
+
+    double cost = CellUpgradeListener.getCellSizeUpgradeCost(level + 1);
+    return java.util.Arrays.asList(
+        "Current level: " + level,
+        "Upgrade cost: " + String.format("%,.0f", cost)
+    );
+}
+
+    private static final int HOPPER_LIMIT_MAX_LEVEL = 4;
+
+    private static java.util.List<String> getHopperLimitLore(int level) {
+    if (level >= HOPPER_LIMIT_MAX_LEVEL) {
+        int hopperLimit = CellUtil.getHopperLimitForLevel(level);
+        return java.util.Arrays.asList(
+            "Current level: Max (" + hopperLimit + " hoppers)",
+            "Upgrade cost: MAX"
+        );
+    }
+
+    double cost = switch (level + 1) {
+        case 1 -> 500_000;
+        case 2 -> 2_000_000;
+        case 3 -> 5_000_000;
+        case 4 -> 10_000_000;
+        default -> 999_999_999;
+    };
+    int hopperLimit = CellUtil.getHopperLimitForLevel(level);
+    return java.util.Arrays.asList(
+        "Current level: " + level + " (" + hopperLimit + " hoppers)",
+        "Upgrade cost: $" + String.format("%,.0f", cost)
+    );
+}
+
+    private static final int FARM_UPGRADE_MAX_LEVEL = 5;
+
+    private static java.util.List<String> getFarmUpgradeLore(int level) {
+    if (level >= FARM_UPGRADE_MAX_LEVEL) {
+        double growthMultiplier = 1.0 + 0.25 * level;
+        return java.util.Arrays.asList(
+            "Current level: Max (Growth & Yield: " + String.format("%.2fx", growthMultiplier) + ")",
+            "Upgrade cost: MAX"
+        );
+    }
+
+    double cost = switch (level + 1) {
+        case 1 -> 10_000_000;
+        case 2 -> 25_000_000;
+        case 3 -> 50_000_000;
+        case 4 -> 100_000_000;
+        case 5 -> 200_000_000;
+        default -> 999_999_999;
+    };
+    double growthMultiplier = 1.0 + 0.25 * level;
+    return java.util.Arrays.asList(
+        "Current level: " + level + " (Growth & Yield: " + String.format("%.2fx", growthMultiplier) + ")",
+        "Upgrade cost: $" + String.format("%,.0f", cost)
+    );
+}
+
+    public static Inventory getEnchantInfoGUI(int page) {
+    Inventory gui = Bukkit.createInventory(null, 54, ChatColor.GRAY + "Custom Enchants - Page " + page);
+
+    // Fill borders
+    ItemStack grayPane = createPane(Material.GRAY_STAINED_GLASS_PANE);
+    for (int i = 0; i < 54; i++) {
+        if (isBorderSlot(i)) gui.setItem(i, grayPane);
+    }
+
+    // Arrows
+    if (page > 1) gui.setItem(45, createArrow(ChatColor.YELLOW + "Previous Page"));
+    if (page < getMaxPages()) gui.setItem(53, createArrow(ChatColor.YELLOW + "Next Page"));
+
+    // Create sorted list of indices by rarity
+    List<Integer> sortedIndices = new ArrayList<>();
+    for (int i = 0; i < EnchantmentData.ENCHANT_NAMES.length; i++) sortedIndices.add(i);
+
+    sortedIndices.sort(Comparator.comparingInt(i -> {
+        String rarity = EnchantmentData.ENCHANT_RARITY[i];
+        int index = RARITY_SORT_ORDER.indexOf(rarity.toUpperCase());
+        return index < 0 ? Integer.MAX_VALUE : index;
+    }));
+
+    int start = (page - 1) * PAGE_SLOTS.length;
+    int end = Math.min(start + PAGE_SLOTS.length, sortedIndices.size());
+
+    for (int displayIndex = 0, listIndex = start; listIndex < end; displayIndex++, listIndex++) {
+        int enchantIndex = sortedIndices.get(listIndex);
+        int slot = PAGE_SLOTS[displayIndex];
+
+        Material displayMat = getMaterialForEnchant(EnchantmentData.ENCHANT_NAMES[enchantIndex]);
+
+        ItemStack book = new ItemStack(displayMat);
+        ItemMeta meta = book.getItemMeta();
+        if (meta != null) {
+            String color = getRarityColor(EnchantmentData.ENCHANT_RARITY[enchantIndex]);
+            meta.setDisplayName(color + EnchantmentData.ENCHANT_NAMES[enchantIndex]);
+
+            List<String> lore = new ArrayList<>();
+            lore.add(ChatColor.GRAY + EnchantmentData.ENCHANT_LORE[enchantIndex]);
+            lore.add("");
+            lore.add("§7Max Level: §f" + EnchantmentData.ENCHANT_MAX_LEVELS[enchantIndex]);
+            lore.add("§7Tool Type: §f" + EnchantmentData.ENCHANT_TOOL_TYPES[enchantIndex]);
+            lore.add("§7Rarity: " + color + EnchantmentData.ENCHANT_RARITY[enchantIndex]);
+
+            meta.setLore(lore);
+            book.setItemMeta(meta);
+        }
+
+        gui.setItem(slot, book);
+    }
+
+    return gui;
+}
+
+    private static final List<String> RARITY_SORT_ORDER = List.of(
+    "PRESTIGE+", "PRESTIGE", "LEGENDARY", "EPIC", "RARE", "UNCOMMON", "COMMON"
+);
+
+    private static String getRarityColor(String rarity) {
+    return switch (rarity) {
+        case "COMMON" -> "§f";
+        case "UNCOMMON" -> "§a";
+        case "RARE" -> "§9";
+        case "EPIC" -> "§5";
+        case "LEGENDARY" -> "§6";
+        case "PRESTIGE" -> "§d";
+        case "PRESTIGE+" -> "§c";
+        default -> "§7";
+    };
+}
+
+    public static int getMaxPages() {
+    int enchantsCount = EnchantmentData.ENCHANT_NAMES.length;
+    return (int) Math.ceil((double) enchantsCount / PAGE_SLOTS.length);
+}
+
+    private static Material getMaterialForEnchant(String enchantName) {
+    return switch (enchantName) {
+        case "Unbreakable" -> Material.BEDROCK;
+        case "Final Echo" -> Material.POPPED_CHORUS_FRUIT;
+        case "Omni Miner" -> Material.DIAMOND_ORE;
+        case "Auto Smelt" -> Material.BLAST_FURNACE;
+        case "Blast" -> Material.TNT;
+        case "Wall Breaker" -> Material.COBBLESTONE_WALL;
+        case "Gold Digger" -> Material.GOLD_INGOT;
+        case "Magnet" -> Material.TARGET;
+        case "Key Miner" -> Material.TRIAL_KEY;
+        case "Speed Breaker" -> Material.LIGHTNING_ROD;
+        case "Vein Miner" -> Material.REDSTONE_ORE;
+        case "Essence Link" -> Material.EMERALD;
+        case "Essence Hoarder" -> Material.EMERALD_BLOCK;
+        case "Aura of Wealth" -> Material.HEART_OF_THE_SEA;
+        case "Legends Echo" -> Material.PURPLE_DYE;
+        case "Preservation" -> Material.OBSIDIAN;
+        case "Light Weight" -> Material.WIND_CHARGE;
+        case "Treasure Hunter" -> Material.CAKE;
+        case "Jackpot" -> Material.DIAMOND;
+        case "Fortune Link" -> Material.LEAD;
+        case "Pure Greed" -> Material.GOLD_BLOCK;
+        case "Frost Touch" -> Material.BLUE_ICE;
+        case "Xp Syphon" -> Material.EXPERIENCE_BOTTLE;
+        case "Vein Flicker" -> Material.IRON_ORE;
+        case "Wealth Pulse" -> Material.COPPER_INGOT;
+        case "Tunneler" -> Material.POINTED_DRIPSTONE;
+        case "Conjure" -> Material.RAW_IRON_BLOCK;
+        case "Auto Sell" -> Material.RAW_COPPER;
+        case "Miners Instinct" -> Material.CRYING_OBSIDIAN;
+        case "Ore Scavenger" -> Material.REDSTONE_ORE;
+        case "Delayed Dynamite" -> Material.COAL_BLOCK;
+        case "Regenerate" -> Material.COAL_ORE;
+        case "Clumsy" -> Material.HONEY_BLOCK;
+        case "Gem Polish" -> Material.GRINDSTONE;
+        case "Sprinter" -> Material.FEATHER;
+        case "Bounder" -> Material.SLIME_BLOCK;
+        case "Resistance" -> Material.NETHERITE_SCRAP;
+        case "Efficient Grip" -> Material.COOKED_BEEF;
+        case "Dust Collector" -> Material.SAND;
+        default -> Material.ENCHANTED_BOOK;
+    };
+}
+
+    private static final int[] PAGE_SLOTS = {
+    10, 11, 12, 13, 14, 15, 16,
+    19, 20, 21, 22, 23, 24, 25,
+    28, 29, 30, 31, 32, 33, 34,
+    37, 38, 39, 40, 41, 42, 43
+};
+
+    private static ItemStack createArrow(String name) {
+    ItemStack arrow = new ItemStack(Material.ARROW);
+    ItemMeta meta = arrow.getItemMeta();
+    if (meta != null) {
+        meta.setDisplayName(name);
+        arrow.setItemMeta(meta);
+    }
+    return arrow;
+}
 
 
 }

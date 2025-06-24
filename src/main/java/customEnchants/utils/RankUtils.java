@@ -292,7 +292,7 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
         RankCost base = baseRankCosts.get(letter);
         if (base == null) return null;
 
-        double money = base.money * (1 + 0.05 * prestige);
+        double money = base.money * (1 + 0.25 * prestige);
         int tier = getEssenceTier(rank);
 
         int essenceCost = 0;
@@ -511,40 +511,47 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
     }
 
     private static int getValue(String rank) {
-        if (rank == null || rank.isEmpty()) return 0;
-        rank = rank.toLowerCase();
+    if (rank == null || rank.isEmpty()) return 0;
+    rank = rank.toLowerCase();
 
-        int prestige = 0;
-        StringBuilder number = new StringBuilder();
-        int i = 0;
+    int value = 0;
+    StringBuilder number = new StringBuilder();
+    int i = 0;
 
-        // Handle single-letter legacy ranks like "a"
-        if (rank.length() == 1) return rank.charAt(0) - 'a' + 1;
+    while (i < rank.length()) {
+        char c = rank.charAt(i);
 
-        while (i < rank.length()) {
-            if (rank.charAt(i) == 'p') {
-                i++;
-                while (i < rank.length() && Character.isDigit(rank.charAt(i))) {
-                    number.append(rank.charAt(i++));
-                }
-                prestige += Integer.parseInt(number.toString());
-                number.setLength(0);
-            } else if (Character.isDigit(rank.charAt(i))) {
-                while (i < rank.length() && Character.isDigit(rank.charAt(i))) {
-                    number.append(rank.charAt(i++));
-                }
-                prestige += Integer.parseInt(number.toString()) * 1000; // Era level
-                number.setLength(0);
-            } else if (Character.isLetter(rank.charAt(i))) {
-                prestige += (rank.charAt(i) - 'a' + 1);
-                i++;
-            } else {
-                i++;
+        if (c == 'a') {
+            i++;
+            while (i < rank.length() && Character.isDigit(rank.charAt(i))) {
+                number.append(rank.charAt(i++));
             }
+            value += number.length() > 0
+                ? Integer.parseInt(number.toString()) * 1_000_000
+                : 0;
+            number.setLength(0);
+        } else if (c == 'p') {
+            i++;
+            while (i < rank.length() && Character.isDigit(rank.charAt(i))) {
+                number.append(rank.charAt(i++));
+            }
+            if (number.length() > 0) {
+                value += Integer.parseInt(number.toString()) * 1_000;
+            } else {
+                value += 'p' - 'a'; // 15 for standalone 'p'
+            }
+            number.setLength(0);
+        } else if (Character.isLetter(c)) {
+            value += c - 'a';
+            i++;
+        } else {
+            i++;
         }
-
-        return prestige;
     }
+
+    return value;
+}
+
 
     public static int getMaxEnchantCount(Player player, Material type) {
     String rank = getRank(player); // e.g. "a", "p1a", "p5a"
@@ -583,11 +590,11 @@ boundaryRankCosts.put("a5p24z_a5p25a", new RankCost(62000, 1240,  8));
         String rarity = EnchantmentData.getRarity(enchant);
 
         if ("PRESTIGE".equalsIgnoreCase(rarity)) {
-            if (compareRanks(playerRank, "p1a") < 1) {
+            if (compareRanks(playerRank, "p1a") < 0) {
                 failMessages.add("You must be Prestige 1 to use tools with " + enchant + "!");
             }
         } else if ("PRESTIGE+".equalsIgnoreCase(rarity)) {
-            if (compareRanks(playerRank, "p10a") < 1) {
+            if (compareRanks(playerRank, "p10a") < 0){
                 failMessages.add("You must be Prestige 10 to use tools with " + enchant + "!");
             }
         }

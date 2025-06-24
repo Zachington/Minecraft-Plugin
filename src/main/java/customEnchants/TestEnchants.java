@@ -29,6 +29,7 @@ import customEnchants.managers.RankManager;
 import customEnchants.managers.SellManager;
 import customEnchants.managers.VaultManager;
 import customEnchants.managers.WarpManager;
+import customEnchants.managers.CellManager;
 import customEnchants.managers.MineResetManager;
 import customEnchants.utils.ClaimStorage;
 import customEnchants.utils.EssenceManager;
@@ -40,16 +41,19 @@ import net.milkbowl.vault.economy.Economy;
 import customEnchants.listeners.AntiCheatListener;
 import customEnchants.listeners.AnvilCombineListener;
 import customEnchants.listeners.BlackScrollListener;
+import customEnchants.listeners.CellUpgradeListener;
 import customEnchants.listeners.InventoryListener;
 import customEnchants.listeners.DurabilityEnchantListener;
+import customEnchants.listeners.EnchantMenuListener;
 import customEnchants.listeners.EnchantScrapListener;
+import customEnchants.listeners.EnchantTableListener;
 import customEnchants.listeners.EssenceGenerationListener;
 import customEnchants.listeners.EssenceMenuListener;
+import customEnchants.listeners.FarmUpgradeListener;
 import customEnchants.listeners.FurnaceListener;
 import customEnchants.listeners.MagnetListener;
 import customEnchants.listeners.PlayerListener;
 import customEnchants.listeners.VoucherListener;
-import customEnchants.listeners.BlockBreakListener;
 import customEnchants.listeners.CrateListener;
 import customEnchants.listeners.GeneralBlockBreakListener;
 import customEnchants.listeners.PlayerQuitListener;
@@ -140,6 +144,7 @@ public class TestEnchants extends JavaPlugin {
         this.sellManager = new SellManager(getDataFolder());
         this.questManager = new QuestManager(getDataFolder());
         this.warpManager = new WarpManager(this);
+        CellManager.loadCellData(this);
 
         // Initialize plugin manager
         PluginManager.getInstance().initialize();
@@ -172,6 +177,7 @@ public class TestEnchants extends JavaPlugin {
         EssenceGenerationListener.savePreferences();
         questManager.saveActiveQuests();
         statTracker.save();
+        CellManager.saveCellData(this);
         getLogger().info("CustomEnchant has been disabled!");
     }
 
@@ -180,7 +186,6 @@ public class TestEnchants extends JavaPlugin {
         int xMin = -6, xMax = 24, yMin = -10, yMax = 5, zMin = 30, zMax = 60;
 
         getServer().getPluginManager().registerEvents(new InventoryListener(statTracker), this);
-        getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new MagnetListener(), this);
         getServer().getPluginManager().registerEvents(new DurabilityEnchantListener(), this);
         getServer().getPluginManager().registerEvents(new AnvilCombineListener(this), this);
@@ -201,6 +206,10 @@ public class TestEnchants extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TraderListener(statTracker,questManager, economy), this);
         getServer().getPluginManager().registerEvents(new AntiCheatListener(), this);
         getServer().getPluginManager().registerEvents(new FurnaceListener(this), this); 
+        getServer().getPluginManager().registerEvents(new CellUpgradeListener(), this); 
+        getServer().getPluginManager().registerEvents(new EnchantTableListener(), this); 
+        getServer().getPluginManager().registerEvents(new FarmUpgradeListener(), this); 
+        getServer().getPluginManager().registerEvents(new EnchantMenuListener(this), this); 
 
     }
 
@@ -227,6 +236,9 @@ public class TestEnchants extends JavaPlugin {
         getCommand("spawntrader").setExecutor(handler);
         getCommand("savewarp").setExecutor(handler);
         getCommand("removewarp").setExecutor(handler);
+        getCommand("cell").setExecutor(handler);
+        getCommand("rankupmax").setExecutor(handler);
+        getCommand("enchants").setExecutor(handler);
     }
 
     private void scheduleScoreboardUpdates() {

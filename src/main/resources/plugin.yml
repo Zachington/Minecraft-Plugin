@@ -7,6 +7,11 @@ api-version: 1.13
 softdepend: [Vault]
 depend: [WorldGuard]
 
+permissions:
+  cells.delete:
+    description: Allows deleting another players cell with /cell delete
+    default: op
+
 
 commands:
   scrap:
@@ -77,3 +82,12 @@ commands:
     usage: /removewarp [warp name]
     description: removes a warp for mine Resets
     permission: customenchants.admin
+  cell:
+    usage: /cell [Invite || Create || Upgrade || delete]
+    description: various cell management commands
+  rankupmax:
+    usage: /rankupmax
+    description: ranks up as many times as possible when p1 or higher
+  enchants:
+    usage: /enchant
+    description: opens the enchant info menu 

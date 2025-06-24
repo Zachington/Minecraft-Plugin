@@ -328,6 +328,15 @@ public class InventoryListener implements Listener {
         return false;
     }
 
+    if (book.name.equalsIgnoreCase("Final Echo")) {
+    Integer legendsEchoLevel = tool.map.get("Legends Echo");
+    EnchantmentData.EnchantmentInfo legendsEchoInfo = EnchantmentData.getEnchantmentInfoByName("Legends Echo");
+    if (legendsEchoLevel == null || legendsEchoLevel < legendsEchoInfo.maxLevel) {
+        player.sendMessage(ChatColor.RED + "You must have Legends Echo at max level to apply Final Echo!");
+        return false;
+    }
+    }
+
     if (tool.map.containsKey(book.name)) {
         int current = tool.map.get(book.name);
         if (current >= info.maxLevel) {
@@ -374,6 +383,10 @@ public class InventoryListener implements Listener {
 
     if (book.name.equalsIgnoreCase("Unbreakable")) {
         toolInfo.map.remove("Preservation");
+    }
+
+    if (book.name.equalsIgnoreCase("Final Echo")) {
+    toolInfo.map.remove("Legends Echo");
     }
 
     meta.setLore(buildLore(tool, toolInfo));

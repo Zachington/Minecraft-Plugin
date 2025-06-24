@@ -1,6 +1,7 @@
 package customEnchants.listeners;
 
 
+import customEnchants.utils.EnchantmentData;
 import customEnchants.utils.GuiUtil;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class EnchantScrapListener implements Listener {
     }
 
     @EventHandler
-public void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) {
     if (!(event.getWhoClicked() instanceof Player player)) return;
     if (!event.getView().getTitle().equals(GUI_TITLE)) return;
     //var
@@ -53,6 +54,7 @@ public void onInventoryClick(InventoryClickEvent event) {
     if (slot >= 0 && slot <= 8 &&
         cursor != null && cursor.getType() == Material.ENCHANTED_BOOK &&
         GuiUtil.parseCustomEnchantBook(cursor) != null &&
+        !containsBlockedEnchant(cursor) &&
         (clickedItem == null || clickedItem.getType() == Material.BLACK_STAINED_GLASS_PANE)) {
 
         topInv.setItem(slot, cursor.clone());
@@ -117,6 +119,10 @@ if (slot >= 18 && slot <= 26 && clickedItem != null && clickedItem.getType() == 
     int bookSlot = slot - 18; // book above sugar
     ItemStack book = clickedInv.getItem(bookSlot);
     if (book != null && GuiUtil.parseCustomEnchantBook(book) != null) {
+        if (containsBlockedEnchant(book)) {
+            player.sendMessage(ChatColor.RED + "You cannot scrap Prestige or P+ enchants.");
+        return;
+        }
         boolean keepSugar = ThreadLocalRandom.current().nextBoolean(); // 50/50 chance
 
         if (keepSugar) {
@@ -183,7 +189,8 @@ if (slot >= 18 && slot <= 26 && clickedItem != null && clickedItem.getType() == 
     // Handle shift-clicking books from player inventory into GUI (slots 0-8)
     if (event.isShiftClick() && clickedInv != null && clickedInv.equals(player.getInventory())) {
         if (clickedItem != null && clickedItem.getType() == Material.ENCHANTED_BOOK &&
-            GuiUtil.parseCustomEnchantBook(clickedItem) != null) {
+            GuiUtil.parseCustomEnchantBook(clickedItem) != null &&
+        !containsBlockedEnchant(clickedItem)) {
 
             for (int i = 0; i < 9; i++) {
                 ItemStack target = topInv.getItem(i);
@@ -239,7 +246,7 @@ if (slot >= 18 && slot <= 26 && clickedItem != null && clickedItem.getType() == 
 }
 
 // Modified createSugar to accept a color code string like "§6" or "§a"
-private ItemStack createSugar(String colorCode, String rarityName) {
+    private ItemStack createSugar(String colorCode, String rarityName) {
     ItemStack sugar = new ItemStack(Material.SUGAR);
     ItemMeta meta = sugar.getItemMeta();
     if (meta != null) {
@@ -284,5 +291,28 @@ private ItemStack createSugar(String colorCode, String rarityName) {
             }
         }
     }
+
+    private boolean containsBlockedEnchant(ItemStack book) {
+    if (book == null || book.getType() != Material.ENCHANTED_BOOK) return false;
+    ItemMeta meta = book.getItemMeta();
+    if (meta == null || !meta.hasLore()) return false;
+
+    for (String line : meta.getLore()) {
+        for (EnchantmentData.EnchantmentInfo info : EnchantmentData.ENCHANTMENTS) {
+            if (line.contains(info.name)) {
+                String rarity = info.rarity;
+                if (rarity.equalsIgnoreCase("PRESTIGE") || rarity.equalsIgnoreCase("P+")) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+
+
+
+
 }
 

@@ -18,7 +18,6 @@ public class EnchantmentData {
         "Wall Breaker",
         "Blast",
         "Gold Digger",
-        "Amplify",
         "Ore Scavenger",
         "Auto Smelt",
         "Unbreakable",
@@ -34,7 +33,27 @@ public class EnchantmentData {
         "Speed Breaker",
         "Sprinter",
         "Bounder",
-        "Vein Miner"
+        "Vein Miner",
+        "Legends Echo",
+        "Final Echo",
+        "Treasure Hunter",
+        "Essence Link",
+        "Jackpot",
+        "Efficient Grip",
+        "Clumsy",
+        "Dust Collector",
+        "Tunneler",
+        "Gem Polish",
+        "Vein Flicker",
+        "Miners Instinct",
+        "Auto Sell",
+        "Fortune Link",
+        "Essence Hoarder",
+        "Wealth Pulse",
+        "Resistance",
+        "Omni Miner",
+        "Aura of Wealth",
+        "Pure Greed"
     };
     
     // Maximum levels for each enchantment (corresponds to ENCHANT_NAMES array)
@@ -42,7 +61,6 @@ public class EnchantmentData {
         3,  // Wall Breaker
         5,  // Blast
         3,  // Gold Digger
-        3,  // Amplify
         4,  // Ore Scavenger
         1,  // Auto Smelt
         1,  // Unbreakable
@@ -58,7 +76,27 @@ public class EnchantmentData {
         5,
         3,
         3,
-        5
+        5,
+        3,
+        3,
+        5,
+        3,
+        3,
+        3,
+        5,
+        3,
+        5,
+        5,
+        5,
+        3,
+        3,
+        1,
+        5,
+        3,
+        3,
+        5,
+        5,
+        1
     };
     
     // Tool types that can receive each enchantment
@@ -66,7 +104,6 @@ public class EnchantmentData {
         "PICKAXE",         // Wall Breaker
         "PICKAXE",         // Blast
         "PICKAXE",         // Gold Digger
-        "PICKAXE",         // Amplify
         "PICKAXE",         // Ore Scavenger
         "PICKAXE",         // Auto Smelt
         "ALL",             // Unbreakable
@@ -82,6 +119,26 @@ public class EnchantmentData {
         "ALL",
         "ALL",
         "ALL",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
+        "PICKAXE",
         "PICKAXE"
     };
     
@@ -90,14 +147,13 @@ public class EnchantmentData {
         "PRESTIGE",     // Wall Breaker
         "PRESTIGE",     // Blast
         "PRESTIGE",     // Gold Digger
-        "LEGENDARY",    // Amplify
         "UNCOMMON",     // Ore Scavenger
         "PRESTIGE+",    // Auto Smelt
         "PRESTIGE+",    // Unbreakable
         "PRESTIGE",     // Magnet
         "LEGENDARY",    //Preservation
         "EPIC",         //Frost touch
-        "LEGENDARY",    //Key miner
+        "PRESTIGE",    //Key miner
         "UNCOMMON",     //Delayed dynamite
         "UNCOMMON",     //Regenerate
         "RARE",         //Conjure
@@ -106,7 +162,29 @@ public class EnchantmentData {
         "PRESTIGE",     //Speed breaker
         "COMMON",       //sprinter
         "COMMON",       //bounder
-        "PRESTIGE"     //vein miner
+        "PRESTIGE",     //vein miner
+        "PRESTIGE",     //Legends Echo
+        "PRESTIGE+",    //Final Echo    
+        "EPIC",         //Treasure Hunter
+        "PRESTIGE",     //Essence Link
+        "LEGENDARY",    //Jackpot
+        "COMMON",       //Efficient grip
+        "UNCOMMON",
+        "COMMON",
+        "RARE",
+        "UNCOMMON",
+        "EPIC",
+        "RARE",
+        "RARE",
+        "LEGENDARY",
+        "PRESTIGE",
+        "EPIC",
+        "COMMON",
+        "PRESTIGE+",
+        "PRESTIGE",
+        "LEGENDARY"
+
+
     };
     
     // ChatColor mappings for each rarity
@@ -136,7 +214,6 @@ public class EnchantmentData {
         "Breaks multiple blocks in a wall pattern",           // Wall Breaker
         "Breaks a 3x3x3 cube",                     // Blast
         "Chance to give money when breaking blocks",         // Gold Digger
-        "Increases other enchants proc chance",            // Amplify
         "Chance to spawn more ore",              // Ore Scavenger
         "Automatically smelts mined blocks",                   // Auto Smelt
         "Tool never breaks from durability damage",           // Unbreakable
@@ -152,7 +229,27 @@ public class EnchantmentData {
         "Chance to give haste when breaking blocks",
         "Chance to give speed when breaking blocks",
         "Chance to give jump boost when breaking blocks",
-        "Chance to break connected ores in a 3 block radius"
+        "Chance to break connected ores in a 3 block radius",
+        "Chance to copy a random enchant with +50% effect",
+        "Chance to copy random enchant with +100% effect",
+        "Chance to give Treasure when breaking blocks",
+        "Gives more essence from extractors",
+        "Chance to give 4x ores",
+        "Reduces food drain",
+        "Chance to mine an extra block",
+        "Turns filler into gravel or sand",
+        "Chance to mine a small tunnel",
+        "Increased xp from gems",
+        "Chance to break adjacent ores",
+        "Decreased durability use on low durability",
+        "Chance to automatically sell filler at 25% value for a few second",
+        "Applies fortune to filler blocks",
+        "Increased essence gain but no xp gained",
+        "Chance to automatically sell filler at 50% value for a few second",
+        "Chance to gain resistance when mining",
+        "Chance to break all types of ore nearby",
+        "Chance to give nearby players essence",
+        "Auto sells everything at 150% value but durability enchants don't work"
     };
     
     // Proc chance percentages (0.0 to 1.0)
@@ -160,7 +257,6 @@ public class EnchantmentData {
         .1,         // Wall Breaker - 10% per level
         .05,        // Blast - 5% per level
         0.002,      // Gold Digger 
-        1.0,        //Amplify never used
         0.35,       // Ore Scavenger - 35% chance
         1.0,        // Auto Smelt - Always active (passive)
         1.0,        // Unbreakable - Always active (passive)
@@ -176,7 +272,27 @@ public class EnchantmentData {
         0.2,        //speed breaker
         0.1,        //sprinter
         0.1,        //bounder
-        0.05        //vein miner
+        0.05,       //vein miner
+        0.5,        //Legends Echo
+        0.5,        //Final Echo 
+        0.001,      //Treasure hunter
+        1,          //Essence Link
+        .05,        //Jackpot
+        .01,        //Efficient grip
+        .05,        //clumsy
+        1,          //dust collector
+        .05,        //tunneler
+        1,          //gem polish
+        .05,        //vein flicker
+        .05,        //miners instinct
+        .01,        //auto sell
+        1,          //fortune link
+        1,          //essence hoarder
+        .01,        //wealth pulse
+        .1,         //resistance
+        .5,         //omni miner
+        1,          //aura of wealth
+        1,          //pure greed
     };
     
     // Helper method to get rarity color by rarity name

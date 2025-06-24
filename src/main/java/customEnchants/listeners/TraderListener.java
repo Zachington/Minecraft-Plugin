@@ -301,10 +301,11 @@ public class TraderListener implements Listener {
 
     private Material getMaterialFromName(String name) {
     name = name.toLowerCase().trim();
+
     if (loreNameToMaterial.containsKey(name)) {
         return loreNameToMaterial.get(name);
     }
-    // fallback: try Material enum names with uppercase and underscores
+
     try {
         return Material.valueOf(name.toUpperCase().replace(" ", "_"));
     } catch (IllegalArgumentException e) {
@@ -454,6 +455,7 @@ public class TraderListener implements Listener {
     loreNameToMaterial.put("coal", Material.COAL);
     loreNameToMaterial.put("redstone", Material.REDSTONE);
     loreNameToMaterial.put("emerald", Material.EMERALD);
+    loreNameToMaterial.put("amethyst blocks", Material.AMETHYST_BLOCK);
     loreNameToMaterial.put("amethyst", Material.AMETHYST_BLOCK);
     // Add more if needed
 }

@@ -16,18 +16,13 @@ public class BlockBreaker {
         int index = EnchantmentData.getEnchantmentIndex(enchantName);
         if (index == -1) return false;
 
-        int amplifyLevel = getAmplifyLevel(tool, enchantName);
+        
 
         double baseChance = EnchantmentData.ENCHANT_PROC_CHANCE[index];
-        double amplifyBonus = amplifyLevel * 0.05;
-        double chance = Math.min(baseChance * level + amplifyBonus, 1.0);
+        
+        double chance = Math.min(baseChance * level, 1.0);
 
         return random.nextDouble() < chance;
-    }
-
-    private static int getAmplifyLevel(ItemStack tool, String enchantName) {
-        HeldToolInfo info = HeldToolInfo.fromItem(tool);
-        return info.getLevel("Amplify");
     }
 
     public static int breakBlastArea(Block baseBlock, Player player, ItemStack tool, int blastLevel, int autoSmeltLevel) {

@@ -13,7 +13,7 @@ import java.util.Set;
 import customEnchants.TestEnchants;
 
 public class SellManager {
-    private final Map<Material, Double> basePrices = new HashMap<>();
+    private final static Map<Material, Double> basePrices = new HashMap<>();
     private final Map<Material, Double> smeltedPrices = new HashMap<>();
     private final Set<Material> fillerBlocks = new HashSet<>();
     private boolean smeltedBonus;
@@ -121,7 +121,7 @@ public class SellManager {
         return fillerBlocks.contains(mat);
     }
 
-    public double getPrice(Material mat) {
+    public static double getPrice(Material mat) {
         if (!basePrices.containsKey(mat)) return 0.0;
 
         // For now, return base price only; if you want smelted price, you need to detect item smelted state elsewhere

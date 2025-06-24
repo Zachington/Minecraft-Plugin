@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
 import org.bukkit.entity.Zombie;
 
@@ -40,6 +41,7 @@ public class RngBlockBreak implements Listener {
     }
 
     private static final Map<UUID, Integer> lastGoblinSpawnMap = new HashMap<>();
+    private final Map<UUID, List<Zombie>> playerGoblins = new HashMap<>();
     private final Random random = new Random();
 
     @EventHandler
@@ -76,6 +78,10 @@ public class RngBlockBreak implements Listener {
                 spawnGoblin(event.getBlock().getLocation(), player, goblin);
                 player.sendTitle(ChatColor.GOLD + goblin.name + " has Spawned!","",10, 70, 20);
                 setLastGoblinSpawnBlocks(uuid, blocksBroken);  // Reset counter
+                String typeKey = goblin.name.replaceAll("§.", "").toLowerCase().replace(" ", "_"); // e.g., "common_goblin"
+                String statKey = "goblins_spawned." + typeKey;
+                int prev = stats.getPlayerStat(uuid, statKey, false);
+                stats.setPlayerStat(uuid, statKey, prev + 1, false);
                 break;  // Spawn only one per break
             }
         }
@@ -109,6 +115,20 @@ public class RngBlockBreak implements Listener {
         } else {
             // Fallback: drop at zombie location if metadata missing
             event.getDrops().addAll(drops);
+        }
+    }
+}
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+    UUID uuid = event.getEntity().getUniqueId();
+    List<Zombie> goblins = playerGoblins.remove(uuid);
+
+    if (goblins != null) {
+        for (Zombie goblin : goblins) {
+            if (!goblin.isDead()) {
+                goblin.remove();
+            }
         }
     }
 }
@@ -149,11 +169,18 @@ public class RngBlockBreak implements Listener {
         }
     }
 
+    if (goblin.equipment != null) {
+    if (goblin.equipment.length > 0) goblinEntity.getEquipment().setItemInMainHand(goblin.equipment[0]);
+    if (goblin.equipment.length > 1) goblinEntity.getEquipment().setHelmet(goblin.equipment[1]);
+    if (goblin.equipment.length > 2) goblinEntity.getEquipment().setChestplate(goblin.equipment[2]);
+    if (goblin.equipment.length > 3) goblinEntity.getEquipment().setLeggings(goblin.equipment[3]);
+    if (goblin.equipment.length > 4) goblinEntity.getEquipment().setBoots(goblin.equipment[4]);
+}
+
     goblinEntity.setMetadata("customDrops", new FixedMetadataValue(plugin, goblin.drops));
     goblinEntity.setMetadata("goblinHits", new FixedMetadataValue(plugin, 0)); 
     goblinEntity.setMetadata("goblinOwner", new FixedMetadataValue(plugin, player.getUniqueId().toString()));
-
-
+    playerGoblins.computeIfAbsent(player.getUniqueId(), k -> new java.util.ArrayList<>()).add(goblinEntity);
 }
 
     private int getLastGoblinSpawnBlocks(UUID uuid) {

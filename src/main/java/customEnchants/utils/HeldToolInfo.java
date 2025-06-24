@@ -74,8 +74,14 @@ public class HeldToolInfo {
     }
     return -1;
 }
-    public static int getAmplifyLevel(ItemStack tool, String enchantName) {
-        HeldToolInfo info = HeldToolInfo.fromItem(tool);
-        return info.getLevel("Amplify");
+
+    public boolean hasEcho() {
+    return customEnchants.containsKey("Legends Echo") || customEnchants.containsKey("Final Echo");
+    }
+
+    public double getEchoMultiplier() {
+        if (customEnchants.containsKey("Final Echo")) return 2.0; // +100%
+        if (customEnchants.containsKey("Legends Echo")) return 1.5; // +50%
+        return 1.0;
     }
 }
